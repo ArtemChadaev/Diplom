@@ -5,24 +5,23 @@ import (
 	"time"
 )
 
-// User — доменная сущность пользователя
+// User — чистая доменная модель пользователя.
+// Не содержит тегов gorm, json или validate — только бизнес-поля.
 type User struct {
-	ID           int       `db:"id"`
-	FullName     string    `db:"full_name"`     // ФИО
-	PasswordHash string    `db:"password_hash"` // Хеш пароля
-	Email        string    `db:"email"`         // E-mail (уникальный)
-	Position     string    `db:"position"`      // Должность
-	Role         string    `db:"role"`          // Полномочия / роль
-	CreatedAt    time.Time `db:"created_at"`    // Дата создания
-	IsActive     bool      `db:"is_active"`     // true — работает, false — уволен
+	ID           string
+	Login        string
+	PasswordHash string
+	Role         string
+	IsBlocked    bool
+	CreatedAt    time.Time
 }
 
-// UserRepository — интерфейс для работы с хранилищем пользователей
+// UserRepository — интерфейс для работы с хранилищем пользователей.
 type UserRepository interface {
-	IsEmailTaken(ctx context.Context, email string) (bool, error)
+	IsLoginTaken(ctx context.Context, login string) (bool, error)
 }
 
-// UserService — интерфейс бизнес-логики пользователей
+// UserService — интерфейс бизнес-логики пользователей.
 type UserService interface {
-	IsEmailTaken(ctx context.Context, email string) (bool, error)
+	IsLoginTaken(ctx context.Context, login string) (bool, error)
 }

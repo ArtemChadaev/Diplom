@@ -42,7 +42,11 @@ func main() {
 	if err != nil {
 		log.Fatalf("ошибка подключения к БД: %s", err)
 	}
-	defer db.Close()
+	sqlDB, err := db.DB()
+	if err != nil {
+		log.Fatalf("ошибка получения sql.DB: %s", err)
+	}
+	defer sqlDB.Close()
 
 	slog.Info("подключение к БД установлено")
 

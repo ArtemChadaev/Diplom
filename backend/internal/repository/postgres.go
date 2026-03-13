@@ -2,9 +2,10 @@ package repository
 
 import (
 	"fmt"
+	"log/slog"
 
-	"github.com/jmoiron/sqlx"
-	_ "github.com/lib/pq"
+	"gorm.io/driver/postgres"
+	"gorm.io/gorm"
 )
 
 type PostgresConfig struct {
@@ -16,20 +17,31 @@ type PostgresConfig struct {
 	SSLMode  string
 }
 
-func NewPostgresDB(cfg PostgresConfig) (*sqlx.DB, error) {
+// NewPostgresDB создаёт подключение '*gorm.DB' к PostgreSQL
+func NewPostgresDB(cfg PostgresConfig) (*gorm.DB, error) {
 	dsn := fmt.Sprintf(
 		"host=%s port=%s user=%s dbname=%s password=%s sslmode=%s",
 		cfg.Host, cfg.Port, cfg.Username, cfg.Database, cfg.Password, cfg.SSLMode,
 	)
 
-	db, err := sqlx.Open("postgres", dsn)
+	// Подключение через GORM
+	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
 	if err != nil {
 		return nil, err
 	}
 
-	if err = db.Ping(); err != nil {
+	// Получаем низкоуровневый *sql.DB для проверки пинга
+	sqlDB, err := db.DB()
+	if err != nil {
 		return nil, err
 	}
+
+	// Проверяем подключение
+	if err = sqlDB.Ping(); err != nil {
+		return nil, err
+	}
+
+	slog.Info("успешное подключение к PostgreSQL через GORM")
 
 	return db, nil
 }

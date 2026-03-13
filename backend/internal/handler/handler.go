@@ -29,7 +29,7 @@ func (h *Handler) Router() chi.Router {
 
 	// TODO: группировать под /api/v1 по мере роста
 	r.Route("/user", func(r chi.Router) {
-		r.Get("/is-email-taken", h.isEmailTaken)
+		r.Get("/is-login-taken", h.isLoginTaken)
 	})
 
 	return r
