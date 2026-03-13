@@ -8,7 +8,7 @@ import (
 // User — чистая доменная модель пользователя.
 // Не содержит тегов gorm, json или validate — только бизнес-поля.
 type User struct {
-	ID           string
+	ID           uint
 	Login        string
 	PasswordHash string
 	Role         string
