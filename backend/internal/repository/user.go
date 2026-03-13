@@ -4,24 +4,38 @@ import (
 	"context"
 
 	"github.com/ima/diplom-backend/internal/domain"
-	"github.com/jmoiron/sqlx"
+	"github.com/ima/diplom-backend/internal/repository/dao"
+	"gorm.io/gorm"
 )
 
 type userRepository struct {
-	db *sqlx.DB
+	db *gorm.DB
 }
 
-func NewUserRepository(db *sqlx.DB) domain.UserRepository {
+func NewUserRepository(db *gorm.DB) domain.UserRepository {
 	return &userRepository{db: db}
 }
 
-// IsEmailTaken — проверяет, зарегистрирован ли уже такой e-mail
-func (r *userRepository) IsEmailTaken(ctx context.Context, email string) (bool, error) {
-	var exists bool
-	query := `SELECT EXISTS(SELECT 1 FROM users WHERE email = $1)`
-	err := r.db.QueryRowContext(ctx, query, email).Scan(&exists)
+// IsLoginTaken — проверяет, занят ли логин.
+func (r *userRepository) IsLoginTaken(ctx context.Context, login string) (bool, error) {
+	var count int64
+
+	// Пример 1: Чистый SQL через GORM (db.Raw)
+	/*
+		err := r.db.WithContext(ctx).
+			Raw(`SELECT count(1) FROM users WHERE login = ?`, login).
+			Scan(&count).Error
+	*/
+
+	// Пример 2: Fluent GORM API (используется)
+	err := r.db.WithContext(ctx).
+		Model(&dao.UserDAO{}).
+		Where("login = ?", login).
+		Count(&count).Error
+
 	if err != nil {
 		return false, err
 	}
-	return exists, nil
+
+	return count > 0, nil
 }
