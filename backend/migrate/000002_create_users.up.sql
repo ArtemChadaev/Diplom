@@ -1,5 +1,5 @@
 CREATE TABLE users (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    id SERIAL PRIMARY KEY,
     login VARCHAR(255) UNIQUE NOT NULL,
     password_hash TEXT NOT NULL,
     role user_role NOT NULL DEFAULT 'employee',

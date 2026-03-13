@@ -5,7 +5,7 @@ import "time"
 // UserDAO — DAO-слепок таблицы users для GORM.
 // Здесь живут gorm-теги; domain-модель тегов не знает.
 type UserDAO struct {
-	ID           string    `gorm:"type:uuid;primaryKey;default:gen_random_uuid()"`
+	ID           uint      `gorm:"primaryKey;autoIncrement"`
 	Login        string    `gorm:"uniqueIndex;not null"`
 	PasswordHash string    `gorm:"column:password_hash;not null"`
 	Role         string    `gorm:"type:user_role;default:employee"`
