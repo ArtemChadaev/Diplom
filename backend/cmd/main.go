@@ -10,6 +10,7 @@ import (
 	"os/signal"
 	"syscall"
 
+	"github.com/ima/diplom-backend/internal/bootstrap"
 	"github.com/ima/diplom-backend/internal/config"
 	"github.com/ima/diplom-backend/internal/domain"
 	"github.com/ima/diplom-backend/internal/handler"
@@ -52,7 +53,13 @@ func main() {
 
 	// 4. Инициализация слоёв: Repository → Service → Handler
 	repos := repository.NewRepository(db)
-	services := service.NewService(repos)
+
+	// Admin Seeding
+	if err := bootstrap.SeedAdmin(ctx, cfg, repos.User); err != nil {
+		log.Fatalf("ошибка инициализации админа: %s", err)
+	}
+
+	services := service.NewService(repos, cfg.JWTSecret)
 	handlers := handler.NewHandler(services)
 
 	router := handlers.Router()

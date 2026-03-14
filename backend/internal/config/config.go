@@ -16,6 +16,11 @@ type Config struct {
 	DBUser     string `mapstructure:"DB_USER"`
 	DBName     string `mapstructure:"DB_NAME"`
 	DBPassword string `mapstructure:"DB_PASSWORD"`
+
+	// Настройки Auth
+	JWTSecret     string `mapstructure:"JWT_SECRET"`
+	AdminUser     string `mapstructure:"ADMIN_USER"`
+	AdminPassword string `mapstructure:"ADMIN_PASSWORD"`
 }
 
 func Load() (*Config, error) {
