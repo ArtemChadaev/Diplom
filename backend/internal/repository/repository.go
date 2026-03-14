@@ -7,12 +7,14 @@ import (
 
 // Repository — агрегатор всех репозиториев приложения
 type Repository struct {
-	User domain.UserRepository
+	User    domain.UserRepository
+	Session domain.SessionRepository
 }
 
 // NewRepository создаёт новый слой репозиториев, используя GORM
 func NewRepository(db *gorm.DB) *Repository {
 	return &Repository{
-		User: NewUserRepository(db),
+		User:    NewUserRepository(db),
+		Session: NewSessionRepository(db),
 	}
 }
