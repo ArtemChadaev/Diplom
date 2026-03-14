@@ -2,7 +2,7 @@ import Link from "next/link";
 import { Search, Bell, CircleUserRound } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { ButtonGroup } from "@/components/ui/button-group";
+import { SearchBar } from "@/components/search-bar";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 
 export function Header() {
@@ -32,14 +32,7 @@ export function Header() {
       </div>
 
       <div className="flex items-center gap-4">
-        <ButtonGroup className="relative hidden sm:flex items-center">
-          <Input
-            placeholder="Search..."
-          />
-          <Button variant="outline">
-            <Search />
-          </Button>
-        </ButtonGroup>
+        <SearchBar />
         
         <Button variant="ghost" size="icon" className="rounded-full hover:bg-muted/80 transition-colors h-10 w-10">
           <Bell className="h-5 w-5 text-muted-foreground" />
