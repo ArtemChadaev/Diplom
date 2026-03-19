@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 import { Inter } from "next/font/google";
 import { cn } from "@/lib/utils";
+import {NuqsAdapter} from "nuqs/adapters/next/app";
 
 const inter = Inter({subsets:['latin'],variable:'--font-sans'});
 
@@ -15,7 +16,9 @@ export default function RootLayout({
 }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="ru" className={cn("font-sans", inter.variable)}>
-      <body>{children}</body>
+      <NuqsAdapter>
+        <body>{children}</body>
+      </NuqsAdapter>
     </html>
   );
 }

@@ -2,36 +2,39 @@ package config
 
 import (
 	"fmt"
+	"log/slog"
 
-	"github.com/spf13/viper"
+	"github.com/ilyakaznacheev/cleanenv"
 )
 
 type Config struct {
-	// Основные настройки приложения
-	Port string `mapstructure:"PORT"`
+	// env-default задает значение, если переменной нет ни в .env, ни в системе
+	Port string `env:"PORT" env-default:"8080"`
 
 	// Настройки Postgres
-	DBHost     string `mapstructure:"DB_HOST"`
-	DBPort     string `mapstructure:"DB_PORT"`
-	DBUser     string `mapstructure:"DB_USER"`
-	DBName     string `mapstructure:"DB_NAME"`
-	DBPassword string `mapstructure:"DB_PASSWORD"`
+	// env-required:"true" — приложение упадет с ошибкой, если переменная не задана
+	DBHost     string `env:"DB_HOST" env-required:"true"`
+	DBPort     string `env:"DB_PORT" env-default:"5432"`
+	DBUser     string `env:"DB_USER" env-required:"true"`
+	DBName     string `env:"DB_NAME" env-required:"true"`
+	DBPassword string `env:"DB_PASSWORD" env-required:"true"`
+
+	JWTSecret      string `env:"JWT_SECRET" env-required:"true"`
+	AdminUser      string `env:"ADMIN_USER" env-default:"admin"`
+	AdminPassword  string `env:"ADMIN_PASSWORD" env-required:"true"`
+	GoogleClientID string `env:"GOOGLE_CLIENT_ID"`
 }
 
 func Load() (*Config, error) {
-	v := viper.New()
+	var cfg Config
 
-	// Читаем .env файл напрямую
-	v.SetConfigFile(".env")
-	v.SetConfigType("env")
-
-	if err := v.ReadInConfig(); err != nil {
-		return nil, fmt.Errorf("ошибка чтения .env файла: %w", err)
+	if err := cleanenv.ReadConfig(".env", &cfg); err != nil {
+		slog.Error(err.Error() + ". Loading config")
 	}
 
-	var cfg Config
-	if err := v.Unmarshal(&cfg); err != nil {
-		return nil, fmt.Errorf("ошибка распаковки конфига: %w", err)
+	err := cleanenv.ReadEnv(&cfg)
+	if err != nil {
+		return nil, fmt.Errorf("config error: %w", err)
 	}
 
 	return &cfg, nil
