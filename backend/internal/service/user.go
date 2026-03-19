@@ -14,7 +14,7 @@ func NewUserService(repo domain.UserRepository) domain.UserService {
 	return &userService{repo: repo}
 }
 
-// IsEmailTaken — делегирует проверку занятости email в репозиторий
-func (s *userService) IsEmailTaken(ctx context.Context, email string) (bool, error) {
-	return s.repo.IsEmailTaken(ctx, email)
+// IsLoginTaken — делегирует проверку занятости логина в репозиторий
+func (s *userService) IsLoginTaken(ctx context.Context, login string) (bool, error) {
+	return s.repo.IsLoginTaken(ctx, login)
 }
