@@ -1,16 +1,77 @@
-*, *::before, *::after {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
+@import "tailwindcss";
+@plugin "tailwindcss-animate"; /* Правильный импорт анимаций для v4 */
+
+/* 1. ТЕМА: Здесь мы связываем переменные shadcn с движком Tailwind
+*/
+@theme inline {
+  /* ГЛАВНОЕ: Возвращаем отступы в строй */
+  --spacing: 0.25rem;
+
+  --font-sans: system-ui, sans-serif;
+
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-md: calc(var(--radius) * 0.8);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.4);
 }
 
-body {
-  font-family: system-ui, sans-serif;
-  background: #f5f5f5;
-  color: #1a1a1a;
+/* 2. ПЕРЕМЕННЫЕ: Цвета (оставляем твои OKLCH, они крутые)
+*/
+@layer base {
+  :root {
+    --background: oklch(1 0 0);
+    --foreground: oklch(0.145 0.008 326);
+    --card: oklch(1 0 0);
+    --card-foreground: oklch(0.145 0.008 326);
+    --popover: oklch(1 0 0);
+    --popover-foreground: oklch(0.145 0.008 326);
+    --primary: oklch(0.212 0.019 322.12);
+    --primary-foreground: oklch(0.985 0 0);
+    --secondary: oklch(0.96 0.003 325.6);
+    --secondary-foreground: oklch(0.212 0.019 322.12);
+    --muted: oklch(0.96 0.003 325.6);
+    --muted-foreground: oklch(0.542 0.034 322.5);
+    --accent: oklch(0.96 0.003 325.6);
+    --accent-foreground: oklch(0.212 0.019 322.12);
+    --destructive: oklch(0.577 0.245 27.325);
+    --border: oklch(0.922 0.005 325.62);
+    --input: oklch(0.922 0.005 325.62);
+    --ring: oklch(0.711 0.019 323.02);
+    --radius: 0.625rem;
+  }
+
+
 }
 
-a {
-  color: inherit;
-  text-decoration: none;
+/* 3. БАЗОВЫЕ СТИЛИ: Настройка стандартных тегов
+*/
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+    font-family: var(--font-sans);
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
 }
