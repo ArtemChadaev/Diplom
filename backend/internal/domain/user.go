@@ -63,9 +63,3 @@ type UserRepository interface {
 	// Profile
 	FindProfileByUserID(ctx context.Context, userID int) (*UserProfile, error)
 }
-
-// UserService — интерфейс бизнес-логики пользователей.
-type UserService interface {
-	IsLoginTaken(ctx context.Context, login string) (bool, error)
-}
-

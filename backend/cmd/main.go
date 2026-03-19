@@ -54,11 +54,6 @@ func main() {
 	// 4. Инициализация слоёв: Repository → Service → Handler
 	repos := repository.NewRepository(db)
 
-	// Admin Seeding
-	if err := bootstrap.SeedAdmin(ctx, cfg, repos.User); err != nil {
-		log.Fatalf("ошибка инициализации админа: %s", err)
-	}
-
 	services := service.NewService(repos, cfg.JWTSecret)
 	handlers := handler.NewHandler(services)
 
@@ -72,6 +67,11 @@ func main() {
 			log.Fatalf("ошибка сервера: %s", err)
 		}
 	}()
+
+	// Admin Seeding
+	if err := bootstrap.SeedAdmin(ctx, cfg, repos.User); err != nil {
+		log.Fatalf("ошибка инициализации админа: %s", err)
+	}
 
 	// 6. Ожидание сигнала завершения
 	<-ctx.Done()

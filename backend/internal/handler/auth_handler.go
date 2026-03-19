@@ -2,6 +2,8 @@ package handler
 
 import (
 	"encoding/json"
+	"errors"
+	"net"
 	"net/http"
 	"time"
 
@@ -30,7 +32,7 @@ func (h *Handler) register(w http.ResponseWriter, r *http.Request) {
 
 	_, err := h.service.Auth.Register(r.Context(), input)
 	if err != nil {
-		if err == domain.ErrLoginTaken || err == domain.ErrEmailTaken {
+		if errors.Is(err, domain.ErrLoginTaken) || errors.Is(err, domain.ErrEmailTaken) {
 			http.Error(w, err.Error(), http.StatusConflict)
 			return
 		}
@@ -50,11 +52,14 @@ func (h *Handler) login(w http.ResponseWriter, r *http.Request) {
 	}
 
 	userAgent := r.UserAgent()
-	ip := r.RemoteAddr // For proxies, you'd extract from X-Forwarded-For
+	ip, _, err := net.SplitHostPort(r.RemoteAddr)
+	if err != nil {
+		ip = r.RemoteAddr
+	}
 
 	pair, err := h.service.Auth.LoginWithPassword(r.Context(), req.Login, req.Password, userAgent, ip)
 	if err != nil {
-		if err == domain.ErrUserUnverified || err == domain.ErrUserBlocked {
+		if errors.Is(err, domain.ErrUserUnverified) || errors.Is(err, domain.ErrUserBlocked) {
 			http.Error(w, err.Error(), http.StatusForbidden)
 			return
 		}
@@ -66,7 +71,7 @@ func (h *Handler) login(w http.ResponseWriter, r *http.Request) {
 	http.SetCookie(w, &http.Cookie{
 		Name:     "refresh_token",
 		Value:    pair.RefreshToken,
-		Path:     "/",
+		Path:     "/auth",
 		Expires:  time.Now().Add(15 * 24 * time.Hour), // 15d
 		HttpOnly: true,
 		Secure:   false, // Set true in production with HTTPS
@@ -110,7 +115,7 @@ func (h *Handler) refresh(w http.ResponseWriter, r *http.Request) {
 	http.SetCookie(w, &http.Cookie{
 		Name:     "refresh_token",
 		Value:    pair.RefreshToken,
-		Path:     "/",
+		Path:     "/auth",
 		MaxAge:   15 * 24 * 3600,
 		HttpOnly: true,
 		Secure:   false,
@@ -123,13 +128,14 @@ func (h *Handler) refresh(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(resp)
+	_ = json.NewEncoder(w).Encode(resp)
 }
 
 func (h *Handler) logout(w http.ResponseWriter, r *http.Request) {
-	// Not fully implemented revocation in the handler context yet,
+	// TODO: Not fully implemented revocation in the handler context yet,
 	// but normally you'd read the access token to get userID and session ID
 	// Or just do a client-side logout by invalidating cookie.
+	// TODO: сделать чтобы именно отозвать токен refresh у какого то пользователя, м.б. новый метод
 	http.SetCookie(w, &http.Cookie{
 		Name:   "refresh_token",
 		Value:  "",

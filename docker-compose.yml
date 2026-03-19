@@ -52,6 +52,38 @@ services:
       - app_network
     restart: unless-stopped
 
+  migrate:
+    image: migrate/migrate
+    volumes:
+      - ./backend/migrate:/migrations
+    # Мы используем переменные, которые Docker Compose подтянет из .env
+    command:
+      - -path=/migrations/
+      - -database
+      - postgres://${DB_USER}:${DB_PASSWORD}@postgres:5432/${DB_NAME}?sslmode=disable
+      - up
+    depends_on:
+      postgres:
+        condition: service_healthy # Ждем, пока база реально будет готова принимать запросы
+    networks:
+      - app_network
+  # Сервис для ОТКАТА (на один шаг назад)
+  migrate-down:
+    image: migrate/migrate
+    profiles: [ "tools" ] # Важно: этот сервис НЕ запустится при обычном docker-compose up
+    volumes:
+      - ./backend/migrate:/migrations
+    command:
+      - -path=/migrations/
+      - -database
+      - postgres://${DB_USER}:${DB_PASSWORD}@postgres:5432/${DB_NAME}?sslmode=disable
+      - down 1 # Откатывает ровно ОДНУ последнюю миграцию
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - app_network
+
   valkey:
     image: valkey/valkey:8-alpine
     ports:
@@ -74,3 +106,4 @@ volumes:
 networks:
   app_network:
     driver: bridge
+    name: my_diplom_network

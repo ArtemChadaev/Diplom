@@ -28,19 +28,13 @@ func (h *Handler) Router() chi.Router {
 	r.Use(h.loggingMiddleware)
 
 	// TODO: группировать под /api/v1 по мере роста
+	// TODO: Сделать проверку в middleware на то какой пользователь, рандомный, стандартный или админ
 	r.Route("/auth", func(r chi.Router) {
 		r.Post("/register", h.register)
 		r.Post("/login", h.login)
 		r.Post("/refresh", h.refresh)
 		r.Post("/logout", h.logout)
 	})
-
-	r.Route("/user", func(r chi.Router) {
-		r.Get("/is-login-taken", h.isLoginTaken)
-	})
-
-	// Пример защищенного маршрута:
-	// r.With(middleware.AuthRequired(h.service.Token)).Get("/protected", h.protectedEndpoint)
 
 	return r
 }
