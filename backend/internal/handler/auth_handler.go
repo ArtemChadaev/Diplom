@@ -3,8 +3,10 @@ package handler
 import (
 	"encoding/json"
 	"errors"
+	"log/slog"
 	"net"
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/ima/diplom-backend/internal/domain"
@@ -132,15 +134,48 @@ func (h *Handler) refresh(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) logout(w http.ResponseWriter, r *http.Request) {
-	// TODO: Not fully implemented revocation in the handler context yet,
-	// but normally you'd read the access token to get userID and session ID
-	// Or just do a client-side logout by invalidating cookie.
-	// TODO: сделать чтобы именно отозвать токен refresh у какого то пользователя, м.б. новый метод
-	http.SetCookie(w, &http.Cookie{
-		Name:   "refresh_token",
-		Value:  "",
-		Path:   "/",
-		MaxAge: -1,
-	})
+	authHeader := r.Header.Get("Authorization")
+	if authHeader == "" {
+		// Just clear cookie and return if no token provided (client-side only logout)
+		h.clearRefreshCookie(w)
+		w.WriteHeader(http.StatusNoContent)
+		return
+	}
+
+	parts := strings.Split(authHeader, " ")
+	if len(parts) != 2 || strings.ToLower(parts[0]) != "bearer" {
+		http.Error(w, "invalid authorization header", http.StatusUnauthorized)
+		return
+	}
+
+	claims, err := h.tokenSvc.ParseAccessToken(parts[1])
+	if err != nil {
+		// Token invalid/expired, still clear cookie for the user
+		h.clearRefreshCookie(w)
+		w.WriteHeader(http.StatusNoContent)
+		return
+	}
+
+	// Revoke the session
+	err = h.service.Auth.RevokeSession(r.Context(), claims.SessionID, claims.UserID, claims.Role)
+	if err != nil {
+		// Log error but proceed to clear cookie
+		slog.Warn("failed to revoke session during logout",
+			slog.String("sessionID", claims.SessionID.String()),
+			slog.String("error", err.Error()),
+		)
+	}
+
+	h.clearRefreshCookie(w)
 	w.WriteHeader(http.StatusNoContent)
+}
+
+func (h *Handler) clearRefreshCookie(w http.ResponseWriter) {
+	http.SetCookie(w, &http.Cookie{
+		Name:     "refresh_token",
+		Value:    "",
+		Path:     "/auth",
+		MaxAge:   -1,
+		HttpOnly: true,
+	})
 }

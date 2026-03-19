@@ -19,9 +19,10 @@ type Config struct {
 	DBName     string `env:"DB_NAME" env-required:"true"`
 	DBPassword string `env:"DB_PASSWORD" env-required:"true"`
 
-	JWTSecret     string `env:"JWT_SECRET" env-required:"true"`
-	AdminUser     string `env:"ADMIN_USER" env-default:"admin"`
-	AdminPassword string `env:"ADMIN_PASSWORD" env-required:"true"`
+	JWTSecret      string `env:"JWT_SECRET" env-required:"true"`
+	AdminUser      string `env:"ADMIN_USER" env-default:"admin"`
+	AdminPassword  string `env:"ADMIN_PASSWORD" env-required:"true"`
+	GoogleClientID string `env:"GOOGLE_CLIENT_ID"`
 }
 
 func Load() (*Config, error) {

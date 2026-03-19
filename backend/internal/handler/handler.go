@@ -5,16 +5,20 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
+	"github.com/ima/diplom-backend/internal/domain"
+	h_middleware "github.com/ima/diplom-backend/internal/handler/middleware"
 	"github.com/ima/diplom-backend/internal/service"
 )
 
 type Handler struct {
-	service service.Service
+	service  service.Service
+	tokenSvc domain.TokenService
 }
 
-func NewHandler(service *service.Service) *Handler {
+func NewHandler(service *service.Service, tokenSvc domain.TokenService) *Handler {
 	return &Handler{
-		service: *service,
+		service:  *service,
+		tokenSvc: tokenSvc,
 	}
 }
 
@@ -27,13 +31,30 @@ func (h *Handler) Router() chi.Router {
 	r.Use(middleware.Heartbeat("/ping"))
 	r.Use(h.loggingMiddleware)
 
-	// TODO: группировать под /api/v1 по мере роста
-	// TODO: Сделать проверку в middleware на то какой пользователь, рандомный, стандартный или админ
+	// Public Auth Routes
 	r.Route("/auth", func(r chi.Router) {
 		r.Post("/register", h.register)
 		r.Post("/login", h.login)
+		r.Post("/google", h.googleLogin)
 		r.Post("/refresh", h.refresh)
-		r.Post("/logout", h.logout)
+		r.Post("/logout", h.logout) // Now requires Authorization header inside handler
+	})
+
+	// Protected API Routes
+	r.Route("/api/v1", func(r chi.Router) {
+		r.Use(h_middleware.AuthRequired(h.tokenSvc))
+
+		// Session management (own)
+		r.Delete("/sessions/{sessionID}", h.revokeSession)
+
+		// Admin routes
+		r.Route("/admin", func(r chi.Router) {
+			r.Use(h_middleware.RequireRole(domain.RoleAdmin))
+
+			r.Patch("/users/{id}/verify", h.adminVerifyUser)
+			r.Patch("/users/{id}/role", h.adminAssignRole)
+			r.Delete("/sessions/{sessionID}", h.adminRevokeSession)
+		})
 	})
 
 	return r

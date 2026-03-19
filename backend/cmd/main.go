@@ -54,8 +54,8 @@ func main() {
 	// 4. Инициализация слоёв: Repository → Service → Handler
 	repos := repository.NewRepository(db)
 
-	services := service.NewService(repos, cfg.JWTSecret)
-	handlers := handler.NewHandler(services)
+	services := service.NewService(repos, cfg.JWTSecret, cfg.GoogleClientID)
+	handlers := handler.NewHandler(services, services.Token)
 
 	router := handlers.Router()
 

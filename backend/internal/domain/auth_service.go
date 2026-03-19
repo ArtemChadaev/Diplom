@@ -46,6 +46,6 @@ type AuthService interface {
 	RevokeSession(ctx context.Context, sessionID uuid.UUID, callerID int, callerRole UserRole) error
 
 	// Admin actions
-	VerifyUser(ctx context.Context, adminID, targetUserID int) error
-	AssignRole(ctx context.Context, adminID, targetUserID int, role UserRole) error
+	VerifyUser(ctx context.Context, adminID int, adminRole UserRole, targetUserID int) error
+	AssignRole(ctx context.Context, adminID int, adminRole UserRole, targetUserID int, role UserRole) error
 }

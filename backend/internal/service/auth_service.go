@@ -2,11 +2,13 @@ package service
 
 import (
 	"context"
+	"errors"
 	"time"
 
 	"github.com/google/uuid"
 	"github.com/ima/diplom-backend/internal/domain"
 	"golang.org/x/crypto/bcrypt"
+	"google.golang.org/api/idtoken"
 )
 
 type authService struct {
@@ -14,6 +16,7 @@ type authService struct {
 	sessionRepo     domain.SessionRepository
 	tokenSvc        domain.TokenService
 	refreshTokenTTL time.Duration
+	googleClientID  string
 }
 
 func NewAuthService(
@@ -21,12 +24,14 @@ func NewAuthService(
 	sessionRepo domain.SessionRepository,
 	tokenSvc domain.TokenService,
 	refreshTTL time.Duration,
+	googleClientID string,
 ) domain.AuthService {
 	return &authService{
 		userRepo:        userRepo,
 		sessionRepo:     sessionRepo,
 		tokenSvc:        tokenSvc,
 		refreshTokenTTL: refreshTTL,
+		googleClientID:  googleClientID,
 	}
 }
 
@@ -85,9 +90,59 @@ func (s *authService) LoginWithPassword(ctx context.Context, login, password, us
 }
 
 func (s *authService) LoginWithGoogle(ctx context.Context, idToken, userAgent, ip string) (*domain.TokenPair, error) {
-	// Not fully implemented OIDC parse yet to save lines.
-	// Normally we'd use idtoken.Validate or something similar to fetch UserInfo
-	panic("implement me via google idtoken validator")
+	payload, err := idtoken.Validate(ctx, idToken, s.googleClientID)
+	if err != nil {
+		return nil, domain.ErrInvalidToken
+	}
+
+	googleID := payload.Subject
+	email, _ := payload.Claims["email"].(string)
+
+	// 1. Try finding by Google ID
+	u, err := s.userRepo.FindByGoogleID(ctx, googleID)
+	if err != nil && !errors.Is(err, domain.ErrUserNotFound) {
+		return nil, err
+	}
+
+	if u != nil {
+		return s.issueTokens(ctx, u, userAgent, ip)
+	}
+
+	// 2. Try finding by Email and link
+	if email != "" {
+		u, err = s.userRepo.FindByEmail(ctx, email)
+		if err != nil && !errors.Is(err, domain.ErrUserNotFound) {
+			return nil, err
+		}
+
+		if u != nil {
+			if err := s.userRepo.LinkGoogle(ctx, u.ID, googleID); err != nil {
+				return nil, err
+			}
+			return s.issueTokens(ctx, u, userAgent, ip)
+		}
+	}
+
+	// 3. New user -> Register as unverified
+	login := email
+	if login == "" {
+		login = "google_" + googleID[:8]
+	}
+
+	newUser := &domain.User{
+		Login:    login,
+		Email:    &email,
+		GoogleID: &googleID,
+		Role:     domain.RoleUnverified,
+		Status:   domain.StatusUnverified,
+	}
+
+	if _, err := s.userRepo.Create(ctx, newUser); err != nil {
+		return nil, err
+	}
+
+	// For unverified users, we don't issue tokens yet
+	return nil, domain.ErrUserUnverified
 }
 
 func (s *authService) LoginWithTelegram(ctx context.Context, data domain.TelegramAuthData, userAgent, ip string) (*domain.TokenPair, error) {
@@ -136,11 +191,17 @@ func (s *authService) RevokeSession(ctx context.Context, sessionID uuid.UUID, ca
 	return s.sessionRepo.Revoke(ctx, sessionID)
 }
 
-func (s *authService) VerifyUser(ctx context.Context, adminID, targetUserID int) error {
+func (s *authService) VerifyUser(ctx context.Context, adminID int, adminRole domain.UserRole, targetUserID int) error {
+	if adminRole != domain.RoleAdmin {
+		return domain.ErrInsufficientPerms
+	}
 	return s.userRepo.UpdateStatus(ctx, targetUserID, domain.StatusActive)
 }
 
-func (s *authService) AssignRole(ctx context.Context, adminID, targetUserID int, role domain.UserRole) error {
+func (s *authService) AssignRole(ctx context.Context, adminID int, adminRole domain.UserRole, targetUserID int, role domain.UserRole) error {
+	if adminRole != domain.RoleAdmin {
+		return domain.ErrInsufficientPerms
+	}
 	return s.userRepo.UpdateRole(ctx, targetUserID, role)
 }
 
@@ -151,11 +212,6 @@ func (s *authService) issueTokens(ctx context.Context, u *domain.User, userAgent
 			return nil, domain.ErrUserUnverified
 		}
 		return nil, domain.ErrUserBlocked
-	}
-
-	accessToken, err := s.tokenSvc.GenerateAccessToken(u)
-	if err != nil {
-		return nil, err
 	}
 
 	rawRT, hashRT, err := s.tokenSvc.GenerateRefreshToken()
@@ -173,7 +229,13 @@ func (s *authService) issueTokens(ctx context.Context, u *domain.User, userAgent
 		Metadata:  metadata,
 	}
 
-	if _, err := s.sessionRepo.Create(ctx, rt); err != nil {
+	createdRT, err := s.sessionRepo.Create(ctx, rt)
+	if err != nil {
+		return nil, err
+	}
+
+	accessToken, err := s.tokenSvc.GenerateAccessToken(u, createdRT.ID)
+	if err != nil {
 		return nil, err
 	}
 
