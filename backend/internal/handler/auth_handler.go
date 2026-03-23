@@ -3,7 +3,6 @@ package handler
 import (
 	"encoding/json"
 	"errors"
-	"log/slog"
 	"net"
 	"net/http"
 	"strings"
@@ -11,6 +10,7 @@ import (
 
 	"github.com/ima/diplom-backend/internal/domain"
 	"github.com/ima/diplom-backend/internal/handler/dto"
+	"github.com/ima/diplom-backend/internal/pkg/logger"
 )
 
 func (h *Handler) register(w http.ResponseWriter, r *http.Request) {
@@ -160,9 +160,9 @@ func (h *Handler) logout(w http.ResponseWriter, r *http.Request) {
 	err = h.service.Auth.RevokeSession(r.Context(), claims.SessionID, claims.UserID, claims.Role)
 	if err != nil {
 		// Log error but proceed to clear cookie
-		slog.Warn("failed to revoke session during logout",
-			slog.String("sessionID", claims.SessionID.String()),
-			slog.String("error", err.Error()),
+		logger.FromContext(r.Context()).Warn("failed to revoke session during logout",
+			"sessionID", claims.SessionID.String(),
+			"error", err.Error(),
 		)
 	}
 

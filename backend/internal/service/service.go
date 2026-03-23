@@ -9,8 +9,9 @@ import (
 
 // Service — агрегатор всех сервисов приложения
 type Service struct {
-	Auth  domain.AuthService
-	Token domain.TokenService
+	Auth            domain.AuthService
+	Token           domain.TokenService
+	EmployeeProfile domain.EmployeeProfileService
 }
 
 func NewService(repos *repository.Repository, jwtSecret string, googleClientID string) *Service {
@@ -18,7 +19,9 @@ func NewService(repos *repository.Repository, jwtSecret string, googleClientID s
 	tokenSvc := NewTokenService(jwtSecret, 15*time.Minute, 15*24*time.Hour)
 
 	return &Service{
-		Auth:  NewAuthService(repos.User, repos.Session, tokenSvc, 15*24*time.Hour, googleClientID),
-		Token: tokenSvc,
+		Auth:            NewAuthService(repos.User, repos.Session, tokenSvc, 15*24*time.Hour, googleClientID),
+		Token:           tokenSvc,
+		EmployeeProfile: NewEmployeeProfileService(repos.EmployeeProfile),
 	}
 }
+

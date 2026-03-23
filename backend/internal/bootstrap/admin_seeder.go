@@ -2,22 +2,24 @@ package bootstrap
 
 import (
 	"context"
-	"log/slog"
 
 	"github.com/ima/diplom-backend/internal/config"
 	"github.com/ima/diplom-backend/internal/domain"
+	"github.com/ima/diplom-backend/internal/pkg/logger"
 	"golang.org/x/crypto/bcrypt"
 )
 
 func SeedAdmin(ctx context.Context, cfg *config.Config, userRepo domain.UserRepository) error {
+	log := logger.FromContext(ctx)
+
 	if cfg.AdminUser == "" || cfg.AdminPassword == "" {
-		slog.Warn("admin credentials not fully configured, skipping bootstrap")
+		log.Warn("admin credentials not fully configured, skipping bootstrap")
 		return nil
 	}
 
 	existingUser, err := userRepo.FindByLogin(ctx, cfg.AdminUser)
 	if err == nil && existingUser != nil {
-		slog.Info("default admin already exists, skipping creation")
+		log.Info("default admin already exists, skipping creation")
 		return nil
 	}
 	if err != nil && err != domain.ErrUserNotFound {
@@ -40,10 +42,10 @@ func SeedAdmin(ctx context.Context, cfg *config.Config, userRepo domain.UserRepo
 
 	_, err = userRepo.Create(ctx, u)
 	if err != nil {
-		slog.Error("failed to create default admin", slog.Any("error", err))
+		log.Error("failed to create default admin", "error", err)
 		return err
 	}
 
-	slog.Info("successfully created default admin", slog.String("login", cfg.AdminUser))
+	log.Info("successfully created default admin", "login", cfg.AdminUser)
 	return nil
 }

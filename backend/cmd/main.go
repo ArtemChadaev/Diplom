@@ -14,18 +14,24 @@ import (
 	"github.com/ima/diplom-backend/internal/config"
 	"github.com/ima/diplom-backend/internal/domain"
 	"github.com/ima/diplom-backend/internal/handler"
+	"github.com/ima/diplom-backend/internal/pkg/logger"
 	"github.com/ima/diplom-backend/internal/repository"
 	"github.com/ima/diplom-backend/internal/service"
 )
 
 func main() {
-	// 1. Загрузка конфигурации из .env
+	// 1. Инициализация логгера
+	logger.Setup(os.Getenv("APP_ENV"))
+
+	// 2. Загрузка конфигурации из .env
 	cfg, err := config.Load()
 	if err != nil {
-		log.Fatalf("ошибка загрузки конфига: %s", err)
+		slog.Error("ошибка загрузки конфига", slog.Any("error", err))
+		os.Exit(1)
 	}
 
 	slog.Info("конфигурация загружена", slog.String("port", cfg.Port))
+
 
 	// 2. Graceful shutdown контекст
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)

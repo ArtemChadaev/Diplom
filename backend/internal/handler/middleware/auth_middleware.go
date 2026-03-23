@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/ima/diplom-backend/internal/domain"
+	"github.com/ima/diplom-backend/internal/pkg/logger"
 )
 
 type contextKey string
@@ -43,7 +44,11 @@ func AuthRequired(tokenSvc domain.TokenService) func(http.Handler) http.Handler 
 			ctx = context.WithValue(ctx, CtxRole, claims.Role)
 			ctx = context.WithValue(ctx, CtxEmail, claims.Email)
 
+			// Enrich logger context with UserID
+			ctx = logger.WithUserID(ctx, claims.UserID)
+
 			next.ServeHTTP(w, r.WithContext(ctx))
+
 		})
 	}
 }

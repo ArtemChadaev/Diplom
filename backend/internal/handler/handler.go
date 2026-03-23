@@ -25,11 +25,13 @@ func NewHandler(service *service.Service, tokenSvc domain.TokenService) *Handler
 func (h *Handler) Router() chi.Router {
 	r := chi.NewRouter()
 
+	r.Use(middleware.RequestID)
 	r.Use(middleware.Logger)
 	r.Use(middleware.Recoverer)
 	r.Use(middleware.Timeout(60 * time.Second))
 	r.Use(middleware.Heartbeat("/ping"))
 	r.Use(h.loggingMiddleware)
+
 
 	// Public Auth Routes
 	r.Route("/auth", func(r chi.Router) {
@@ -54,7 +56,15 @@ func (h *Handler) Router() chi.Router {
 			r.Patch("/users/{id}/verify", h.adminVerifyUser)
 			r.Patch("/users/{id}/role", h.adminAssignRole)
 			r.Delete("/sessions/{sessionID}", h.adminRevokeSession)
+
+			// Admin Employee Profile routes
+			r.Route("/employees", func(r chi.Router) {
+				r.Get("/", h.adminListEmployeeProfiles)
+				r.Get("/{userID}", h.adminGetEmployeeProfile)
+				r.Patch("/{userID}", h.adminPatchEmployeeProfile)
+			})
 		})
+
 	})
 
 	return r
