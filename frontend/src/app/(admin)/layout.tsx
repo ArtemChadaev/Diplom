@@ -12,3 +12,4 @@ export default function UserLayout({ children }: { children: React.ReactNode }) 
         </div>
     );
 }
+// TODO: Сделать проверку на администратора если не он перекинуть на прошлую страницу или на главную
