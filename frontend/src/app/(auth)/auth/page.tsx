@@ -21,7 +21,7 @@ export default function AuthPage() {
   return (
     <div className="w-full max-w-[440px] animate-in fade-in zoom-in-95 duration-500">
       <Card className="border-border/40 shadow-2xl bg-card/50 backdrop-blur-md overflow-hidden min-h-[520px] flex flex-col">
-        <CardHeader className="space-y-1 pb-6 text-center">
+        <CardHeader className="space-y-1 text-center">
           <CardTitle className="text-2xl font-bold tracking-tight">
             {activeTab === "login" ? "Авторизация" : "Регистрация"}
           </CardTitle>
