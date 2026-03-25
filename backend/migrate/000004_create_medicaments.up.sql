@@ -6,3 +6,4 @@ CREATE TABLE medicaments (
     description TEXT,
     created_at TIMESTAMPTZ DEFAULT NOW()
 );
+-- TODO: Сделать чтобы был штрихкод, так же условия хранения и м.б. многие ко многим со складами
