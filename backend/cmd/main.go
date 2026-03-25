@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"errors"
-	"log"
 	"log/slog"
 	"net/http"
 	"os"
@@ -26,11 +25,11 @@ func main() {
 	// 2. Загрузка конфигурации из .env
 	cfg, err := config.Load()
 	if err != nil {
-		slog.Error("ошибка загрузки конфига", slog.Any("error", err))
+		slog.Error("failed to load config", slog.Any("error", err))
 		os.Exit(1)
 	}
 
-	slog.Info("конфигурация загружена", slog.String("port", cfg.Port))
+	slog.Info("config loaded", slog.String("port", cfg.Port))
 
 
 	// 2. Graceful shutdown контекст
@@ -47,15 +46,17 @@ func main() {
 		SSLMode:  "disable",
 	})
 	if err != nil {
-		log.Fatalf("ошибка подключения к БД: %s", err)
+		slog.Error("failed to connect to database", slog.Any("error", err))
+		os.Exit(1)
 	}
 	sqlDB, err := db.DB()
 	if err != nil {
-		log.Fatalf("ошибка получения sql.DB: %s", err)
+		slog.Error("failed to get sql.DB from gorm explorer", slog.Any("error", err))
+		os.Exit(1)
 	}
 	defer sqlDB.Close()
 
-	slog.Info("подключение к БД установлено")
+	slog.Info("database connection established")
 
 	// 4. Инициализация слоёв: Repository → Service → Handler
 	repos := repository.NewRepository(db)
@@ -68,22 +69,24 @@ func main() {
 	// 5. Запуск HTTP-сервера
 	srv := new(domain.Server)
 	go func() {
-		slog.Info("сервер запущен", slog.String("addr", ":"+cfg.Port))
+		slog.Info("server started", slog.String("addr", ":"+cfg.Port))
 		if err := srv.Run(cfg.Port, router); err != nil && !errors.Is(err, http.ErrServerClosed) {
-			log.Fatalf("ошибка сервера: %s", err)
+			slog.Error("server error", slog.Any("error", err))
+			os.Exit(1)
 		}
 	}()
 
 	// Admin Seeding
 	if err := bootstrap.SeedAdmin(ctx, cfg, repos.User); err != nil {
-		log.Fatalf("ошибка инициализации админа: %s", err)
+		slog.Error("admin bootstrap failed", slog.Any("error", err))
+		os.Exit(1)
 	}
 
 	// 6. Ожидание сигнала завершения
 	<-ctx.Done()
-	slog.Info("завершение работы сервера...")
+	slog.Info("shutting down server...")
 
 	if err := srv.Shutdown(context.Background()); err != nil {
-		log.Printf("ошибка при shutdown: %s", err)
+		slog.Error("shutdown error", slog.Any("error", err))
 	}
 }

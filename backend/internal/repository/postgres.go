@@ -41,7 +41,7 @@ func NewPostgresDB(cfg PostgresConfig) (*gorm.DB, error) {
 		return nil, err
 	}
 
-	slog.Info("успешное подключение к PostgreSQL через GORM")
+	slog.Info("successfully connected to PostgreSQL via GORM")
 
 	return db, nil
 }

@@ -9,19 +9,20 @@ import (
 )
 
 var (
-	ErrUserNotFound      = errors.New("пользователь не найден")
-	ErrLoginTaken        = errors.New("логин уже занят")
-	ErrEmailTaken        = errors.New("email уже занят")
-	ErrInvalidCreds      = errors.New("неверный логин или пароль")
-	ErrUserUnverified    = errors.New("аккаунт ожидает подтверждения администратором")
-	ErrUserBlocked       = errors.New("аккаунт заблокирован")
-	ErrTokenExpired      = errors.New("срок действия токена истёк")
-	ErrInvalidToken      = errors.New("недействительный токен")
-	ErrSessionNotFound   = errors.New("сессия не найдена или была завершена")
-	ErrInvalidTelegram   = errors.New("неверные данные авторизации Telegram")
-	ErrInsufficientPerms = errors.New("недостаточно прав для выполнения операции")
-	ErrEmployeeProfileNotFound = errors.New("профиль сотрудника не найден")
+	ErrUserNotFound      = errors.New("user not found")
+	ErrLoginTaken        = errors.New("login already taken")
+	ErrEmailTaken        = errors.New("email already taken")
+	ErrInvalidCreds      = errors.New("invalid login or password")
+	ErrUserUnverified    = errors.New("account pending administrator verification")
+	ErrUserBlocked       = errors.New("account is blocked")
+	ErrTokenExpired      = errors.New("token expired")
+	ErrInvalidToken      = errors.New("invalid token")
+	ErrSessionNotFound   = errors.New("session not found or terminated")
+	ErrInvalidTelegram   = errors.New("invalid telegram auth data")
+	ErrInsufficientPerms = errors.New("insufficient permissions for this operation")
+	ErrEmployeeProfileNotFound = errors.New("employee profile not found")
 )
+
 
 // AppError is a structured application error that carries
 // a human-readable message plus arbitrary key-value context.
