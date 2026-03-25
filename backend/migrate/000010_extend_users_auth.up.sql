@@ -10,3 +10,4 @@ ALTER TABLE users ALTER COLUMN password_hash DROP NOT NULL;
 
 -- Add 'unverified' to the user_role ENUM
 ALTER TYPE user_role ADD VALUE IF NOT EXISTS 'unverified';
+-- Убрать пароль и просто пересмотреть особенно user_role

@@ -9,3 +9,4 @@ CREATE TABLE audit_logs (
     ip_address VARCHAR(45),
     created_at TIMESTAMPTZ DEFAULT NOW()
 );
+-- TODO: Переделать точно
