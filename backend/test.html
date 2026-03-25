@@ -1,0 +1,18 @@
+<html>
+<body>
+<script src="https://accounts.google.com/gsi/client" async defer></script>
+<div id="g_id_onload"
+     data-client_id="691345228451-172nt62vjc3pirkbumpjqcr6pd280pbp.apps.googleusercontent.com"
+     data-callback="handleCredentialResponse">
+</div>
+<div class="g_id_signin" data-type="standard"></div>
+
+<script>
+    function handleCredentialResponse(response) {
+      console.log("Твой ID Token:");
+      console.log(response.credential); // Копируй это из консоли браузера
+      alert("Токен в консоли!");
+    }
+</script>
+</body>
+</html>

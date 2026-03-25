@@ -29,7 +29,7 @@ func Load() (*Config, error) {
 	var cfg Config
 
 	if err := cleanenv.ReadConfig(".env", &cfg); err != nil {
-		slog.Error(err.Error() + ". Loading config")
+		slog.Warn(".env file not found, loading from environment variables")
 	}
 
 	err := cleanenv.ReadEnv(&cfg)
