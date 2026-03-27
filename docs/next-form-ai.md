@@ -1,111 +1,139 @@
-# Техническая спецификация ERP-системы
+# ERP System Technical Specification
 
-## 1. Общие элементы интерфейса (Layout)
+## Form Specifications
 
-### 1.1 Шапка (Header)
-* **Элементы:** Логотип, Навигация, Профиль (статус ЭЦП), Центр уведомлений.
-* **Глобальный поиск:** Поддержка поиска по МНН, SKU, Серии, **DataMatrix (КИЗ)**, Штрих-коду и № Регистрационного удостоверения (РУ).
-
-### 1.2 Футер (Footer)
-* **Юридические данные:** Номер лицензии, срок действия, ФИО Уполномоченного лица на смене.
-* **Технические данные:** Статус сервера, версия БД, индикатор синхронизации с ГИС (Честный Знак/МДЛП).
-
----
-
-## 2. Группа: Доступ и Безопасность
-
-### 2.1 Авторизация
-* **Вход:** Email/Google + Обязательная привязка **УКЭП** для ответственных лиц (Провизор, Директор).
-* **Роли:** Админ, Уполномоченное лицо (QP), Заведующий складом, Кладовщик, Фармацевт.
-* **Допуски (admin):** Отдельный флаг доступа к работе с **НС и ПВ** (Наркотические и Психотропные вещества).
-
-### 2.2 Профиль сотрудника
-* **Данные:** Скан медкнижки, история обучения GDP, статус допуска к спецзонам.
+| # | Form | Phase | Description |
+|---|------|-------|-------------|
+| 01 | [Auth — Login](./form/01-auth-login.md) | 1 | Email OTP login, Google OAuth |
+| 01b | [Auth — Email OTP Verify](./form/01b-email-otp-verify.md) | 1 | 6-digit code confirmation |
+| 02 | [Employee Profile](./form/02-employee-profile.md) | 1 | Profile, GDP training, access flags |
+| 03 | [Inbound Receiving](./form/03-inbound-receiving.md) | 1 | Goods receipt, quarantine, Inbound form |
+| 04 | [Warehouse Zoning](./form/04-warehouse-zoning.md) | 1 | Zone management and storage rules |
+| 05 | [Environment Log](./form/05-environment-log.md) | 3 | Temperature/humidity shift logging |
+| 06 | [Assembly & Shipment (FEFO)](./form/06-assembly-shipment-fefo.md) | 2 | FEFO picking, MOS control, TTN |
+| 07 | [Claims & Defects](./form/07-claims-defects.md) | 3 | Returns, recalls, Roszdravnadzor STOP signals |
+| 08 | [Product Card](./form/08-product-card.md) | 1 | Master data for medicaments |
+| 09 | [Inventory](./form/09-inventory.md) | 2 | Blind stocktaking |
 
 ---
 
-## 3. Складской учет: Приемка и Карантин
+## Related Documentation
 
-### 3.1 Форма прихода (Inbound)
-* **Основные поля:** Поставщик, Тип закупки, № Накладной, Страна, Завод-изготовитель, **№ Регистрационного удостоверения (РУ)**.
-* **Данные серии:** № Серии, Дата производства, **Дата окончания срока годности (Expiry Date)**.
-* **Финансы:** Ставка НДС, Контроль наценки ЖНВЛП.
-* **Статус «Карантин»:** Принятый товар системно заблокирован для любых перемещений.
-* **Выпуск в обращение (admin/QP):** Форма «Протокола приемки». Только после подписания ЭЦП Уполномоченным лицом товар переходит в статус «Доступен к продаже».
-
-### 3.2 Зонирование и Хранение
-* **Зоны в системе:** * Общая зона.
-  * Холодовая цепь (холодильники).
-  * Огнеопасные / Спиртосодержащие.
-  * Сейфовая зона (для НС и ПВ / ПКУ).
-* **Журнал параметров среды:** Форма ежедневного ввода (2 раза в день) температуры и влажности для каждой зоны склада.
+| Document | Description |
+|----------|-------------|
+| [api-endpoints.md](./api-endpoints.md) | OpenAPI-style reference for all endpoints |
+| [database-schema.md](./database-schema.md) | Target PostgreSQL schema |
+| [valkey-cache.md](./valkey-cache.md) | Valkey (Redis) data — OTP, cache, rate limiting |
+| [frontend.md](./frontend.md) | Frontend tech stack and conventions |
 
 ---
 
-## 4. Логистика и Сбыт
+## 1. Common UI Elements (Layout)
 
-### 4.1 Алгоритм сборки (FEFO)
-* **Логика:** Система автоматически предлагает к сборке товар из партии с **наименьшим остаточным сроком годности** (First Expired, First Out), независимо от даты прихода.
+### 1.1 Header
+* **Elements:** Logo, Navigation, Profile (UKEP status), Notification center.
+* **Global search:** Search by INN, SKU, Batch number, **DataMatrix (KIZ)**, Barcode, Registration certificate #.
 
-### 4.2 Контроль отгрузки
-* **Минимальный остаточный срок (МОС):** Система блокирует отгрузку в аптеку, если у товара осталось менее 60% (или иного лимита) срока годности.
-* **Документация:** Авто-генерация «Реестра документов качества» (сертификаты/декларации) к каждой ТТН.
-* **Cito!:** Срочные заказы перемещаются в начало очереди сборки.
-
-### 4.3 Рекламации и Брак
-* **Интеграция с Росздравнадзором:** Авто-импорт списка изъятых серий. При совпадении серии система мгновенно блокирует остатки («STOP-сигнал»).
-* **Возвраты:** Оформление возвратов от аптек и поставщику с фотофиксацией брака.
+### 1.2 Footer
+* **Legal data:** License number, expiry, name of the Authorized Person on shift.
+* **Technical data:** Server status, DB version, GIS sync indicator (Chestny Znak / MDLP).
 
 ---
 
-## 5. Информационные карточки
+## 2. Access & Security
 
-### 5.1 Карточка товара (Медикамента)
-* **Мастер-данные:** Фото (визуал), МНН, **ATC-классификация**, Кратность упаковки, ВГХ (Вес/Габариты).
-* **Флаги:** «ЖНВЛП», «Подлежит МДЛП (Маркировка)», «НС/ПВ (ПКУ)», «Холодовая цепь».
-* **Требования:** Диапазон температуры и **Допустимая влажность**.
+### 2.1 Auth — Login → [form/01-auth-login.md](./form/01-auth-login.md)
+* **Login:** Email OTP / Google OAuth + mandatory **UKEP** binding for responsible persons.
+* **Roles:** Admin, QP (Authorized Person), Warehouse Manager, Storekeeper, Pharmacist.
+* **Access flags (admin):** Separate flag for **NS/PV** (Narcotic and Psychotropic substances) access.
 
-### 5.2 Инвентаризация
-* **Механизм:** «Слепая инвентаризация».
-* **Акт зачета пересортицы (admin):** Схлопывание излишков и недостач внутри одной ценовой группы.
-* **Образцы:** Учет раскомплектованных упаковок (контрольные образцы для лаборатории).
+### 2.1b Auth — Email OTP Verify → [form/01b-email-otp-verify.md](./form/01b-email-otp-verify.md)
+* **Flow:** User enters 6-digit code from email. Code stored in Valkey (TTL 10 min, max 3 attempts).
 
----
-
-## 6. Аналитика и Аудит
-
-### 6.1 Отчетность
-* **Сроки:** Отчет «Финансовые риски по срокам годности» (3/6/12 мес).
-* **Анализ:** ABC/XYZ-анализ оборачиваемости.
-
-### 6.2 Аудит (admin)
-* **Версионность:** Хранение истории всех сертификатов качества.
-* **Immutable Logs:** Хэширование всей цепочки действий с каждой упаковкой.
+### 2.2 Employee Profile → [form/02-employee-profile.md](./form/02-employee-profile.md)
+* **Data:** Medical book scan, GDP training history, special zone access status.
 
 ---
 
-## 🗺️ Расширенный Roadmap (Priority 2026)
+## 3. Warehouse: Receiving & Quarantine
 
-### Фаза 1: "Выжить" (Месяц 1-2)
-* Авторизация, База пользователей (Роли/Допуски).
-* Карточка товара (МНН, РУ, Флаги НС/ПВ).
-* Приход в статус «Карантин» + Дата экспирации.
-* **Цель:** Начать учет без нарушения базовых законов.
+### 3.1 Inbound Receiving → [form/03-inbound-receiving.md](./form/03-inbound-receiving.md)
+* **Main fields:** Supplier, Purchase type, Invoice #, Country, Manufacturer, **Registration certificate #**.
+* **Batch data:** Batch #, Manufacture date, **Expiry date**.
+* **Finance:** VAT rate, JNVLP markup control.
+* **Quarantine status:** Received goods are system-blocked from all movements.
+* **Release (admin/QP):** Acceptance protocol. Goods move to "available" only after QP signs off.
 
-### Фаза 2: "Регуляторный щит" (Месяц 3-4)
-* **Алгоритм FEFO:** Замена стандартного FIFO.
-* **Маркировка (DataMatrix):** Связка с Честным Знаком.
-* **Контроль ЖНВЛП:** Ценообразование.
-* **Цель:** Защита от штрафов и пересортицы по срокам.
+### 3.2 Warehouse Zoning → [form/04-warehouse-zoning.md](./form/04-warehouse-zoning.md)
+* **Zones:** General, Cold chain (refrigerators), Flammable/alcohol, Safe zone (NS/PV, PKU).
 
-### Фаза 3: "Безопасность и Качество" (Месяц 5-6)
-* **ЭЦП (УКЭП):** Протоколы приемки и выпуска в обращение.
-* **Журналы среды:** Температура и влажность.
-* **Блокировка брака:** Синхронизация с реестрами изъятых серий.
-* **Цель:** Полное соответствие стандартам GDP/GSP.
+### 3.3 Environment Log → [form/05-environment-log.md](./form/05-environment-log.md)
+* **Log:** Daily entry form (2x/day): temperature and humidity per zone.
 
-### Фаза 4: "Оптимизация" (Месяц 7+)
-* **Адресное хранение:** Стеллажи/Ячейки.
-* **Аналитика:** ABC/XYZ и прогноз потерь.
-* **Логистика:** Контроль МОС (остаточного срока) и ВГХ (габаритов).
-* **Цель:** Максимизация прибыли и сокращение логистических издержек.
+---
+
+## 4. Logistics & Distribution
+
+### 4.1 Assembly & Shipment (FEFO) → [form/06-assembly-shipment-fefo.md](./form/06-assembly-shipment-fefo.md)
+* **FEFO logic:** System proposes batches with the **shortest remaining shelf life** (First Expired, First Out).
+* **MOS control:** Shipment blocked if remaining shelf life < 60% (configurable).
+* **Documentation:** Auto-generated quality certificate registry per TTN.
+* **Cito!:** Urgent orders jump the assembly queue.
+
+### 4.2 Claims & Defects → [form/07-claims-defects.md](./form/07-claims-defects.md)
+* **Roszdravnadzor integration:** Auto-import of recalled batches. Matching batch → immediate STOP signal.
+* **Returns:** Returns from pharmacies and to supplier, with photo evidence.
+
+---
+
+## 5. Master Data
+
+### 5.1 Product Card → [form/08-product-card.md](./form/08-product-card.md)
+* **Master data:** Photo, INN, **ATC classification**, Package multiplicity, dimensions/weight.
+* **Flags:** JNVLP, MDLP (labeling), NS/PV (PKU), Cold chain.
+* **Storage:** Temperature range and **max humidity**.
+
+### 5.2 Inventory → [form/09-inventory.md](./form/09-inventory.md)
+* **Mechanism:** Blind inventory (expected qty hidden until session closed).
+* **Recount act (admin):** Netting surpluses and shortfalls within one price group.
+* **Samples:** Tracking opened packages (control samples for the lab).
+
+---
+
+## 6. Analytics & Audit
+
+### 6.1 Reporting
+* **Expiry risk report:** 3/6/12-month financial risk analysis.
+* **Turnover analysis:** ABC/XYZ analysis.
+
+### 6.2 Audit (admin)
+* **Versioning:** Full history of all quality certificates.
+* **Immutable Logs:** SHA-256 chain hashing for every package action.
+
+---
+
+## 🗺️ Roadmap (Priority 2026)
+
+### Phase 1 — "Survive" (Month 1-2)
+* Auth, Users (Roles/Access flags).
+* Product card (INN, registration #, NS/PV flags).
+* Inbound → quarantine + expiry date.
+* **Goal:** Start accounting without violating basic regulations.
+
+### Phase 2 — "Regulatory Shield" (Month 3-4)
+* **FEFO algorithm:** Replace standard FIFO.
+* **DataMatrix labeling:** Integration with Chestny Znak.
+* **JNVLP pricing control.**
+* **Goal:** Protection from fines and batch expiry mix-ups.
+
+### Phase 3 — "Safety & Quality" (Month 5-6)
+* **UKEP (e-signature):** Acceptance and release protocols.
+* **Environment logs:** Temperature and humidity.
+* **Defect blocking:** Sync with recalled batch registries.
+* **Goal:** Full compliance with GDP/GSP standards.
+
+### Phase 4 — "Optimization" (Month 7+)
+* **Address storage:** Racks/Cells.
+* **Analytics:** ABC/XYZ and loss forecasting.
+* **Logistics:** MOS (remaining shelf life) and dimension control.
+* **Goal:** Maximize profit and reduce logistics costs.
