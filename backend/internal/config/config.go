@@ -20,8 +20,7 @@ type Config struct {
 	DBPassword string `env:"DB_PASSWORD" env-required:"true"`
 
 	JWTSecret      string `env:"JWT_SECRET" env-required:"true"`
-	AdminUser      string `env:"ADMIN_USER" env-default:"admin"`
-	AdminPassword  string `env:"ADMIN_PASSWORD" env-required:"true"`
+	AdminEmail     string `env:"ADMIN_EMAIL" env-required:"true"`
 	GoogleClientID string `env:"GOOGLE_CLIENT_ID"`
 }
 

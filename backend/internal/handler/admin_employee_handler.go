@@ -71,17 +71,18 @@ func (h *Handler) adminPatchEmployeeProfile(w http.ResponseWriter, r *http.Reque
 	callerRole := r.Context().Value(middleware.CtxRole).(domain.UserRole)
 
 	input := domain.UpdateEmployeeProfileInput{
-		FullName:         req.FullName,
-		CorporateEmail:   req.CorporateEmail,
-		Phone:            req.Phone,
-		TelegramHandle:   req.TelegramHandle,
-		EmergencyContact: req.EmergencyContact,
-		Position:         req.Position,
-		Department:       req.Department,
-		BirthDate:        req.BirthDate,
-		AvatarURL:        req.AvatarURL,
-		HireDate:         req.HireDate,
-		DismissalDate:    req.DismissalDate,
+		FullName:           req.FullName,
+		CorporateEmail:     req.CorporateEmail,
+		Phone:              req.Phone,
+		Position:           req.Position,
+		Department:         req.Department,
+		BirthDate:          req.BirthDate,
+		AvatarURL:          req.AvatarURL,
+		HireDate:           req.HireDate,
+		DismissalDate:      req.DismissalDate,
+		MedicalBookScanURL: req.MedicalBookScanURL,
+		SpecialZoneAccess:  req.SpecialZoneAccess,
+		GDPTrainingHistory: req.GDPTrainingHistory,
 	}
 
 	updated, err := h.service.EmployeeProfile.UpdateProfile(r.Context(), callerID, callerRole, targetUserID, input)
@@ -119,20 +120,20 @@ func mustParseIntParam(w http.ResponseWriter, r *http.Request, param string) int
 
 func profileToResponse(p *domain.EmployeeProfile) *dto.EmployeeProfileResponse {
 	return &dto.EmployeeProfileResponse{
-		ID:               p.ID,
-		UserID:           p.UserID,
-		EmployeeCode:     p.EmployeeCode,
-		FullName:         p.FullName,
-		CorporateEmail:   p.CorporateEmail,
-		Phone:            p.Phone,
-		TelegramHandle:   p.TelegramHandle,
-		EmergencyContact: p.EmergencyContact,
-		Position:         p.Position,
-		Department:       p.Department,
-		BirthDate:        p.BirthDate,
-		AvatarURL:        p.AvatarURL,
-		HireDate:         p.HireDate,
-		DismissalDate:    p.DismissalDate,
+		ID:                 p.ID,
+		UserID:             p.UserID,
+		EmployeeCode:       p.EmployeeCode,
+		FullName:           p.FullName,
+		CorporateEmail:     p.CorporateEmail,
+		Phone:              p.Phone,
+		Position:           p.Position,
+		Department:         p.Department,
+		BirthDate:          p.BirthDate,
+		AvatarURL:          p.AvatarURL,
+		HireDate:           p.HireDate,
+		DismissalDate:      p.DismissalDate,
+		MedicalBookScanURL: p.MedicalBookScanURL,
+		SpecialZoneAccess:  p.SpecialZoneAccess,
 	}
 }
 

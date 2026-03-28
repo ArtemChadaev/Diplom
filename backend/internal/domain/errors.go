@@ -9,20 +9,17 @@ import (
 )
 
 var (
-	ErrUserNotFound      = errors.New("user not found")
-	ErrLoginTaken        = errors.New("login already taken")
-	ErrEmailTaken        = errors.New("email already taken")
-	ErrInvalidCreds      = errors.New("invalid login or password")
-	ErrUserUnverified    = errors.New("account pending administrator verification")
-	ErrUserBlocked       = errors.New("account is blocked")
-	ErrTokenExpired      = errors.New("token expired")
-	ErrInvalidToken      = errors.New("invalid token")
-	ErrSessionNotFound   = errors.New("session not found or terminated")
-	ErrInvalidTelegram   = errors.New("invalid telegram auth data")
-	ErrInsufficientPerms = errors.New("insufficient permissions for this operation")
+	ErrUserNotFound            = errors.New("user not found")
+	ErrEmailTaken              = errors.New("email already taken")
+	ErrInvalidCreds            = errors.New("invalid credentials")
+	ErrUserBlocked             = errors.New("account is blocked")
+	ErrTokenExpired            = errors.New("token expired")
+	ErrInvalidToken            = errors.New("invalid token")
+	ErrSessionNotFound         = errors.New("session not found or terminated")
+	ErrInvalidTelegram         = errors.New("invalid telegram auth data")
+	ErrInsufficientPerms       = errors.New("insufficient permissions for this operation")
 	ErrEmployeeProfileNotFound = errors.New("employee profile not found")
 )
-
 
 // AppError is a structured application error that carries
 // a human-readable message plus arbitrary key-value context.
@@ -39,9 +36,6 @@ type AppError struct {
 }
 
 // NewAppError creates a new AppError.
-// Example:
-//   domain.NewAppError("profile_not_found", "employee profile not found", ErrUserNotFound,
-//       slog.Int("user_id", uid))
 func NewAppError(code, message string, cause error, attrs ...slog.Attr) *AppError {
 	return &AppError{
 		Code:    code,
@@ -65,4 +59,3 @@ func (e *AppError) LogError(ctx context.Context) {
 	}
 	logger.FromContext(ctx).Error(e.Message, args...)
 }
-

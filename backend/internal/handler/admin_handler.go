@@ -12,7 +12,7 @@ import (
 	"github.com/ima/diplom-backend/internal/handler/middleware"
 )
 
-func (h *Handler) adminVerifyUser(w http.ResponseWriter, r *http.Request) {
+func (h *Handler) adminSetBlocked(w http.ResponseWriter, r *http.Request) {
 	idStr := chi.URLParam(r, "id")
 	userID, err := strconv.Atoi(idStr)
 	if err != nil {
@@ -20,17 +20,22 @@ func (h *Handler) adminVerifyUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	var req dto.SetBlockedRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		http.Error(w, "invalid JSON", http.StatusBadRequest)
+		return
+	}
+
 	callerID := r.Context().Value(middleware.CtxUserID).(int)
 	callerRole := r.Context().Value(middleware.CtxRole).(domain.UserRole)
 
-	err = h.service.Auth.VerifyUser(r.Context(), callerID, callerRole, userID)
-	if err != nil {
+	if err = h.service.Auth.SetBlocked(r.Context(), callerID, callerRole, userID, req.Blocked); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
 	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(map[string]string{"status": "active"})
+	_ = json.NewEncoder(w).Encode(map[string]bool{"blocked": req.Blocked})
 }
 
 func (h *Handler) adminAssignRole(w http.ResponseWriter, r *http.Request) {

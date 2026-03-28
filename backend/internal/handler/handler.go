@@ -32,13 +32,11 @@ func (h *Handler) Router() chi.Router {
 	r.Use(h.loggingMiddleware)
 
 
-	// Public Auth Routes
+	// Public Auth Routes (OAuth only)
 	r.Route("/auth", func(r chi.Router) {
-		r.Post("/register", h.register)
-		r.Post("/login", h.login)
 		r.Post("/google", h.googleLogin)
 		r.Post("/refresh", h.refresh)
-		r.Post("/logout", h.logout) // Now requires Authorization header inside handler
+		r.Post("/logout", h.logout)
 	})
 
 	// Protected API Routes
@@ -52,8 +50,8 @@ func (h *Handler) Router() chi.Router {
 		r.Route("/admin", func(r chi.Router) {
 			r.Use(h_middleware.RequireRole(domain.RoleAdmin))
 
-			r.Patch("/users/{id}/verify", h.adminVerifyUser)
 			r.Patch("/users/{id}/role", h.adminAssignRole)
+			r.Patch("/users/{id}/blocked", h.adminSetBlocked)
 			r.Delete("/sessions/{sessionID}", h.adminRevokeSession)
 
 			// Admin Employee Profile routes

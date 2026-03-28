@@ -25,16 +25,11 @@ func NewTokenService(secret string, accessTTL, refreshTTL time.Duration) domain.
 }
 
 func (s *tokenService) GenerateAccessToken(user *domain.User, sessionID uuid.UUID) (string, error) {
-	email := ""
-	if user.Email != nil {
-		email = *user.Email
-	}
-
 	claims := &domain.AccessTokenClaims{
 		UserID:    user.ID,
 		SessionID: sessionID,
 		Role:      user.Role,
-		Email:     email,
+		Email:     user.Email,
 		RegisteredClaims: jwt.RegisteredClaims{
 			ExpiresAt: jwt.NewNumericDate(time.Now().Add(s.accessTokenTTL)),
 			IssuedAt:  jwt.NewNumericDate(time.Now()),

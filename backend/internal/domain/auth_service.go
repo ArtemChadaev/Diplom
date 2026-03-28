@@ -7,9 +7,8 @@ import (
 )
 
 type RegisterInput struct {
-	Login    string
 	Email    string
-	Password string
+	GoogleID *string
 }
 
 type TelegramAuthData struct {
@@ -33,12 +32,10 @@ type SessionMeta struct {
 }
 
 type AuthService interface {
-	// Email / Password
-	Register(ctx context.Context, req RegisterInput) (*User, error)
-	LoginWithPassword(ctx context.Context, login, password, userAgent, ip string) (*TokenPair, error)
-
-	// Social auth
+	// Google OAuth
 	LoginWithGoogle(ctx context.Context, idToken, userAgent, ip string) (*TokenPair, error)
+
+	// Telegram OAuth (stub)
 	LoginWithTelegram(ctx context.Context, data TelegramAuthData, userAgent, ip string) (*TokenPair, error)
 
 	// Session management
@@ -46,6 +43,6 @@ type AuthService interface {
 	RevokeSession(ctx context.Context, sessionID uuid.UUID, callerID int, callerRole UserRole) error
 
 	// Admin actions
-	VerifyUser(ctx context.Context, adminID int, adminRole UserRole, targetUserID int) error
 	AssignRole(ctx context.Context, adminID int, adminRole UserRole, targetUserID int, role UserRole) error
+	SetBlocked(ctx context.Context, adminID int, adminRole UserRole, targetUserID int, blocked bool) error
 }

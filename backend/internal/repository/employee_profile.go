@@ -3,6 +3,7 @@ package repository
 import (
 	"context"
 	"errors"
+	"encoding/json"
 	"fmt"
 
 	"github.com/ima/diplom-backend/internal/domain"
@@ -20,21 +21,25 @@ func NewEmployeeProfileRepository(db *gorm.DB) domain.EmployeeProfileRepository 
 }
 
 func (r *employeeProfileRepository) toDomain(d *dao.EmployeeProfileDAO) *domain.EmployeeProfile {
+	var gdp []domain.GDPTrainingRecord
+	_ = json.Unmarshal(d.GDPTrainingHistory, &gdp)
+
 	return &domain.EmployeeProfile{
-		ID:               d.ID,
-		UserID:           d.UserID,
-		EmployeeCode:     d.EmployeeCode,
-		FullName:         d.FullName,
-		CorporateEmail:   d.CorporateEmail,
-		Phone:            d.Phone,
-		TelegramHandle:   d.TelegramHandle,
-		EmergencyContact: d.EmergencyContact,
-		Position:         d.Position,
-		Department:       d.Department,
-		BirthDate:        d.BirthDate,
-		AvatarURL:        d.AvatarURL,
-		HireDate:         d.HireDate,
-		DismissalDate:    d.DismissalDate,
+		ID:                 d.ID,
+		UserID:             d.UserID,
+		EmployeeCode:       d.EmployeeCode,
+		FullName:           d.FullName,
+		CorporateEmail:     d.CorporateEmail,
+		Phone:              d.Phone,
+		Position:           d.Position,
+		Department:         d.Department,
+		BirthDate:          d.BirthDate,
+		AvatarURL:          d.AvatarURL,
+		HireDate:           d.HireDate,
+		DismissalDate:      d.DismissalDate,
+		MedicalBookScanURL: d.MedicalBookScanURL,
+		SpecialZoneAccess:  d.SpecialZoneAccess,
+		GDPTrainingHistory: gdp,
 	}
 }
 
@@ -61,7 +66,7 @@ func (r *employeeProfileRepository) FindByID(ctx context.Context, id int) (*doma
 }
 
 func (r *employeeProfileRepository) Update(ctx context.Context, id int, input domain.UpdateEmployeeProfileInput) (*domain.EmployeeProfile, error) {
-	updates := buildUpdateMap(input)
+	updates := buildProfileUpdateMap(input)
 
 	if len(updates) == 0 {
 		return r.FindByID(ctx, id)
@@ -94,18 +99,19 @@ func (r *employeeProfileRepository) List(ctx context.Context, limit, offset int)
 	return result, nil
 }
 
-func buildUpdateMap(input domain.UpdateEmployeeProfileInput) map[string]any {
+func buildProfileUpdateMap(input domain.UpdateEmployeeProfileInput) map[string]any {
 	m := make(map[string]any)
-	if input.FullName != nil         { m["full_name"] = *input.FullName }
-	if input.CorporateEmail != nil   { m["corporate_email"] = *input.CorporateEmail }
-	if input.Phone != nil            { m["phone"] = *input.Phone }
-	if input.TelegramHandle != nil   { m["telegram_handle"] = *input.TelegramHandle }
-	if input.EmergencyContact != nil { m["emergency_contact"] = *input.EmergencyContact }
-	if input.Position != nil         { m["position"] = *input.Position }
-	if input.Department != nil       { m["department"] = *input.Department }
-	if input.BirthDate != nil        { m["birth_date"] = *input.BirthDate }
-	if input.AvatarURL != nil        { m["avatar_url"] = *input.AvatarURL }
-	if input.HireDate != nil         { m["hire_date"] = *input.HireDate }
-	if input.DismissalDate != nil    { m["dismissal_date"] = *input.DismissalDate }
+	if input.FullName != nil           { m["full_name"] = *input.FullName }
+	if input.CorporateEmail != nil     { m["corporate_email"] = *input.CorporateEmail }
+	if input.Phone != nil              { m["phone"] = *input.Phone }
+	if input.Position != nil           { m["position"] = *input.Position }
+	if input.Department != nil         { m["department"] = *input.Department }
+	if input.BirthDate != nil          { m["birth_date"] = *input.BirthDate }
+	if input.AvatarURL != nil          { m["avatar_url"] = *input.AvatarURL }
+	if input.HireDate != nil           { m["hire_date"] = *input.HireDate }
+	if input.DismissalDate != nil      { m["dismissal_date"] = *input.DismissalDate }
+	if input.MedicalBookScanURL != nil { m["medical_book_scan_url"] = *input.MedicalBookScanURL }
+	if input.SpecialZoneAccess != nil  { m["special_zone_access"] = *input.SpecialZoneAccess }
+	if input.GDPTrainingHistory != nil { m["gdp_training_history"] = input.GDPTrainingHistory }
 	return m
 }
