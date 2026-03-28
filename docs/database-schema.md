@@ -75,7 +75,7 @@ CREATE TABLE users (
   telegram_id  BIGINT UNIQUE,
   role         user_role NOT NULL DEFAULT 'pharmacist',
   ns_pv_access BOOLEAN NOT NULL DEFAULT false,  -- допуск к НС/ПВ
-  ukep_bound   BOOLEAN NOT NULL DEFAULT false,  -- привязана УКЭП
+  ukep_bound   BOOLEAN NOT NULL DEFAULT false,  -- привязана УКЭП (электронная подпись)
   is_blocked   BOOLEAN NOT NULL DEFAULT false,
   created_at   TIMESTAMPTZ DEFAULT NOW(),
   updated_at   TIMESTAMPTZ DEFAULT NOW()
@@ -117,18 +117,18 @@ CREATE TABLE employee_profiles (
   user_id               INT UNIQUE NOT NULL REFERENCES users(id) ON DELETE CASCADE,
   employee_code         VARCHAR(100) UNIQUE NOT NULL,
   full_name             VARCHAR(255) NOT NULL,
-  corporate_email       VARCHAR(255) UNIQUE,
-  phone                 VARCHAR(20),
-  position              VARCHAR(255),
-  department            VARCHAR(255),
-  birth_date            DATE,
+  corporate_email       VARCHAR(255) UNIQUE NOT NULL,
+  phone                 VARCHAR(20) UNIQUE NOT NULL,
+  position              VARCHAR(255) NOT NULL,
+  department            VARCHAR(255) NOT NULL,
+  birth_date            DATE NOT NULL,
   avatar_url            TEXT,
   hire_date             DATE NOT NULL,
   dismissal_date        DATE,
   -- Новые поля (vs. 000009):
-  medical_book_scan_url TEXT,
-  special_zone_access   BOOLEAN NOT NULL DEFAULT false,
-  gdp_training_history  JSONB NOT NULL DEFAULT '[]'
+  medical_book_scan_url TEXT, -- Скан медкнижки для подтверждения работы
+  special_zone_access   BOOLEAN NOT NULL DEFAULT false, -- Допуск к спец зонам
+  gdp_training_history  JSONB NOT NULL DEFAULT '[]' -- История прохождения Good Distribution Practice которые надо делать раз в год
   -- Структура JSONB-элемента:
   -- { date, course_name, result: "pass"|"fail", certificate_url }
 );
@@ -154,26 +154,26 @@ CREATE TABLE categories (
 ```sql
 CREATE TABLE products (
   id                   UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  trade_name           VARCHAR(255) NOT NULL,
-  mnn                  VARCHAR(255) NOT NULL,
-  sku                  VARCHAR(100) UNIQUE,
-  barcode              VARCHAR(50),
-  datamatrix_gtin      VARCHAR(50),
+  trade_name           VARCHAR(255) NOT NULL, -- Торговое наименование препарата
+  mnn                  VARCHAR(255) NOT NULL, -- Международное непатентованное наименование
+  sku                  VARCHAR(100) UNIQUE, -- Артикул
+  barcode              VARCHAR(50), -- Штрихкод
+  datamatrix_gtin      VARCHAR(50), -- Часть кода маркировки Честный Знак
   ru_number            VARCHAR(100) NOT NULL,       -- № Регистрационного удостоверения
   atc_codes            TEXT[] NOT NULL DEFAULT '{}', -- массив ATC-кодов
-  dosage_form          VARCHAR(100),
-  dosage               VARCHAR(100),
-  package_multiplicity INT NOT NULL DEFAULT 1,
+  dosage_form          VARCHAR(100), -- Лекарственная форма
+  dosage               VARCHAR(100), -- Дозировка
+  package_multiplicity INT NOT NULL DEFAULT 1, -- Количество в упаковке
   -- Флаги
-  is_jnvlp             BOOLEAN NOT NULL DEFAULT false,
-  is_mdlp              BOOLEAN NOT NULL DEFAULT false,  -- подлежит маркировке
+  is_jnvlp             BOOLEAN NOT NULL DEFAULT false, -- Поизнак жизненно необходимых и важнейших лекарственных препаратов
+  is_mdlp              BOOLEAN NOT NULL DEFAULT false,  -- Подлежит маркировке
   is_ns_pv             BOOLEAN NOT NULL DEFAULT false,  -- НС/ПВ (ПКУ)
-  cold_chain           BOOLEAN NOT NULL DEFAULT false,
+  cold_chain           BOOLEAN NOT NULL DEFAULT false, -- Требует холодовой цепи
   -- Условия хранения
-  temp_min             NUMERIC(5,2),
-  temp_max             NUMERIC(5,2),
+  temp_min             NUMERIC(5,2), -- Минимальная температура хранения
+  temp_max             NUMERIC(5,2), -- Максимальная температура хранения
   humidity_max         NUMERIC(5,2),
-  -- ВГХ
+  -- ВГХ (Весогаборитные характеристики)
   weight_g             NUMERIC(10,3),
   width_cm             NUMERIC(8,2),
   height_cm            NUMERIC(8,2),
@@ -210,7 +210,7 @@ CREATE TABLE product_photos (
 
 ### `suppliers`
 > **Новая таблица.**
-
+> Картотека поставщиков
 ```sql
 CREATE TABLE suppliers (
   id             UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -287,6 +287,9 @@ CREATE TABLE inbound_receipts (
   -- Мета
   created_by           INT NOT NULL REFERENCES users(id),
   created_at           TIMESTAMPTZ DEFAULT NOW()
+
+  photo_urls           TEXT[] DEFAULT '{}', -- Фото поврежденных коробок/паллет при разгрузке
+  digital_signature_id UUID,                -- Ссылка на файл открепленной подписи (УКЭП) провизора
 );
 ```
 
@@ -302,6 +305,35 @@ CREATE TABLE inbound_positions (
   batch_id    UUID NOT NULL REFERENCES batches(id)
 );
 ```
+---
+
+
+### `digital_signatures` (цифровые подписи)
+> **Новая таблица.**
+> Единое хранилище подписей, на которое будут ссылаться все документы (приемка, логи, списания). 
+> MOCK: Реальная криптографическая проверка подписи заменена на логическую фиксацию. signature_url будет просто строкой 'mock_signature_file_path', а signed_hash — простым md5.
+> Вообще не буду делать в коде скорее всего
+
+```sql
+CREATE TABLE digital_signatures (
+  id            UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id       INT NOT NULL REFERENCES users(id),
+  
+  -- Ссылка на файл подписи (обычно .p7s или .sig) в S3-хранилище
+  signature_url TEXT NOT NULL,
+  
+  -- Хэш данных, которые были подписаны (чтобы нельзя было подменить данные в логах)
+  signed_hash   TEXT NOT NULL,
+  
+  -- Данные сертификата (для истории, даже если срок действия выйдет)
+  cert_serial   VARCHAR(100),
+  cert_issuer   TEXT,
+  signed_at     TIMESTAMPTZ DEFAULT NOW(),
+  
+  -- Результат проверки (валидна ли подпись на момент записи)
+  is_valid      BOOLEAN DEFAULT true
+);
+```
 
 ---
 
@@ -312,6 +344,7 @@ CREATE TABLE inbound_positions (
 CREATE TABLE environment_logs (
   id          UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   zone_id     UUID NOT NULL REFERENCES warehouse_zones(id) ON DELETE CASCADE,
+  digital_signature_id UUID REFERENCES digital_signatures(id), -- ЭЦП сотрудника, зафиксировавшего параметры (не реализовывать)
   recorded_by INT NOT NULL REFERENCES users(id),
   shift       shift_type NOT NULL,
   temperature NUMERIC(5,2) NOT NULL,
@@ -335,6 +368,10 @@ CREATE TABLE orders (
   type           order_type NOT NULL DEFAULT 'regular',
   status         order_status NOT NULL DEFAULT 'new',
   destination_id UUID,   -- FK → destinations (аптеки, будущая таблица)
+  -- КТО заказал (подпись аптеки/заказчика) (не реализовывать)
+  customer_signature_id UUID REFERENCES digital_signatures(id),
+  -- КТО разрешил отгрузку (подпись Уполномоченного лица склада) (не реализовывать)
+  outbound_signature_id UUID REFERENCES digital_signatures(id),
   assembled_by   INT REFERENCES users(id),
   shipped_by     INT REFERENCES users(id),
   shipped_at     TIMESTAMPTZ,
@@ -373,6 +410,7 @@ CREATE TABLE order_items (
 ```sql
 CREATE TABLE claims (
   id         UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  digital_signature_id UUID; -- ЭЦП лица, утвердившего блокировку/возврат серии (не реализовывать)
   type       claim_type NOT NULL,
   batch_id   UUID REFERENCES batches(id),
   product_id UUID NOT NULL REFERENCES products(id),
@@ -405,6 +443,7 @@ CREATE TABLE claim_photos (
 
 ### `recalled_batches` (изъятые серии Росздравнадзора)
 > **Новая таблица.**
+> MOCK: Прям подключать не думаю что возможно просто сам добавлю пару штук и мб сделаю функцию тоже MOCK.
 
 ```sql
 CREATE TABLE recalled_batches (
@@ -502,6 +541,7 @@ CREATE TABLE audit_logs (
   old_values   JSONB,
   new_values   JSONB,
   ip_address   INET,
+  -- Вполне возможно не буду делать ибо слишком сложно, как мок оставлю, но фиг его знает
   -- Иммутабельность (Фаза 3):
   prev_hash    TEXT,    -- хэш предыдущей записи в цепочке
   log_hash     TEXT,    -- SHA-256(prev_hash + user_id + action + entity_id + new_values + created_at)
