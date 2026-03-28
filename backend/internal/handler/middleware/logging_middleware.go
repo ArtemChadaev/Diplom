@@ -1,4 +1,4 @@
-package handler
+package middleware
 
 import (
 	"net/http"
@@ -8,9 +8,9 @@ import (
 	"github.com/ima/diplom-backend/internal/pkg/logger"
 )
 
-// loggingMiddleware enriches the context with request_id (from chi's
+// RequestLogger enriches the context with request_id (from chi's
 // RequestID middleware which must run first), then logs start/end.
-func (h *Handler) loggingMiddleware(next http.Handler) http.Handler {
+func RequestLogger(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		start := time.Now()
 
@@ -37,4 +37,3 @@ func (h *Handler) loggingMiddleware(next http.Handler) http.Handler {
 		)
 	})
 }
-

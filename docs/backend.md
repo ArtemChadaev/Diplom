@@ -40,3 +40,8 @@
 - Valkey/Redis кэш сессий — описан в [docs/valkey-cache.md](./valkey-cache.md), в коде отсутствует
 - Immutable audit log hash chain — поля `prev_hash`, `log_hash` добавлены в схему, логика не реализована
 - Бизнес-модули (Inbound, Orders, Inventory, Claims и т.д.) — только схема в БД, handlers не написаны
+
+### Логирование
+Для логирования используется собственный контекст-зависимый логгер: [backend/internal/pkg/logger/logger.go](../backend/internal/pkg/logger/logger.go).
+- Вместо стандартных пакетов `log/slog` или `fmt`, всегда используйте его.
+- **Правило именования**: В коде называйте переменную логгера просто `log`, а не `logger` (например, `log := logger.FromContext(ctx); log.Info(...)`).

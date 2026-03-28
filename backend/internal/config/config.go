@@ -1,10 +1,11 @@
 package config
 
 import (
+	"context"
 	"fmt"
-	"log/slog"
-
+	
 	"github.com/ilyakaznacheev/cleanenv"
+	"github.com/ima/diplom-backend/internal/pkg/logger"
 )
 
 type Config struct {
@@ -22,13 +23,24 @@ type Config struct {
 	JWTSecret      string `env:"JWT_SECRET" env-required:"true"`
 	AdminEmail     string `env:"ADMIN_EMAIL" env-required:"true"`
 	GoogleClientID string `env:"GOOGLE_CLIENT_ID"`
+
+	// Valkey
+	ValkeyHost     string `env:"VALKEY_HOST" env-default:"valkey"`
+	ValkeyPort     string `env:"VALKEY_PORT" env-default:"6379"`
+	ValkeyPassword string `env:"VALKEY_PASSWORD"`
+
+	// UniSender Mail
+	UniSenderAPIKey    string `env:"UNISENDER_API_KEY"`
+	UniSenderAPIURL    string `env:"UNISENDER_API_URL" env-default:"https://api.unisender.com/ru/api/sendEmail"`
+	UniSenderFromEmail string `env:"UNISENDER_FROM_EMAIL"`
+	UniSenderFromName  string `env:"UNISENDER_FROM_NAME"`
 }
 
 func Load() (*Config, error) {
 	var cfg Config
 
 	if err := cleanenv.ReadConfig(".env", &cfg); err != nil {
-		slog.Warn(".env file not found, loading from environment variables")
+		logger.FromContext(context.Background()).Warn(".env file not found, loading from environment variables")
 	}
 
 	err := cleanenv.ReadEnv(&cfg)

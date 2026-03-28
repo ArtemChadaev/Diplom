@@ -29,7 +29,7 @@ func (h *Handler) Router() chi.Router {
 	r.Use(middleware.Recoverer)
 	r.Use(middleware.Timeout(60 * time.Second))
 	r.Use(middleware.Heartbeat("/ping"))
-	r.Use(h.loggingMiddleware)
+	r.Use(h_middleware.RequestLogger)
 
 
 	// Public Auth Routes (OAuth only)
