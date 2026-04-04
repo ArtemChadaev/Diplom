@@ -46,6 +46,10 @@ func AuthRequired(tokenSvc domain.TokenService) func(http.Handler) http.Handler 
 
 			// Enrich logger context with UserID
 			ctx = logger.WithUserID(ctx, claims.UserID)
+			
+			if logData, ok := r.Context().Value(CtxLogData).(*LogData); ok {
+				logData.UserID = claims.UserID
+			}
 
 			next.ServeHTTP(w, r.WithContext(ctx))
 

@@ -7,18 +7,21 @@ import (
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/ima/diplom-backend/internal/domain"
 	h_middleware "github.com/ima/diplom-backend/internal/handler/middleware"
+	"github.com/ima/diplom-backend/internal/config"
 	"github.com/ima/diplom-backend/internal/service"
 )
 
 type Handler struct {
 	service  service.Service
 	tokenSvc domain.TokenService
+	cfg      *config.Config
 }
 
-func NewHandler(service *service.Service, tokenSvc domain.TokenService) *Handler {
+func NewHandler(service *service.Service, tokenSvc domain.TokenService, cfg *config.Config) *Handler {
 	return &Handler{
 		service:  *service,
 		tokenSvc: tokenSvc,
+		cfg:      cfg,
 	}
 }
 

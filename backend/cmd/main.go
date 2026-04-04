@@ -37,7 +37,7 @@ func main() {
 	log.Info("config loaded", "port", cfg.Port)
 
 	// 3. Подключение к БД
-	db, err := repository.NewPostgresDB(ctx, repository.PostgresConfig{
+	db, err := repository.NewPostgresDB(repository.PostgresConfig{
 		Host:     cfg.DBHost,
 		Port:     cfg.DBPort,
 		Username: cfg.DBUser,
@@ -62,7 +62,7 @@ func main() {
 	repos := repository.NewRepository(db)
 
 	services := service.NewService(repos, cfg.JWTSecret, cfg.GoogleClientID)
-	handlers := handler.NewHandler(services, services.Token)
+	handlers := handler.NewHandler(services, services.Token, cfg)
 
 	router := handlers.Router()
 
