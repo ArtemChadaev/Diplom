@@ -2,35 +2,52 @@ package service
 
 import (
 	"context"
+	"crypto/hmac"
+	"crypto/rand"
+	"crypto/sha256"
+	"crypto/subtle"
+	"encoding/hex"
 	"errors"
+	"math/big"
+	"strconv"
 	"time"
 
 	"github.com/google/uuid"
 	"github.com/ima/diplom-backend/internal/domain"
+	"github.com/ima/diplom-backend/internal/pkg/mailer"
 	"google.golang.org/api/idtoken"
 )
 
 type authService struct {
 	userRepo        domain.UserRepository
 	sessionRepo     domain.SessionRepository
+	otpRepo         domain.OTPRepository
 	tokenSvc        domain.TokenService
+	mailer          mailer.Mailer
 	refreshTokenTTL time.Duration
 	googleClientID  string
+	otpHMACSecret   string
 }
 
 func NewAuthService(
 	userRepo domain.UserRepository,
 	sessionRepo domain.SessionRepository,
+	otpRepo domain.OTPRepository,
 	tokenSvc domain.TokenService,
 	refreshTTL time.Duration,
 	googleClientID string,
+	mailer mailer.Mailer,
+	otpHMACSecret string,
 ) domain.AuthService {
 	return &authService{
 		userRepo:        userRepo,
 		sessionRepo:     sessionRepo,
+		otpRepo:         otpRepo,
 		tokenSvc:        tokenSvc,
+		mailer:          mailer,
 		refreshTokenTTL: refreshTTL,
 		googleClientID:  googleClientID,
+		otpHMACSecret:   otpHMACSecret,
 	}
 }
 
@@ -142,6 +159,76 @@ func (s *authService) SetBlocked(ctx context.Context, adminID int, adminRole dom
 		return domain.ErrInsufficientPerms
 	}
 	return s.userRepo.SetBlocked(ctx, targetUserID, blocked)
+}
+
+func generateOTPCode() string {
+	max := big.NewInt(1000000)
+	n, err := rand.Int(rand.Reader, max)
+	if err != nil {
+		// Fallback if crypto/rand fails
+		return "000000"
+	}
+	code := strconv.FormatInt(n.Int64(), 10)
+	for len(code) < 6 {
+		code = "0" + code
+	}
+	return code
+}
+
+func hmacSHA256(data, secret string) string {
+	h := hmac.New(sha256.New, []byte(secret))
+	h.Write([]byte(data))
+	return hex.EncodeToString(h.Sum(nil))
+}
+
+func (s *authService) SendOTPCode(ctx context.Context, email string) error {
+	user, err := s.userRepo.FindByEmail(ctx, email)
+	if err != nil {
+		return err // ErrUserNotFound → mapped to 404
+	}
+
+	// Rate-limit check
+	otpData, err := s.otpRepo.Get(ctx, user.ID)
+	if err == nil && otpData.Attempts >= domain.OTPMaxAttempts {
+		return domain.ErrOTPMaxAttempts
+	}
+
+	code := generateOTPCode()
+	hash := hmacSHA256(code, s.otpHMACSecret)
+
+	if err := s.otpRepo.Store(ctx, user.ID, hash); err != nil {
+		return err
+	}
+
+	return s.mailer.SendOTP(ctx, email, code)
+}
+
+func (s *authService) VerifyOTPCode(ctx context.Context, email, code string, meta domain.SessionMeta) (*domain.TokenPair, error) {
+	user, err := s.userRepo.FindByEmail(ctx, email)
+	if err != nil {
+		return nil, err // ErrUserNotFound
+	}
+	if user.IsBlocked {
+		return nil, domain.ErrUserBlocked
+	}
+
+	otpData, err := s.otpRepo.Get(ctx, user.ID)
+	if err != nil {
+		return nil, domain.ErrOTPNotFound
+	}
+
+	if otpData.Attempts >= domain.OTPMaxAttempts {
+		return nil, domain.ErrOTPMaxAttempts
+	}
+
+	expectedHash := hmacSHA256(code, s.otpHMACSecret)
+	if subtle.ConstantTimeCompare([]byte(expectedHash), []byte(otpData.CodeHash)) == 0 {
+		_ = s.otpRepo.IncrAttempts(ctx, user.ID)
+		return nil, domain.ErrOTPInvalid
+	}
+
+	_ = s.otpRepo.Delete(ctx, user.ID)
+	return s.issueTokens(ctx, user, meta.UserAgent, meta.IPAddress)
 }
 
 // issueTokens is a private helper: validates user state, creates refresh session, returns token pair.

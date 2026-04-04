@@ -35,6 +35,9 @@ type Config struct {
 	UniSenderAPIURL    string `env:"UNISENDER_API_URL" env-default:"https://api.unisender.com/ru/api/sendEmail"`
 	UniSenderFromEmail string `env:"UNISENDER_FROM_EMAIL"`
 	UniSenderFromName  string `env:"UNISENDER_FROM_NAME"`
+
+	OTPHMACSecret string `env:"OTP_HMAC_SECRET" env-required:"true"`
+	UploadDir     string `env:"UPLOAD_DIR" env-default:"./uploads"`
 }
 
 func Load() (*Config, error) {

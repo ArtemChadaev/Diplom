@@ -40,6 +40,14 @@ type UserProfile struct {
 	Department   string
 }
 
+// UserListFilter — filter for searching and listing users.
+type UserListFilter struct {
+	Query string
+	Role  UserRole
+	Page  int
+	Limit int
+}
+
 // UserRepository — storage interface for users.
 type UserRepository interface {
 	// Identity resolution
@@ -59,4 +67,5 @@ type UserRepository interface {
 
 	// Profile
 	FindProfileByUserID(ctx context.Context, userID int) (*UserProfile, error)
+	List(ctx context.Context, filter UserListFilter) ([]*UserProfile, int, error)
 }

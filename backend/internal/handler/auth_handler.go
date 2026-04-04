@@ -2,6 +2,7 @@ package handler
 
 import (
 	"encoding/json"
+	"errors"
 	"net/http"
 	"time"
 
@@ -100,4 +101,81 @@ func (h *Handler) clearRefreshCookie(w http.ResponseWriter) {
 		MaxAge:   -1,
 		HttpOnly: true,
 	})
+}
+
+func (h *Handler) sendCode(w http.ResponseWriter, r *http.Request) {
+	var req dto.SendCodeRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		writeError(w, http.StatusBadRequest, "invalid request body")
+		return
+	}
+
+	if req.Email == "" {
+		writeError(w, http.StatusBadRequest, "email is required")
+		return
+	}
+
+	if err := h.service.Auth.SendOTPCode(r.Context(), req.Email); err != nil {
+		if errors.Is(err, domain.ErrUserNotFound) {
+			writeError(w, http.StatusNotFound, "user with this email not found")
+			return
+		}
+		if errors.Is(err, domain.ErrOTPMaxAttempts) {
+			writeError(w, http.StatusTooManyRequests, "too many requests, try again later")
+			return
+		}
+		writeError(w, http.StatusInternalServerError, "failed to send code")
+		return
+	}
+
+	resp := dto.SendCodeResponse{
+		Message:   "OTP code sent successfully",
+		ExpiresIn: 600, // 10 minutes
+	}
+	writeJSON(w, http.StatusOK, resp)
+}
+
+func (h *Handler) verifyCode(w http.ResponseWriter, r *http.Request) {
+	var req dto.VerifyCodeRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		writeError(w, http.StatusBadRequest, "invalid request body")
+		return
+	}
+
+	if req.Email == "" || req.Code == "" {
+		writeError(w, http.StatusBadRequest, "email and code are required")
+		return
+	}
+
+	meta := domain.SessionMeta{
+		UserAgent: r.UserAgent(),
+		IPAddress: r.RemoteAddr,
+	}
+
+	pair, err := h.service.Auth.VerifyOTPCode(r.Context(), req.Email, req.Code, meta)
+	if err != nil {
+		if errors.Is(err, domain.ErrOTPNotFound) || errors.Is(err, domain.ErrOTPInvalid) || errors.Is(err, domain.ErrOTPMaxAttempts) { // using ErrOTPNotFound as "invalid or expired"
+			writeError(w, http.StatusUnauthorized, "invalid or expired code")
+			return
+		}
+		writeError(w, http.StatusInternalServerError, "failed to verify code")
+		return
+	}
+
+	http.SetCookie(w, &http.Cookie{
+		Name:     "refresh_token",
+		Value:    pair.RefreshToken,
+		Path:     "/auth",
+		MaxAge:   15 * 24 * 3600,
+		HttpOnly: true,
+		Secure:   h.cfg.Env == "production",
+		SameSite: http.SameSiteStrictMode,
+	})
+
+	resp := dto.TokenResponse{
+		AccessToken: pair.AccessToken,
+		ExpiresIn:   pair.ExpiresIn,
+	}
+
+	writeJSON(w, http.StatusOK, resp)
 }

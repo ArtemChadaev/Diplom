@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"errors"
+	"net"
 	"net/http"
 	"os"
 	"os/signal"
@@ -13,8 +14,10 @@ import (
 	"github.com/ima/diplom-backend/internal/domain"
 	"github.com/ima/diplom-backend/internal/handler"
 	"github.com/ima/diplom-backend/internal/pkg/logger"
+	"github.com/ima/diplom-backend/internal/pkg/mailer"
 	"github.com/ima/diplom-backend/internal/repository"
 	"github.com/ima/diplom-backend/internal/service"
+	"github.com/valkey-io/valkey-go"
 )
 
 func main() {
@@ -58,15 +61,36 @@ func main() {
 
 	log.Info("database connection established")
 
-	// 4. Инициализация слоёв: Repository → Service → Handler
-	repos := repository.NewRepository(db)
+	// 4. Подключение к Valkey (Redis)
+	valkeyClient, err := valkey.NewClient(valkey.ClientOption{
+		InitAddress: []string{net.JoinHostPort(cfg.ValkeyHost, cfg.ValkeyPort)},
+		Password:    cfg.ValkeyPassword,
+	})
+	if err != nil {
+		log.Error("failed to connect to valkey", "error", err)
+		os.Exit(1)
+	}
+	defer valkeyClient.Close()
+	log.Info("valkey connection established")
 
-	services := service.NewService(repos, cfg.JWTSecret, cfg.GoogleClientID)
-	handlers := handler.NewHandler(services, services.Token, cfg)
+	// 5. Инициализация Mailer
+	m := mailer.New(mailer.Config{
+		APIKey:    cfg.UniSenderAPIKey,
+		APIURL:    cfg.UniSenderAPIURL,
+		FromEmail: cfg.UniSenderFromEmail,
+		FromName:  cfg.UniSenderFromName,
+		UploadDir: cfg.UploadDir,
+	})
+
+	// 6. Инициализация слоёв: Repository → Service → Handler
+	repos := repository.NewRepository(db, valkeyClient)
+
+	services := service.NewService(repos, cfg.JWTSecret, cfg.GoogleClientID, cfg.OTPHMACSecret, m)
+	handlers := handler.NewHandler(services, services.Token, cfg, repos.User, repos.EmployeeProfile)
 
 	router := handlers.Router()
 
-	// 5. Запуск HTTP-сервера
+	// 7. Запуск HTTP-сервера
 	srv := new(domain.Server)
 	go func() {
 		log.Info("server started", "addr", ":"+cfg.Port)
@@ -82,7 +106,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	// 6. Ожидание сигнала завершения
+	// 8. Ожидание сигнала завершения
 	<-ctx.Done()
 	log.Info("shutting down server...")
 

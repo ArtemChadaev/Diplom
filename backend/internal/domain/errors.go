@@ -19,8 +19,11 @@ var (
 	ErrInvalidTelegram         = errors.New("invalid telegram auth data")
 	ErrInsufficientPerms       = errors.New("insufficient permissions for this operation")
 	ErrEmployeeProfileNotFound = errors.New("employee profile not found")
-)
 
+	ErrOTPNotFound    = errors.New("no active OTP code found")
+	ErrOTPMaxAttempts = errors.New("max OTP attempts reached")
+	ErrOTPInvalid     = errors.New("invalid OTP code")
+)
 // AppError is a structured application error that carries
 // a human-readable message plus arbitrary key-value context.
 // It wraps an underlying cause so errors.Is / errors.As keep working.

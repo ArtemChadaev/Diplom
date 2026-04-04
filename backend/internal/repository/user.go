@@ -199,3 +199,70 @@ func (r *userRepository) FindProfileByUserID(ctx context.Context, userID int) (*
 		Department:   p.Department,
 	}, nil
 }
+
+func (r *userRepository) List(ctx context.Context, filter domain.UserListFilter) ([]*domain.UserProfile, int, error) {
+	type Result struct {
+		dao.UserDAO
+		EmployeeCode string
+		FullName     string
+		Position     string
+		Department   string
+	}
+
+	var results []Result
+	var total int64
+
+	query := r.db.WithContext(ctx).Table("users u").
+		Joins("LEFT JOIN employee_profiles ep ON ep.user_id = u.id")
+
+	if filter.Query != "" {
+		likeQuery := "%" + filter.Query + "%"
+		query = query.Where("u.email ILIKE ? OR ep.full_name ILIKE ?", likeQuery, likeQuery)
+	}
+	if filter.Role != "" {
+		query = query.Where("u.role = ?", string(filter.Role))
+	}
+
+	err := query.Count(&total).Error
+	if err != nil {
+		return nil, 0, err
+	}
+
+	limit := filter.Limit
+	if limit <= 0 {
+		limit = 20
+	}
+	if limit > 100 {
+		limit = 100
+	}
+
+	page := filter.Page
+	if page < 1 {
+		page = 1
+	}
+
+	offset := (page - 1) * limit
+
+	err = query.Select("u.*, ep.employee_code, ep.full_name, ep.position, ep.department").
+		Order("u.created_at DESC").
+		Limit(limit).
+		Offset(offset).
+		Scan(&results).Error
+
+	if err != nil {
+		return nil, 0, err
+	}
+
+	profiles := make([]*domain.UserProfile, len(results))
+	for i, res := range results {
+		profiles[i] = &domain.UserProfile{
+			User:         *r.toDomain(&res.UserDAO),
+			EmployeeCode: res.EmployeeCode,
+			FullName:     res.FullName,
+			Position:     res.Position,
+			Department:   res.Department,
+		}
+	}
+
+	return profiles, int(total), nil
+}
