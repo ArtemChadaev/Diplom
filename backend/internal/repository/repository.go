@@ -16,15 +16,11 @@ type Repository struct {
 
 // NewRepository создаёт новый слой репозиториев, используя GORM и Valkey
 func NewRepository(db *gorm.DB, valkeyClient valkey.Client) *Repository {
-	var otpRepo domain.OTPRepository
-	if valkeyClient != nil {
-		otpRepo = NewOTPValkeyRepository(valkeyClient)
-	}
 	return &Repository{
 		User:            NewUserRepository(db),
 		Session:         NewSessionRepository(db),
 		EmployeeProfile: NewEmployeeProfileRepository(db),
-		OTP:             otpRepo,
+		OTP:             NewOTPValkeyRepository(valkeyClient),
 	}
 }
 

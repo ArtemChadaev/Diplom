@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"encoding/json"
-	"fmt"
 
 	"github.com/ima/diplom-backend/internal/domain"
 	"github.com/ima/diplom-backend/internal/pkg/logger"
@@ -49,7 +48,7 @@ func (r *employeeProfileRepository) FindByUserID(ctx context.Context, userID int
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, domain.ErrEmployeeProfileNotFound
 		}
-		return nil, fmt.Errorf("employeeProfileRepo.FindByUserID: %w", err)
+		return nil, errors.New("employeeProfileRepo.FindByUserID: " + err.Error())
 	}
 	return r.toDomain(&d), nil
 }
@@ -60,7 +59,7 @@ func (r *employeeProfileRepository) FindByID(ctx context.Context, id int) (*doma
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, domain.ErrEmployeeProfileNotFound
 		}
-		return nil, fmt.Errorf("employeeProfileRepo.FindByID: %w", err)
+		return nil, errors.New("employeeProfileRepo.FindByID: " + err.Error())
 	}
 	return r.toDomain(&d), nil
 }
@@ -76,7 +75,7 @@ func (r *employeeProfileRepository) Update(ctx context.Context, id int, input do
 		Model(&dao.EmployeeProfileDAO{}).
 		Where("id = ?", id).
 		Updates(updates).Error; err != nil {
-		return nil, fmt.Errorf("employeeProfileRepo.Update: %w", err)
+		return nil, errors.New("employeeProfileRepo.Update: " + err.Error())
 	}
 
 	logger.FromContext(ctx).Info("employee profile updated",
@@ -90,7 +89,7 @@ func (r *employeeProfileRepository) Update(ctx context.Context, id int, input do
 func (r *employeeProfileRepository) List(ctx context.Context, limit, offset int) ([]domain.EmployeeProfile, error) {
 	var rows []dao.EmployeeProfileDAO
 	if err := r.db.WithContext(ctx).Limit(limit).Offset(offset).Find(&rows).Error; err != nil {
-		return nil, fmt.Errorf("employeeProfileRepo.List: %w", err)
+		return nil, errors.New("employeeProfileRepo.List: " + err.Error())
 	}
 	result := make([]domain.EmployeeProfile, len(rows))
 	for i, row := range rows {

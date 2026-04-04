@@ -1,6 +1,8 @@
 package handler
 
 import (
+	"encoding/json"
+	"net/http"
 	"time"
 
 	"github.com/go-chi/chi/v5"
@@ -82,4 +84,13 @@ func (h *Handler) Router() chi.Router {
 	})
 
 	return r
+}
+func writeJSON(w http.ResponseWriter, status int, data interface{}) {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(status)
+	_ = json.NewEncoder(w).Encode(data)
+}
+
+func writeError(w http.ResponseWriter, status int, message string) {
+	writeJSON(w, status, map[string]string{"error": message})
 }

@@ -2,7 +2,7 @@ package config
 
 import (
 	"context"
-	"fmt"
+	"errors"
 	
 	"github.com/ilyakaznacheev/cleanenv"
 	"github.com/ima/diplom-backend/internal/pkg/logger"
@@ -49,7 +49,7 @@ func Load() (*Config, error) {
 
 	err := cleanenv.ReadEnv(&cfg)
 	if err != nil {
-		return nil, fmt.Errorf("config error: %w", err)
+		return nil, errors.New("config error: " + err.Error())
 	}
 
 	return &cfg, nil
