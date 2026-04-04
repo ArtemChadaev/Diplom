@@ -3,29 +3,30 @@
 > Отправить 6-значный OTP-код на email сотрудника.
 
 **Auth:** Нет  
-**Route file:** `internal/handler/auth_handler.go`  
+**Route file:** `internal/handler/auth_handler.go`
 
 ---
 
-## Требования к БД
+## Хранилище
 
-### Таблица `users`
+OTP-коды хранятся **исключительно в Valkey (Redis)** — БД не используется.  
+TTL истечения управляется самим Valkey автоматически.
+
+### Таблица `users` (PostgreSQL, только чтение)
 
 - Найти пользователя по `email` → `SELECT * FROM users WHERE email = ?`
 - **Нет** в таблице → вернуть `404 user_not_found`
 
-### Таблица `otp_codes` *(планируемая, ещё не создана)*
+### Valkey-ключи
 
-| Поле         | Тип           | Описание                               |
-|--------------|---------------|----------------------------------------|
-| `id`         | UUID / SERIAL  | PK                                    |
-| `user_id`    | INT            | FK → users.id                         |
-| `code`       | VARCHAR(6)     | 6-значный цифровой код                |
-| `expires_at` | TIMESTAMPTZ    | Текущее время + 10 мин (TTL = 600 с)  |
-| `attempts`   | SMALLINT       | Счётчик неверных попыток              |
-| `created_at` | TIMESTAMPTZ    | Время создания                        |
+| Ключ | Значение | TTL | Назначение |
+|------|----------|-----|------------|
+| `otp:hash:{user_id}` | HMAC-SHA256 hex кода | 600 с | Хранит хеш для верификации |
+| `otp:attempts:{user_id}` | INT (счётчик) | 600 с | Счётчик неверных попыток |
+| `otp:cooldown:{user_id}` | `1` | 60 с | Rate-limit: не даёт запросить новый код чаще раза в минуту |
 
-**Rate-limit:** перед созданием кода проверить, нет ли существующего кода для этого `user_id` созданного < 1 часа назад и уже превышающего попытки (`attempts >= 5`). Если да — вернуть `429`.
+**Rate-limit:** перед созданием кода проверить наличие `otp:cooldown:{user_id}`.  
+Если ключ существует → вернуть `429 too_many_requests`.
 
 ---
 
@@ -53,14 +54,23 @@
 
 **Шаги:**
 1. `userRepo.FindByEmail(ctx, email)` → `ErrUserNotFound` → 404
-2. Rate-limit check по `user_id` из хранилища OTP (Redis или БД)
+2. Rate-limit: `otpStore.HasCooldown(ctx, user.ID)` → если есть → `ErrOTPCooldown` → 429
 3. Сгенерировать 6 цифр: `crypto/rand → fmt.Sprintf("%06d", n%1000000)`
-4. Сохранить хэш кода в `otp_codes` с TTL 10 мин
-5. Отправить email через SMTP / сервис рассылки
+4. Хеш: `hmacSHA256(code, cfg.OTPHMACSecret)` → `hex.EncodeToString`
+5. `otpStore.Set(ctx, user.ID, hash, 600s)` — сохранить хеш в Valkey
+6. `otpStore.SetCooldown(ctx, user.ID, 60s)` — выставить кулдаун
+7. Отправить email через UniSender
 
-### Repository
+### OTP Store (Valkey)
 
 ```go
-// Нужно реализовать: OTPRepository
-// методы: Create(ctx, otp), FindActiveByUserID(ctx, userID), IncrAttempts(ctx, id)
+// Нужно реализовать: domain.OTPStore (интерфейс)
+// Файл: internal/repository/cache/otp_store.go
+// методы:
+//   Set(ctx, userID, hash string, ttl time.Duration) error
+//   Get(ctx, userID int) (hash string, attempts int, error)
+//   IncrAttempts(ctx, userID int) (int, error)
+//   Delete(ctx, userID int) error
+//   HasCooldown(ctx, userID int) (bool, error)
+//   SetCooldown(ctx, userID int, ttl time.Duration) error
 ```
