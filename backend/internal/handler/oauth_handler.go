@@ -42,7 +42,7 @@ func (h *Handler) googleLogin(w http.ResponseWriter, r *http.Request) {
 		Path:     "/auth",
 		MaxAge:   15 * 24 * 3600,
 		HttpOnly: true,
-		Secure:   false, // Set true in production
+		Secure:   h.cfg.Env == "production",
 		SameSite: http.SameSiteStrictMode,
 	})
 

@@ -9,6 +9,7 @@ import (
 )
 
 type Config struct {
+	Env  string `env:"ENV" env-default:"development"`
 	// env-default задает значение, если переменной нет ни в .env, ни в системе
 	Port string `env:"PORT" env-default:"8080"`
 
