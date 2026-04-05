@@ -45,3 +45,4 @@ hotfix/frontend/<name>       ← срочный фикс frontend
 |------------|-----------------------|
 | `backend/` | Go-сервер             |
 | `frontend/`| Next.js приложение    |
+
