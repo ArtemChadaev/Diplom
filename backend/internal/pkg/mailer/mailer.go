@@ -2,15 +2,12 @@ package mailer
 
 import (
 	"context"
-	"encoding/json"
-	"errors"
-	"net/http"
-	"strconv"
-	"net/url"
-	"strings"
-	"time"
+	"crypto/tls"
+	"log/slog"
+	"net/smtp"
 
-	"github.com/ima/diplom-backend/internal/pkg/logger"
+	"github.com/jordan-wright/email"
+	"github.com/ima/diplom-backend/internal/domain" // Импорт твоих ошибок
 )
 
 type Mailer interface {
@@ -18,84 +15,52 @@ type Mailer interface {
 }
 
 type Config struct {
-	APIKey    string
-	APIURL    string
-	FromEmail string
-	FromName  string
-	UploadDir string
+	SMTPServer string
+	SMTPPort   string
+	Username   string
+	Password   string
 }
 
-type unisenderMailer struct {
-	cfg    Config
-	client *http.Client
+type smtpMailer struct {
+	cfg Config
 }
 
 func New(cfg Config) Mailer {
-	return &unisenderMailer{
-		cfg: cfg,
-		client: &http.Client{
-			Timeout: 10 * time.Second,
-		},
-	}
+	return &smtpMailer{cfg: cfg}
 }
 
-func (m *unisenderMailer) SendOTP(ctx context.Context, toEmail, code string) error {
-	log := logger.FromContext(ctx)
+func (m *smtpMailer) SendOTP(ctx context.Context, toEmail, code string) error {
+	// 1. Сборка письма через библиотеку
+	e := email.NewEmail()
+	e.From = "Diplom Admin <" + m.cfg.Username + ">" // Простая конкатенация вместо fmt
+	e.To = []string{toEmail}
+	e.Subject = "Verification Code"
+	e.HTML = []byte("<h2>Your code: " + code + "</h2>") // Конкатенация для скорости
 
-	// If API key is not set, just log it out (useful in development)
-	if m.cfg.APIKey == "" {
-		log.Info("UniSender API key not set, simulating email dispatch", "to", toEmail, "code", code)
-		return nil
-	}
+	auth := smtp.PlainAuth("", m.cfg.Username, m.cfg.Password, m.cfg.SMTPServer)
+	addr := m.cfg.SMTPServer + ":" + m.cfg.SMTPPort
 
-	apiURL := m.cfg.APIURL
-	if apiURL == "" {
-		apiURL = "https://api.unisender.com/ru/api/sendEmail"
-	}
+	// 2. Отправка
+	err := e.SendWithTLS(
+		addr,
+		auth,
+		&tls.Config{ServerName: m.cfg.SMTPServer},
+	)
 
-	body := "Code: " + code + "\nExpires in 10 minutes."
-	subject := "Your login code"
-
-	params := url.Values{}
-	params.Set("format", "json")
-	params.Set("api_key", m.cfg.APIKey)
-	params.Set("email", toEmail)
-	params.Set("sender_name", m.cfg.FromName)
-	params.Set("sender_email", m.cfg.FromEmail)
-	params.Set("subject", subject)
-	params.Set("body", body)
-	params.Set("list_id", "1") // Assuming some list ID or not needed by API docs
-
-	req, err := http.NewRequestWithContext(ctx, http.MethodPost, apiURL, strings.NewReader(params.Encode()))
 	if err != nil {
-		return errors.New("failed to create request: " + err.Error())
+		// Создаем структурированную ошибку приложения
+		appErr := domain.NewAppError(
+			"mailer_send_error",
+			"failed to physically send email via SMTP",
+			err, // Оборачиваем реальную ошибку библиотеки
+			slog.String("target_email", toEmail),
+			slog.String("smtp_server", m.cfg.SMTPServer),
+		)
+		
+		// Логируем через встроенный метод AppError
+		appErr.LogError(ctx)
+		return appErr
 	}
 
-	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
-
-	resp, err := m.client.Do(req)
-	if err != nil {
-		return errors.New("failed to send email via UniSender: " + err.Error())
-	}
-	defer resp.Body.Close()
-
-	if resp.StatusCode >= 400 {
-		return errors.New("unisender returned status " + strconv.Itoa(resp.StatusCode))
-	}
-
-	var jsonResp map[string]interface{}
-	if err := json.NewDecoder(resp.Body).Decode(&jsonResp); err != nil {
-		return errors.New("failed to decode unisender response: " + err.Error())
-	}
-
-	if msg, hasErr := jsonResp["error"]; hasErr {
-		strMsg, _ := msg.(string)
-		if strMsg == "" {
-			strMsg = "unknown error"
-		}
-		return errors.New("unisender error: " + strMsg)
-	}
-
-	log.Info("OTP email sent successfully", "to", toEmail)
 	return nil
 }

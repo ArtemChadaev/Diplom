@@ -45,4 +45,8 @@ type AuthService interface {
 	// Admin actions
 	AssignRole(ctx context.Context, adminID int, adminRole UserRole, targetUserID int, role UserRole) error
 	SetBlocked(ctx context.Context, adminID int, adminRole UserRole, targetUserID int, blocked bool) error
+
+	// OTP
+	SendOTPCode(ctx context.Context, email string) error
+	VerifyOTPCode(ctx context.Context, email, code string, meta SessionMeta) (*TokenPair, error)
 }

@@ -3,6 +3,7 @@ package middleware
 import (
 	"context"
 	"net/http"
+	"net"
 	"time"
 
 	chimiddleware "github.com/go-chi/chi/v5/middleware"
@@ -24,6 +25,10 @@ func RequestLogger(next http.Handler) http.Handler {
 		// chi's RequestID middleware sets this header automatically.
 		requestID := chimiddleware.GetReqID(r.Context())
 		
+		if host, _, err := net.SplitHostPort(r.RemoteAddr); err == nil {
+			r.RemoteAddr = host
+		}
+
 		logData := &LogData{}
 		ctx := context.WithValue(r.Context(), CtxLogData, logData)
 		ctx = logger.WithRequestID(ctx, requestID)

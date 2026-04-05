@@ -75,11 +75,10 @@ func main() {
 
 	// 5. Инициализация Mailer
 	m := mailer.New(mailer.Config{
-		APIKey:    cfg.UniSenderAPIKey,
-		APIURL:    cfg.UniSenderAPIURL,
-		FromEmail: cfg.UniSenderFromEmail,
-		FromName:  cfg.UniSenderFromName,
-		UploadDir: cfg.UploadDir,
+		SMTPServer: cfg.MAILER_SMTP_SERVER,
+		SMTPPort:   cfg.MAILER_SMTP_PORT,
+		Username:   cfg.MAILER_USERNAME,
+		Password:   cfg.MAILER_PASSWORD,
 	})
 
 	// 6. Инициализация слоёв: Repository → Service → Handler
