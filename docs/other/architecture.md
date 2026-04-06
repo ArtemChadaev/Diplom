@@ -75,49 +75,97 @@ graph LR
 
 ## 3. Схема данных и взаимосвязь классов (Entities)
 
-Основные сущности и их отношения (Class-level diagram).
+Ниже представлена детальная структура основных сущностей системы и их атрибутов.
 
 ```mermaid
 classDiagram
     class User {
         +int ID
         +string Email
-        +UserRole Role
+        +string GoogleID
+        +string TelegramID
+        +user_role Role
         +bool NsPvAccess
+        +bool UkepBound
+        +bool IsBlocked
     }
     class EmployeeProfile {
+        +int ID
+        +int UserID
         +string FullName
         +string EmployeeCode
+        +string Position
+        +string Department
+        +date HireDate
+        +string MedicalBookUrl
         +json GDPHistory
     }
     class Product {
         +uuid ID
         +string TradeName
         +string mnn
+        +string Sku
+        +string RuNumber
         +bool IsJNVLP
+        +bool IsNS_PV
+        +bool ColdChain
+        +float TempMin
+        +float TempMax
     }
     class Batch {
         +uuid ID
+        +uuid ProductID
+        +uuid ZoneID
         +string SerialNumber
         +date ExpiryDate
-        +BatchStatus Status
-    }
-    class WarehouseZone {
-        +string Name
-        +ZoneType Type
+        +int Quantity
+        +batch_status Status
     }
     class InboundReceipt {
+        +uuid ID
+        +uuid SupplierID
         +string InvoiceNumber
+        +purchase_type Type
         +string InspectionResult
+        +int QpUserID
+        +date InspectionDate
+    }
+    class Order {
+        +uuid ID
+        +order_type Type
+        +order_status Status
+        +uuid DestinationID
+        +int CreatedBy
+        +timestamp ShippedAt
+    }
+    class WarehouseZone {
+        +uuid ID
+        +string Name
+        +zone_type Type
+        +float TempMin
+        +float TempMax
+        +float HumidityMax
     }
 
     User "1" -- "1" EmployeeProfile : has
-    User "1" -- "n" InboundReceipt : audits (QP)
+    User "1" -- "n" InboundReceipt : approves (QP)
     Product "1" -- "n" Batch : comprises
     WarehouseZone "1" -- "n" Batch : stores
-    InboundReceipt "1" -- "n" Batch : contains
-    Product "1" -- "n" ProductPhoto : has
+    InboundReceipt "1" -- "n" InboundPosition : defines
+    InboundPosition "n" -- "1" Batch : links
+    Order "1" -- "n" OrderItem : contains
+    OrderItem "n" -- "1" Batch : allocates
 ```
+
+### Описание ключевых атрибутов сущностей:
+
+*   **User (Пользователь)**: Базовая сущность для аутентификации. `NsPvAccess` определяет допуск к сильнодействующим веществам, `UkepBound` — привязку электронной подписи.
+*   **EmployeeProfile (Профиль сотрудника)**: Хранит кадровые данные. `GDPHistory` — JSON-массив с историей ежегодных обучений надлежащей практике распределения.
+*   **Product (Товар)**: Карточка лекарственного средства. Включает требования по хранению (`TempMin`/`Max`) и регуляторные флаги (`IsJNVLP` — ЖНВЛП, `IsNS_PV` — ПКУ).
+*   **Batch (Серия)**: Партия конкретного товара на складе. Ключевые поля: `ExpiryDate` (срок годности для FEFO) и `Status` (контроль доступности).
+*   **InboundReceipt (Приемка)**: Документ поступления. Связывает поставщика и принятые серии. Содержит результаты контроля `QP` (Уполномоченного лица).
+*   **Order (Заказ)**: Документ отгрузки. Содержит статус жизненного цикла заказа и ссылки на ответственных за сборку и отгрузку.
+*   **WarehouseZone (Зона склада)**: Физическое или логическое место хранения с заданными параметрами микроклимата (`TempMin`, `TempMax`, `HumidityMax`).
 
 ---
 
