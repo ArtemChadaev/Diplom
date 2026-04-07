@@ -110,7 +110,7 @@ export default function AdminSettingsPage() {
             <div className="space-y-2">
               <Label htmlFor="birth_date">Дата рождения</Label>
               <div className="w-full">
-                <DatePicker />
+                <DatePicker date={mockUser.birth_date} setDate={() => {}} />
               </div>
             </div>
             <div className="space-y-2 col-span-full">
@@ -158,7 +158,7 @@ export default function AdminSettingsPage() {
             <div className="space-y-2">
               <Label htmlFor="hire_date">Дата приема на работу</Label>
               <div className="w-full">
-                <DatePicker />
+                <DatePicker date={mockUser.hire_date} setDate={() => {}} />
               </div>
             </div>
             <div className="space-y-2">
@@ -167,7 +167,7 @@ export default function AdminSettingsPage() {
                 <span className="text-[10px] font-normal px-1.5 py-0.5 bg-muted rounded uppercase text-muted-foreground border border-border/50">опционально</span>
               </Label>
               <div className="w-full">
-                <DatePicker />
+                <DatePicker date={mockUser.dismissal_date || undefined} setDate={() => {}} />
               </div>
             </div>
           </CardContent>

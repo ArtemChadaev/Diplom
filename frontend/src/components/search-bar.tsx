@@ -1,13 +1,13 @@
 "use client"
 
-import { useState } from "react"
+import { useState, Suspense } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { ButtonGroup } from "@/components/ui/button-group"
 import { Search } from "lucide-react"
 
-export function SearchBar() {
+function SearchBarInner() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const [query, setQuery] = useState(searchParams.get("q") || "")
@@ -38,5 +38,13 @@ export function SearchBar() {
         </Button>
       </ButtonGroup>
     </form>
+  )
+}
+
+export function SearchBar() {
+  return (
+    <Suspense fallback={<div className="hidden sm:flex w-[200px] h-10" />}>
+      <SearchBarInner />
+    </Suspense>
   )
 }
