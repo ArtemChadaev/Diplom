@@ -1,0 +1,10 @@
+DROP TYPE IF EXISTS training_result;
+DROP TYPE IF EXISTS inventory_status;
+DROP TYPE IF EXISTS order_status;
+DROP TYPE IF EXISTS order_type;
+DROP TYPE IF EXISTS purchase_type;
+DROP TYPE IF EXISTS claim_type;
+DROP TYPE IF EXISTS shift_type;
+DROP TYPE IF EXISTS zone_type;
+DROP TYPE IF EXISTS batch_status;
+DROP TYPE IF EXISTS user_role;

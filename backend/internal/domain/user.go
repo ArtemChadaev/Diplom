@@ -5,35 +5,33 @@ import (
 	"time"
 )
 
+// UserRole — roles defined in the ERP spec.
 type UserRole string
-type UserStatus string
 
 const (
-	RoleAdmin      UserRole = "admin"
-	RoleEmployee   UserRole = "employee"
-	RoleUnverified UserRole = "unverified"
-
-	StatusUnverified UserStatus = "unverified"
-	StatusActive     UserStatus = "active"
-	StatusBlocked    UserStatus = "blocked"
+	RoleAdmin            UserRole = "admin"
+	RoleQP               UserRole = "qp"               // Authorised Person / QP
+	RoleWarehouseManager UserRole = "warehouse_manager"
+	RoleStorekeeper      UserRole = "storekeeper"
+	RolePharmacist       UserRole = "pharmacist"
 )
 
-// User — чистая доменная модель пользователя.
-// Не содержит тегов gorm, json или validate — только бизнес-поля.
+// User — clean domain model for a system user.
+// No gorm/json/validate tags — only business fields.
 type User struct {
-	ID           int
-	Login        string
-	Email        *string // nullable
-	GoogleID     *string // nullable
-	TelegramID   *int64  // nullable
-	PasswordHash *string // nullable (social-only users have no password)
-	Role         UserRole
-	Status       UserStatus
-	IsBlocked    bool
-	CreatedAt    time.Time
+	ID          int
+	Email       string    // primary identity (unique, not null)
+	GoogleID    *string   // nullable — set when linked via Google OAuth
+	TelegramID  *int64    // nullable — set when linked via Telegram
+	Role        UserRole
+	NsPvAccess  bool      // access to narcotic/psychotropic substances (НС/ПВ)
+	UkepBound   bool      // qualified electronic signature linked
+	IsBlocked   bool
+	CreatedAt   time.Time
+	UpdatedAt   time.Time
 }
 
-// UserProfile — flattened view joining users + employee_profiles
+// UserProfile — flattened view joining users + employee_profiles.
 type UserProfile struct {
 	User
 	EmployeeCode string
@@ -42,24 +40,32 @@ type UserProfile struct {
 	Department   string
 }
 
-// UserRepository — интерфейс для работы с хранилищем пользователей.
+// UserListFilter — filter for searching and listing users.
+type UserListFilter struct {
+	Query string
+	Role  UserRole
+	Page  int
+	Limit int
+}
+
+// UserRepository — storage interface for users.
 type UserRepository interface {
 	// Identity resolution
 	FindByID(ctx context.Context, id int) (*User, error)
-	FindByLogin(ctx context.Context, login string) (*User, error)
 	FindByEmail(ctx context.Context, email string) (*User, error)
 	FindByGoogleID(ctx context.Context, googleID string) (*User, error)
 	FindByTelegramID(ctx context.Context, telegramID int64) (*User, error)
-	IsLoginTaken(ctx context.Context, login string) (bool, error)
+	IsEmailTaken(ctx context.Context, email string) (bool, error)
 
 	// Mutation
 	Create(ctx context.Context, u *User) (*User, error)
 	UpdateRole(ctx context.Context, userID int, role UserRole) error
-	UpdateStatus(ctx context.Context, userID int, status UserStatus) error
 	LinkGoogle(ctx context.Context, userID int, googleID string) error
 	LinkTelegram(ctx context.Context, userID int, telegramID int64) error
-	SetPasswordHash(ctx context.Context, userID int, hash string) error
+	SetNsPvAccess(ctx context.Context, userID int, access bool) error
+	SetBlocked(ctx context.Context, userID int, blocked bool) error
 
 	// Profile
 	FindProfileByUserID(ctx context.Context, userID int) (*UserProfile, error)
+	List(ctx context.Context, filter UserListFilter) ([]*UserProfile, int, error)
 }

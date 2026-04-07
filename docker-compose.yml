@@ -1,5 +1,6 @@
 services:
   backend:
+    profiles: ["backend-all", "all"]
     build:
       context: ./backend
       dockerfile: Dockerfile
@@ -17,6 +18,7 @@ services:
     restart: unless-stopped
 
   frontend:
+    profiles: ["all"] 
     build:
       context: ./frontend
       dockerfile: Dockerfile
@@ -34,6 +36,7 @@ services:
 
   postgres:
     image: postgres:17-alpine
+    profiles: ["backend-all", "all"]
     environment:
       - POSTGRES_USER=${DB_USER}
       - POSTGRES_PASSWORD=${DB_PASSWORD}
@@ -54,6 +57,7 @@ services:
 
   migrate:
     image: migrate/migrate
+    profiles: ["backend-all", "all"]
     volumes:
       - ./backend/migrate:/migrations
     # Мы используем переменные, которые Docker Compose подтянет из .env
@@ -86,6 +90,7 @@ services:
 
   valkey:
     image: valkey/valkey:8-alpine
+    profiles: ["backend-all", "all"]
     ports:
       - "${VALKEY_PORT}:6379"
     volumes:

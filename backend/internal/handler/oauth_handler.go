@@ -25,10 +25,10 @@ func (h *Handler) googleLogin(w http.ResponseWriter, r *http.Request) {
 
 	pair, err := h.service.Auth.LoginWithGoogle(r.Context(), req.IDToken, userAgent, ip)
 	if err != nil {
-		if errors.Is(err, domain.ErrUserUnverified) {
+		if errors.Is(err, domain.ErrUserBlocked) {
 			w.Header().Set("Content-Type", "application/json")
 			w.WriteHeader(http.StatusForbidden)
-			json.NewEncoder(w).Encode(map[string]string{"message": "account pending admin approval"})
+			_ = json.NewEncoder(w).Encode(map[string]string{"message": "account is blocked"})
 			return
 		}
 		http.Error(w, "google auth failed", http.StatusUnauthorized)
@@ -42,7 +42,7 @@ func (h *Handler) googleLogin(w http.ResponseWriter, r *http.Request) {
 		Path:     "/auth",
 		MaxAge:   15 * 24 * 3600,
 		HttpOnly: true,
-		Secure:   false, // Set true in production
+		Secure:   h.cfg.Env == "production",
 		SameSite: http.SameSiteStrictMode,
 	})
 
@@ -52,5 +52,5 @@ func (h *Handler) googleLogin(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(resp)
+	_ = json.NewEncoder(w).Encode(resp)
 }

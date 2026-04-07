@@ -2,6 +2,7 @@ package handler
 
 import (
 	"encoding/json"
+	"errors"
 	"net/http"
 	"strconv"
 
@@ -12,7 +13,19 @@ import (
 	"github.com/ima/diplom-backend/internal/handler/middleware"
 )
 
-func (h *Handler) adminVerifyUser(w http.ResponseWriter, r *http.Request) {
+func mapAdminError(w http.ResponseWriter, err error) {
+	if errors.Is(err, domain.ErrUserNotFound) || errors.Is(err, domain.ErrSessionNotFound) {
+		http.Error(w, err.Error(), http.StatusNotFound)
+		return
+	}
+	if errors.Is(err, domain.ErrInsufficientPerms) {
+		http.Error(w, err.Error(), http.StatusForbidden)
+		return
+	}
+	http.Error(w, err.Error(), http.StatusInternalServerError)
+}
+
+func (h *Handler) adminSetBlocked(w http.ResponseWriter, r *http.Request) {
 	idStr := chi.URLParam(r, "id")
 	userID, err := strconv.Atoi(idStr)
 	if err != nil {
@@ -20,17 +33,22 @@ func (h *Handler) adminVerifyUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	var req dto.SetBlockedRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		http.Error(w, "invalid JSON", http.StatusBadRequest)
+		return
+	}
+
 	callerID := r.Context().Value(middleware.CtxUserID).(int)
 	callerRole := r.Context().Value(middleware.CtxRole).(domain.UserRole)
 
-	err = h.service.Auth.VerifyUser(r.Context(), callerID, callerRole, userID)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+	if err = h.service.Auth.SetBlocked(r.Context(), callerID, callerRole, userID, req.Blocked); err != nil {
+		mapAdminError(w, err)
 		return
 	}
 
 	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(map[string]string{"status": "active"})
+	_ = json.NewEncoder(w).Encode(map[string]bool{"blocked": req.Blocked})
 }
 
 func (h *Handler) adminAssignRole(w http.ResponseWriter, r *http.Request) {
@@ -52,7 +70,7 @@ func (h *Handler) adminAssignRole(w http.ResponseWriter, r *http.Request) {
 
 	err = h.service.Auth.AssignRole(r.Context(), callerID, callerRole, userID, domain.UserRole(req.Role))
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		mapAdminError(w, err)
 		return
 	}
 
@@ -73,7 +91,7 @@ func (h *Handler) adminRevokeSession(w http.ResponseWriter, r *http.Request) {
 
 	err = h.service.Auth.RevokeSession(r.Context(), sessionID, callerID, callerRole)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		mapAdminError(w, err)
 		return
 	}
 
@@ -93,7 +111,7 @@ func (h *Handler) revokeSession(w http.ResponseWriter, r *http.Request) {
 
 	err = h.service.Auth.RevokeSession(r.Context(), sessionID, callerID, callerRole)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		mapAdminError(w, err)
 		return
 	}
 

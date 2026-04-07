@@ -2,91 +2,53 @@ package service
 
 import (
 	"context"
+	"crypto/hmac"
+	"crypto/rand"
+	"crypto/sha256"
+	"crypto/subtle"
+	"encoding/hex"
 	"errors"
+	"math/big"
+	"strconv"
 	"time"
 
 	"github.com/google/uuid"
 	"github.com/ima/diplom-backend/internal/domain"
-	"golang.org/x/crypto/bcrypt"
+	"github.com/ima/diplom-backend/internal/pkg/mailer"
 	"google.golang.org/api/idtoken"
 )
 
 type authService struct {
 	userRepo        domain.UserRepository
 	sessionRepo     domain.SessionRepository
+	otpRepo         domain.OTPRepository
 	tokenSvc        domain.TokenService
+	mailer          mailer.Mailer
 	refreshTokenTTL time.Duration
 	googleClientID  string
+	otpHMACSecret   string
 }
 
 func NewAuthService(
 	userRepo domain.UserRepository,
 	sessionRepo domain.SessionRepository,
+	otpRepo domain.OTPRepository,
 	tokenSvc domain.TokenService,
 	refreshTTL time.Duration,
 	googleClientID string,
+	mailer mailer.Mailer,
+	otpHMACSecret string,
 ) domain.AuthService {
 	return &authService{
 		userRepo:        userRepo,
 		sessionRepo:     sessionRepo,
+		otpRepo:         otpRepo,
 		tokenSvc:        tokenSvc,
+		mailer:          mailer,
 		refreshTokenTTL: refreshTTL,
 		googleClientID:  googleClientID,
+		otpHMACSecret:   otpHMACSecret,
 	}
-}
-
-func (s *authService) Register(ctx context.Context, req domain.RegisterInput) (*domain.User, error) {
-	// 1. Check if login explicitly taken
-	taken, err := s.userRepo.IsLoginTaken(ctx, req.Login)
-	if err != nil {
-		return nil, err
-	}
-	if taken {
-		return nil, domain.ErrLoginTaken
-	}
-
-	if req.Email != "" {
-		// optionally throw ErrEmailTaken if doing a manual check
-		// For now pg err code would handle it or we do explicit:
-		if existing, _ := s.userRepo.FindByEmail(ctx, req.Email); existing != nil {
-			return nil, domain.ErrEmailTaken
-		}
-	}
-
-	// 2. Hash password
-	bytes, err := bcrypt.GenerateFromPassword([]byte(req.Password), 12)
-	if err != nil {
-		return nil, err
-	}
-	hash := string(bytes)
-	var em *string
-	if req.Email != "" {
-		em = &req.Email
-	}
-
-	u := &domain.User{
-		Login:        req.Login,
-		Email:        em,
-		PasswordHash: &hash,
-		Role:         domain.RoleUnverified,
-		Status:       domain.StatusUnverified,
-	}
-
-	// 3. Create user
-	return s.userRepo.Create(ctx, u)
-}
-
-func (s *authService) LoginWithPassword(ctx context.Context, login, password, userAgent, ip string) (*domain.TokenPair, error) {
-	u, err := s.userRepo.FindByLogin(ctx, login)
-	if err != nil {
-		return nil, domain.ErrInvalidCreds // prevent user enumeration
-	}
-
-	if u.PasswordHash == nil || bcrypt.CompareHashAndPassword([]byte(*u.PasswordHash), []byte(password)) != nil {
-		return nil, domain.ErrInvalidCreds
-	}
-
-	return s.issueTokens(ctx, u, userAgent, ip)
 }
 
 func (s *authService) LoginWithGoogle(ctx context.Context, idToken, userAgent, ip string) (*domain.TokenPair, error) {
@@ -108,7 +70,7 @@ func (s *authService) LoginWithGoogle(ctx context.Context, idToken, userAgent, i
 		return s.issueTokens(ctx, u, userAgent, ip)
 	}
 
-	// 2. Try finding by Email and link
+	// 2. Try finding by Email and link Google ID
 	if email != "" {
 		u, err = s.userRepo.FindByEmail(ctx, email)
 		if err != nil && !errors.Is(err, domain.ErrUserNotFound) {
@@ -119,45 +81,39 @@ func (s *authService) LoginWithGoogle(ctx context.Context, idToken, userAgent, i
 			if err := s.userRepo.LinkGoogle(ctx, u.ID, googleID); err != nil {
 				return nil, err
 			}
+			u.GoogleID = &googleID
 			return s.issueTokens(ctx, u, userAgent, ip)
 		}
 	}
 
-	// 3. New user -> Register as unverified
-	login := email
-	if login == "" {
-		login = "google_" + googleID[:8]
-	}
-
+	// 3. New user — auto-register with default role pharmacist
 	newUser := &domain.User{
-		Login:    login,
-		Email:    &email,
+		Email:    email,
 		GoogleID: &googleID,
-		Role:     domain.RoleUnverified,
-		Status:   domain.StatusUnverified,
+		Role:     domain.RolePharmacist,
 	}
 
-	if _, err := s.userRepo.Create(ctx, newUser); err != nil {
+	created, err := s.userRepo.Create(ctx, newUser)
+	if err != nil {
 		return nil, err
 	}
 
-	// For unverified users, we don't issue tokens yet
-	return nil, domain.ErrUserUnverified
+	return s.issueTokens(ctx, created, userAgent, ip)
 }
 
 func (s *authService) LoginWithTelegram(ctx context.Context, data domain.TelegramAuthData, userAgent, ip string) (*domain.TokenPair, error) {
-	// Telegram hash verification not implemented here to save lines
-	panic("implement telegram hash validator")
+	// TODO: verify Telegram hash with bot token
+	panic("LoginWithTelegram not implemented: need Telegram hash validator")
 }
 
 func (s *authService) RefreshTokens(ctx context.Context, oldRefreshToken string, meta domain.SessionMeta) (*domain.TokenPair, error) {
 	hash := s.tokenSvc.HashToken(oldRefreshToken)
 	session, err := s.sessionRepo.FindByTokenHash(ctx, hash)
 	if err != nil {
-		return nil, domain.ErrInvalidCreds // or specific refresh error
+		return nil, domain.ErrInvalidCreds
 	}
 
-	// Token theft detection: if an old token is reused that was revoked
+	// Token theft detection: reused revoked token → revoke all sessions
 	if session.RevokedAt != nil {
 		_ = s.sessionRepo.RevokeAllForUser(ctx, session.UserID)
 		return nil, domain.ErrSessionNotFound
@@ -167,7 +123,7 @@ func (s *authService) RefreshTokens(ctx context.Context, oldRefreshToken string,
 		return nil, domain.ErrTokenExpired
 	}
 
-	// Revoke old session atomically (if this fails we abort to prevent dup issue)
+	// Revoke old session
 	if err := s.sessionRepo.Revoke(ctx, session.ID); err != nil {
 		return nil, err
 	}
@@ -191,13 +147,6 @@ func (s *authService) RevokeSession(ctx context.Context, sessionID uuid.UUID, ca
 	return s.sessionRepo.Revoke(ctx, sessionID)
 }
 
-func (s *authService) VerifyUser(ctx context.Context, adminID int, adminRole domain.UserRole, targetUserID int) error {
-	if adminRole != domain.RoleAdmin {
-		return domain.ErrInsufficientPerms
-	}
-	return s.userRepo.UpdateStatus(ctx, targetUserID, domain.StatusActive)
-}
-
 func (s *authService) AssignRole(ctx context.Context, adminID int, adminRole domain.UserRole, targetUserID int, role domain.UserRole) error {
 	if adminRole != domain.RoleAdmin {
 		return domain.ErrInsufficientPerms
@@ -205,12 +154,86 @@ func (s *authService) AssignRole(ctx context.Context, adminID int, adminRole dom
 	return s.userRepo.UpdateRole(ctx, targetUserID, role)
 }
 
-// issueTokens is a private helper to generate a pair and insert the refresh session
+func (s *authService) SetBlocked(ctx context.Context, adminID int, adminRole domain.UserRole, targetUserID int, blocked bool) error {
+	if adminRole != domain.RoleAdmin {
+		return domain.ErrInsufficientPerms
+	}
+	return s.userRepo.SetBlocked(ctx, targetUserID, blocked)
+}
+
+func generateOTPCode() string {
+	max := big.NewInt(1000000)
+	n, err := rand.Int(rand.Reader, max)
+	if err != nil {
+		// Fallback if crypto/rand fails
+		return "000000"
+	}
+	code := strconv.FormatInt(n.Int64(), 10)
+	for len(code) < 6 {
+		code = "0" + code
+	}
+	return code
+}
+
+func hmacSHA256(data, secret string) string {
+	h := hmac.New(sha256.New, []byte(secret))
+	h.Write([]byte(data))
+	return hex.EncodeToString(h.Sum(nil))
+}
+
+func (s *authService) SendOTPCode(ctx context.Context, email string) error {
+	user, err := s.userRepo.FindByEmail(ctx, email)
+	if err != nil {
+		return err // ErrUserNotFound → mapped to 404
+	}
+
+	// Rate-limit check
+	otpData, err := s.otpRepo.Get(ctx, user.ID)
+	if err == nil && otpData.Attempts >= domain.OTPMaxAttempts {
+		return domain.ErrOTPMaxAttempts
+	}
+
+	code := generateOTPCode()
+	hash := hmacSHA256(code, s.otpHMACSecret)
+
+	if err := s.otpRepo.Store(ctx, user.ID, hash); err != nil {
+		return err
+	}
+
+	return s.mailer.SendOTP(ctx, email, code)
+}
+
+func (s *authService) VerifyOTPCode(ctx context.Context, email, code string, meta domain.SessionMeta) (*domain.TokenPair, error) {
+	user, err := s.userRepo.FindByEmail(ctx, email)
+	if err != nil {
+		return nil, err // ErrUserNotFound
+	}
+	if user.IsBlocked {
+		return nil, domain.ErrUserBlocked
+	}
+
+	otpData, err := s.otpRepo.Get(ctx, user.ID)
+	if err != nil {
+		return nil, domain.ErrOTPNotFound
+	}
+
+	if otpData.Attempts >= domain.OTPMaxAttempts {
+		return nil, domain.ErrOTPMaxAttempts
+	}
+
+	expectedHash := hmacSHA256(code, s.otpHMACSecret)
+	if subtle.ConstantTimeCompare([]byte(expectedHash), []byte(otpData.CodeHash)) == 0 {
+		_ = s.otpRepo.IncrAttempts(ctx, user.ID)
+		return nil, domain.ErrOTPInvalid
+	}
+
+	_ = s.otpRepo.Delete(ctx, user.ID)
+	return s.issueTokens(ctx, user, meta.UserAgent, meta.IPAddress)
+}
+
+// issueTokens is a private helper: validates user state, creates refresh session, returns token pair.
 func (s *authService) issueTokens(ctx context.Context, u *domain.User, userAgent, ip string) (*domain.TokenPair, error) {
-	if u.IsBlocked || u.Status != domain.StatusActive {
-		if u.Status == domain.StatusUnverified {
-			return nil, domain.ErrUserUnverified
-		}
+	if u.IsBlocked {
 		return nil, domain.ErrUserBlocked
 	}
 
@@ -219,14 +242,13 @@ func (s *authService) issueTokens(ctx context.Context, u *domain.User, userAgent
 		return nil, err
 	}
 
-	metadata := make(map[string]any)
 	rt := &domain.RefreshToken{
 		UserID:    u.ID,
 		TokenHash: hashRT,
 		ExpiresAt: time.Now().Add(s.refreshTokenTTL),
 		UserAgent: userAgent,
 		IPAddress: ip,
-		Metadata:  metadata,
+		Metadata:  make(map[string]any),
 	}
 
 	createdRT, err := s.sessionRepo.Create(ctx, rt)
@@ -239,11 +261,9 @@ func (s *authService) issueTokens(ctx context.Context, u *domain.User, userAgent
 		return nil, err
 	}
 
-	// 15m default hard code assumption vs Config, we can derive from Config/TTL.
-	// For API response:
 	return &domain.TokenPair{
 		AccessToken:  accessToken,
-		ExpiresIn:    900, // 15 min TTL default
+		ExpiresIn:    900, // 15 min in seconds
 		RefreshToken: rawRT,
 	}, nil
 }
