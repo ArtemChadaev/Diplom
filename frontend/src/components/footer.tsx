@@ -59,12 +59,12 @@ export function Footer() {
         <div className="flex items-center gap-8">
           {/* Server Status (One line) */}
           <div className="bg-muted/40 px-3 py-1.5 rounded-md flex items-center gap-2 border border-border/30">
-            <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse"></span>
+            <span className="w-1.5 h-1.5 rounded-full bg-warning animate-pulse"></span>
             <div className="flex items-baseline gap-1.5">
               <span className="text-[10px] font-bold text-muted-foreground uppercase leading-none">
                 Status:
               </span>
-              <span className="text-xs font-bold text-amber-500 leading-none">
+              <span className="text-xs font-bold text-warning leading-none">
                 Operational
               </span>
             </div>

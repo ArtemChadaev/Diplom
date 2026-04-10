@@ -1,21 +1,27 @@
 import type { Metadata } from "next";
 import "./globals.css";
-import { Inter } from "next/font/google";
+import { Plus_Jakarta_Sans } from "next/font/google";
 import { cn } from "@/lib/utils";
-import {NuqsAdapter} from "nuqs/adapters/next/app";
+import { NuqsAdapter } from "nuqs/adapters/next/app";
 
-const inter = Inter({subsets:['latin'],variable:'--font-sans'});
+const plusJakartaSans = Plus_Jakarta_Sans({
+  subsets: ["latin"],
+  variable: "--font-plus-jakarta",
+  weight: ["300", "400", "500", "600", "700"],
+  display: "swap",
+});
 
 export const metadata: Metadata = {
-  title: "Diplom App",
-  description: "Employee & Admin portal",
+  title: "MedicamentHouse — Управление фармацевтическим складом",
+  description:
+    "ERP-система для управления медицинским складом: учёт партий, FEFO, инвентаризация, операции.",
 };
 
 export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="ru" className={cn("font-sans", inter.variable)}>
+    <html lang="ru" className={cn("font-sans", plusJakartaSans.variable)}>
       <NuqsAdapter>
         <body>{children}</body>
       </NuqsAdapter>

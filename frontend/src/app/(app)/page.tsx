@@ -42,7 +42,7 @@ export default function EmployeePage() {
                         <CardTitle className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Быстрые операции</CardTitle>
                     </CardHeader>
                     <CardContent className="flex flex-col gap-4">
-                        <button className="bg-gradient-to-br from-gray-900 to-gray-800 group w-full p-6 rounded-xl flex items-center justify-between text-left hover:scale-[1.01] transition-all">
+                        <button className="bg-gradient-to-br from-primary to-primary/80 group w-full p-6 rounded-xl flex items-center justify-between text-left hover:shadow-lg transition-all cursor-pointer">
                             <div className="flex items-center gap-4">
                                 <div className="bg-white/10 p-3 rounded-lg">
                                     <PlusSquare className="text-white h-6 w-6" />
@@ -55,7 +55,7 @@ export default function EmployeePage() {
                             <ChevronRight className="text-white/40 group-hover:translate-x-1 transition-transform h-5 w-5" />
                         </button>
                         
-                        <button className="bg-card group w-full p-6 rounded-xl flex items-center justify-between text-left border border-transparent hover:border-border transition-all">
+                        <button className="bg-card group w-full p-6 rounded-xl flex items-center justify-between text-left border border-transparent hover:border-border hover:shadow-sm transition-all cursor-pointer">
                             <div className="flex items-center gap-4">
                                 <div className="bg-muted p-3 rounded-lg text-primary">
                                     <MinusSquare className="h-6 w-6" />
@@ -142,7 +142,7 @@ export default function EmployeePage() {
                                     <TableCell className="px-6 py-4 text-sm font-medium text-muted-foreground">14:22</TableCell>
                                     <TableCell className="px-6 py-4">
                                         <div className="flex items-center gap-2">
-                                            <div className="w-6 h-6 rounded-full bg-gray-800 text-[10px] text-white flex items-center justify-center">AS</div>
+                                            <div className="w-6 h-6 rounded-full bg-primary text-[10px] text-primary-foreground flex items-center justify-center">AS</div>
                                             <span className="text-sm font-medium text-primary">А. Сидоров</span>
                                         </div>
                                     </TableCell>
@@ -160,7 +160,7 @@ export default function EmployeePage() {
                                     <TableCell className="px-6 py-4 text-sm font-medium text-muted-foreground">13:05</TableCell>
                                     <TableCell className="px-6 py-4">
                                         <div className="flex items-center gap-2">
-                                            <div className="w-6 h-6 rounded-full bg-gray-900 text-[10px] text-white flex items-center justify-center">ИВ</div>
+                                            <div className="w-6 h-6 rounded-full bg-primary text-[10px] text-primary-foreground flex items-center justify-center">ИВ</div>
                                             <span className="text-sm font-medium text-primary">И. Волков</span>
                                         </div>
                                     </TableCell>

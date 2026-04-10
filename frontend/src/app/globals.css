@@ -1,13 +1,12 @@
 @import "tailwindcss";
 @plugin "tailwindcss-animate"; /* Правильный импорт анимаций для v4 */
 
-/* 1. ТЕМА: Здесь мы связываем переменные shadcn с движком Tailwind
+/* 1. ТЕМА: Связываем переменные shadcn с движком Tailwind
 */
 @theme inline {
-  /* ГЛАВНОЕ: Возвращаем отступы в строй */
   --spacing: 0.25rem;
 
-  --font-sans: system-ui, sans-serif;
+  --font-sans: var(--font-plus-jakarta);
 
   --color-background: var(--background);
   --color-foreground: var(--foreground);
@@ -21,6 +20,15 @@
   --color-accent-foreground: var(--accent-foreground);
   --color-destructive: var(--destructive);
   --color-destructive-foreground: var(--destructive-foreground);
+  --color-warning: var(--warning);
+  --color-warning-foreground: var(--warning-foreground);
+  --color-warning-subtle: var(--warning-subtle);
+  --color-success: var(--success);
+  --color-success-foreground: var(--success-foreground);
+  --color-success-subtle: var(--success-subtle);
+  --color-blue: var(--blue);
+  --color-blue-foreground: var(--blue-foreground);
+  --color-blue-subtle: var(--blue-subtle);
   --color-border: var(--border);
   --color-input: var(--input);
   --color-ring: var(--ring);
@@ -35,38 +43,66 @@
   --radius-xl: calc(var(--radius) * 1.4);
 }
 
-/* 2. ПЕРЕМЕННЫЕ: Цвета (оставляем твои OKLCH, они крутые)
+/* 2. ПЕРЕМЕННЫЕ: Дизайн-система MedicamentHouse
+   Палитра: Slate Navy + Emerald — профессиональная, медицинская, чистая.
 */
 @layer base {
   :root {
-    --background: #f9f9f9;
-    --foreground: #1a1c1c;
+    /* Фон: чуть холоднее белого — даёт глубину */
+    --background: #f8fafc;
+    --foreground: #0f172a;
+
+    /* Карточки: белые на голубоватом фоне — контраст есть */
     --card: #ffffff;
-    --card-foreground: #1a1c1c;
+    --card-foreground: #0f172a;
+
     --popover: #ffffff;
-    --popover-foreground: #1a1c1c;
-    --primary: #181619;
-    --primary-foreground: #ffffff;
-    --secondary: #006b58;
+    --popover-foreground: #0f172a;
+
+    /* Primary: Slate Navy — тёмный, но с синевой. Явно богаче чёрного */
+    --primary: #0f172a;
+    --primary-foreground: #f8fafc;
+
+    /* Secondary: Emerald — медицинский зелёный, насыщеннее прежнего #006b58 */
+    --secondary: #059669;
     --secondary-foreground: #ffffff;
-    --muted: #f3f3f3;
-    --muted-foreground: #7a767a;
-    --accent: #e2e2e2;
-    --accent-foreground: #49454a;
-    --destructive: #ba1a1a;
+
+    /* Muted: холодный серый вместо нейтрального */
+    --muted: #f1f5f9;
+    --muted-foreground: #64748b;
+
+    /* Accent: чуть голубоватый hover */
+    --accent: #e2e8f0;
+    --accent-foreground: #334155;
+
+    /* Destructive: насыщенный красный */
+    --destructive: #dc2626;
     --destructive-foreground: #ffffff;
-    --blue: #0077ff;
+
+    /* ✅ Warning — НОВЫЙ ТОКЕН (заменяет yellow-* в kpi-card) */
+    --warning: #d97706;
+    --warning-foreground: #ffffff;
+    --warning-subtle: #fef3c7;
+
+    /* ✅ Success — НОВЫЙ ТОКЕН (заменяет green-* в kpi-card) */
+    --success: #059669;
+    --success-foreground: #ffffff;
+    --success-subtle: #d1fae5;
+
+    /* Blue — информационные состояния */
+    --blue: #2563eb;
     --blue-foreground: #ffffff;
-    --border: #e2e2e2;
-    --input: #e2e2e2;
-    --ring: #006b58;
+    --blue-subtle: #dbeafe;
+
+    /* Бордеры и инпуты: чуть холоднее */
+    --border: #e2e8f0;
+    --input: #e2e8f0;
+    --ring: #059669;
     --radius: 0.625rem;
   }
-
-
 }
 
-/* 3. БАЗОВЫЕ СТИЛИ: Настройка стандартных тегов
+/* 3. БАЗОВЫЕ СТИЛИ
 */
 @layer base {
   * {
