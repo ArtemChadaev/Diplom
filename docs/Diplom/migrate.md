@@ -1,3 +1,9 @@
+# Database Schema — Full SQL Migrations
+
+← [Back to Main README](../../README.md) | [Backend Docs →](../backend.md)
+
+<!-- All ENUMs and CREATE TABLE statements for the ERP system -->
+
 all sql:
 ```sql
 -- ============================================================

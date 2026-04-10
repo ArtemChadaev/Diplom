@@ -1,51 +1,51 @@
-# Backend — Domain, Repository и Service
+# Backend — Domain, Repository & Service
 
-> Часть документации `backend.md`. Описывает ключевые модели, репозитории и сервисы.
+← [Back to Main README](../../README.md) | [Routing & Middleware →](./routing.md)
 
 ---
 
-## Слой Domain (`internal/domain/`)
+## Domain Layer (`internal/domain/`)
 
-Чистые Go-структуры **без тегов ORM или JSON** — только бизнес-поля.
+Pure Go structs **without ORM or JSON tags** — business fields only.
 
-### Ключевые модели
+### Key Models
 
 ```go
-// User — пользователь системы
+// User — system user
 type User struct {
     ID          int
-    Email       string    // основной идентификатор
+    Email       string    // primary identifier
     GoogleID    *string   // nullable (OAuth)
     TelegramID  *int64    // nullable (OAuth)
     Role        UserRole
-    NsPvAccess  bool      // допуск к НС/ПВ
-    UkepBound   bool      // привязана УКЭП
+    NsPvAccess  bool      // access to NS/PV (narcotic/psychotropic substances)
+    UkepBound   bool      // qualified e-signature bound
     IsBlocked   bool
     CreatedAt   time.Time
     UpdatedAt   time.Time
 }
 
-// Роли пользователей (ENUM user_role в PostgreSQL)
+// User roles (mirror of PostgreSQL ENUM user_role)
 RoleAdmin            UserRole = "admin"
 RoleQP               UserRole = "qp"
 RoleWarehouseManager UserRole = "warehouse_manager"
 RoleStorekeeper      UserRole = "storekeeper"
 RolePharmacist       UserRole = "pharmacist"
 
-// RefreshToken — активная сессия
+// RefreshToken — active session
 type RefreshToken struct {
     ID        uuid.UUID
     UserID    int
-    TokenHash string       // SHA-256 от raw token
+    TokenHash string       // SHA-256 of raw token
     ExpiresAt time.Time
     UserAgent string
     IPAddress string
     Metadata  map[string]any
     CreatedAt time.Time
-    RevokedAt *time.Time   // nil = активна
+    RevokedAt *time.Time   // nil = active
 }
 
-// EmployeeProfile — профиль сотрудника
+// EmployeeProfile — staff profile
 type EmployeeProfile struct {
     ID                 uint
     UserID             uint
@@ -61,13 +61,13 @@ type EmployeeProfile struct {
     DismissalDate      *time.Time
     MedicalBookScanURL string
     SpecialZoneAccess  bool
-    GDPTrainingHistory []GDPTrainingRecord  // JSONB массив
+    GDPTrainingHistory []GDPTrainingRecord  // JSONB array
 }
 ```
 
-### Ошибки (`errors.go`)
+### Errors (`errors.go`)
 
-Sentinel-ошибки (используются с `errors.Is`):
+Sentinel errors (used with `errors.Is`):
 
 ```go
 ErrUserNotFound            = "user not found"
@@ -81,96 +81,96 @@ ErrInsufficientPerms       = "insufficient permissions for this operation"
 ErrEmployeeProfileNotFound = "employee profile not found"
 ```
 
-`AppError` — структурированная ошибка с кодом, сообщением и `slog.Attr` для логирования.
+`AppError` — structured error with a code, message, and `slog.Attr` for logging.
 
 ---
 
-## Слой Repository (`internal/repository/`)
+## Repository Layer (`internal/repository/`)
 
-### Подключение к PostgreSQL (`postgres.go`)
+### PostgreSQL Connection (`postgres.go`)
 
 ```go
 // GORM + pgx driver
 db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
 ```
 
-### DAO-паттерн
+### DAO Pattern
 
-Между доменными моделями и GORM стоят **DAO** в `repository/dao/` с GORM-тегами:
+Domain models and GORM are separated by **DAO structs** in `repository/dao/` which carry GORM tags:
 
-- `UserDAO` → таблица `users`
-- `SessionDAO` → таблица `refresh_tokens`
-- `EmployeeProfileDAO` → таблица `employee_profiles`
+- `UserDAO` → table `users`
+- `SessionDAO` → table `refresh_tokens`
+- `EmployeeProfileDAO` → table `employee_profiles`
 
-Репозитории конвертируют `DAO ↔ domain` через методы `toDomain()` / `fromDomain()`.
+Repositories convert between `DAO ↔ domain` via `toDomain()` / `fromDomain()` methods.
 
 ### `UserRepository` (`user.go`)
 
-| Метод                | SQL / GORM операция                          |
-|----------------------|----------------------------------------------|
-| `FindByID`           | `SELECT * FROM users WHERE id = ?`            |
-| `FindByEmail`        | `WHERE email = ?`                             |
-| `FindByGoogleID`     | `WHERE google_id = ?`                         |
-| `FindByTelegramID`   | `WHERE telegram_id = ?`                       |
-| `IsEmailTaken`       | `COUNT(*) WHERE email = ?`                    |
-| `Create`             | `INSERT INTO users`                           |
-| `UpdateRole`         | `UPDATE users SET role = ? WHERE id = ?`      |
-| `LinkGoogle`         | `UPDATE users SET google_id = ?`              |
-| `LinkTelegram`       | `UPDATE users SET telegram_id = ?`            |
-| `SetNsPvAccess`      | `UPDATE users SET ns_pv_access = ?`           |
-| `SetBlocked`         | `UPDATE users SET is_blocked = ?`             |
-| `FindProfileByUserID`| JOIN users + employee_profiles                |
+| Method | SQL / GORM |
+|--------|-----------|
+| `FindByID` | `SELECT * FROM users WHERE id = ?` |
+| `FindByEmail` | `WHERE email = ?` |
+| `FindByGoogleID` | `WHERE google_id = ?` |
+| `FindByTelegramID` | `WHERE telegram_id = ?` |
+| `IsEmailTaken` | `COUNT(*) WHERE email = ?` |
+| `Create` | `INSERT INTO users` |
+| `UpdateRole` | `UPDATE users SET role = ? WHERE id = ?` |
+| `LinkGoogle` | `UPDATE users SET google_id = ?` |
+| `LinkTelegram` | `UPDATE users SET telegram_id = ?` |
+| `SetNsPvAccess` | `UPDATE users SET ns_pv_access = ?` |
+| `SetBlocked` | `UPDATE users SET is_blocked = ?` |
+| `FindProfileByUserID` | JOIN users + employee_profiles |
 
 ### `SessionRepository` (`session.go`)
 
-| Метод                | Описание                                        |
-|----------------------|-------------------------------------------------|
-| `Create`             | Сохранить новую сессию (refresh token hash)     |
-| `FindByID`           | Найти сессию по UUID                            |
-| `FindByTokenHash`    | Найти сессию по SHA-256 хэшу токена             |
-| `FindActiveByUserID` | Все не истёкшие и не отозванные сессии          |
-| `Revoke`             | SET revoked_at = NOW() WHERE id = ?             |
-| `RevokeAllForUser`   | SET revoked_at = NOW() WHERE user_id = ?        |
-| `DeleteExpired`      | DELETE WHERE expires_at < NOW() (cleanup job)   |
+| Method | Description |
+|--------|-------------|
+| `Create` | Store new session (refresh token hash) |
+| `FindByID` | Find session by UUID |
+| `FindByTokenHash` | Find session by SHA-256 token hash |
+| `FindActiveByUserID` | All non-expired, non-revoked sessions |
+| `Revoke` | `SET revoked_at = NOW() WHERE id = ?` |
+| `RevokeAllForUser` | `SET revoked_at = NOW() WHERE user_id = ?` |
+| `DeleteExpired` | `DELETE WHERE expires_at < NOW()` (cleanup job) |
 
 ---
 
-## Слой Service (`internal/service/`)
+## Service Layer (`internal/service/`)
 
 ### `Service` (`service.go`)
 
-Агрегатор сервисов. Создаётся один раз в `main.go`:
+Service aggregator. Instantiated once in `main.go`:
 
 ```go
 service.NewService(repos, jwtSecret, googleClientID)
-// Access Token TTL  = 15 минут
-// Refresh Token TTL = 15 дней
+// Access Token TTL  = 15 minutes
+// Refresh Token TTL = 15 days
 ```
 
 ### `AuthService` (`auth_service.go`)
 
-| Метод               | Описание                                                                  |
-|---------------------|---------------------------------------------------------------------------|
-| `LoginWithGoogle`   | idtoken.Validate → найти/создать user → issueTokens                       |
-| `LoginWithTelegram` | Заглушка (`panic("implement...")`), нужна верификация hash по bot token    |
-| `RefreshTokens`     | HashToken → FindByTokenHash → проверка theft → Revoke old → issueTokens  |
-| `RevokeSession`     | Проверка владельца или admin → sessionRepo.Revoke                         |
-| `AssignRole`        | Только admin → userRepo.UpdateRole                                        |
-| `SetBlocked`        | Только admin → userRepo.SetBlocked                                        |
+| Method | Description |
+|--------|-------------|
+| `LoginWithGoogle` | `idtoken.Validate` → find/create user → `issueTokens` |
+| `LoginWithTelegram` | **Stub** (`panic("implement...")`), needs bot token hash verification |
+| `RefreshTokens` | `HashToken` → `FindByTokenHash` → theft check → revoke old → `issueTokens` |
+| `RevokeSession` | Verify ownership or admin → `sessionRepo.Revoke` |
+| `AssignRole` | Admin only → `userRepo.UpdateRole` |
+| `SetBlocked` | Admin only → `userRepo.SetBlocked` |
 
-**Приватный метод `issueTokens`:**
-1. Проверяет что пользователь не заблокирован
-2. Генерирует raw refresh token (crypto/rand) + его SHA-256 хэш
-3. Создаёт запись `RefreshToken` в БД
-4. Генерирует JWT access token с `session_id = RefreshToken.ID`
+**Private `issueTokens`:**
+1. Verify user is not blocked
+2. Generate raw refresh token (`crypto/rand`) + its SHA-256 hash
+3. Create `RefreshToken` record in DB
+4. Generate JWT access token with `session_id = RefreshToken.ID`
 
 ### `TokenService` (`token_service.go`)
 
 - `GenerateAccessToken(user, sessionID)` → JWT HS256
 - `ParseAccessToken(token)` → `TokenClaims{UserID, Role, Email, SessionID}`
-- `GenerateRefreshToken()` → (rawToken, hashToken, error)
+- `GenerateRefreshToken()` → `(rawToken, hashToken, error)`
 - `HashToken(raw)` → SHA-256 hex
 
 ### `EmployeeProfileService` (`employee_profile_service.go`)
 
-CRUD операций профиля сотрудника. Проверяет права вызывающего (admin или сам пользователь).
+CRUD for employee profiles. Checks caller permissions (admin or the user themselves).

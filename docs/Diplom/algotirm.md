@@ -1,4 +1,6 @@
-# Алгоритмы работы системы ERP (Фармацевтика)
+# Business Algorithms — Pharmaceutical ERP (FEFO, VEN, ROP)
+
+← [Back to Main README](../../README.md) | [System Architecture →](architecture.md)
 
 Данный документ описывает общую логику работы системы и детальные алгоритмы ключевых бизнес-процессов.
 

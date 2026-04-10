@@ -1,4 +1,6 @@
-# Архитектура системы ERP (Фармацевтика)
+# System Architecture — Pharmaceutical ERP
+
+← [Back to Main README](../../README.md) | [Algorithms →](algotirm.md) | [Workflow →](../other/workflow.md)
 
 Данный документ описывает программную архитектуру, взаимосвязь модулей и структуру данных системы.
 

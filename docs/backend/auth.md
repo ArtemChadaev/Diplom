@@ -1,69 +1,68 @@
-# Backend — Аутентификация и сессии
+# Backend — Authentication & Sessions
 
-> Часть документации `backend.md`. Описывает схему токенов, защиту от кражи сессий и OAuth-потоки.
-
----
-
-## Схема токенов
-
-| Токен          | Хранение             | TTL     | Назначение                              |
-|----------------|----------------------|---------|-----------------------------------------|
-| Access Token   | В памяти клиента     | 15 мин  | Авторизация запросов (Bearer)           |
-| Refresh Token  | `httpOnly` Cookie    | 15 дней | Обновление access token                 |
-
-**Access Token** — JWT, подписанный `HS256` с `JWT_SECRET`. Payload содержит:
-- `user_id` — ID пользователя
-- `role` — роль (`UserRole`)
-- `email` — email
-- `session_id` — UUID сессии (refresh token) для отзыва
-
-**Refresh Token** — случайная строка (crypto/rand). В БД хранится **только хэш** (`SHA-256`), сам токен отдаётся клиенту в `httpOnly; Secure; SameSite=Strict` cookie по пути `/auth`.
+← [Back to Main README](../../README.md) | [Routing & Middleware →](./routing.md)
 
 ---
 
-## Роли пользователей
+## Token Scheme
 
-Роли определены как PostgreSQL ENUM `user_role`:
+| Token | Storage | TTL | Purpose |
+|-------|---------|-----|---------|
+| Access Token | Client memory | 15 min | API authorization (Bearer header) |
+| Refresh Token | `httpOnly` Cookie | 15 days | Access token renewal |
 
-| Роль               | Описание                                      |
-|--------------------|-----------------------------------------------|
-| `admin`            | Администратор системы                         |
-| `qp`               | Уполномоченное лицо (Qualified Person)        |
-| `warehouse_manager`| Начальник склада                              |
-| `storekeeper`      | Кладовщик                                     |
-| `pharmacist`       | Провизор (роль по умолчанию при создании)     |
+**Access Token** — JWT signed with `HS256` using `JWT_SECRET`. Payload contains:
+- `user_id` — user ID
+- `role` — user role (`UserRole`)
+- `email` — email address
+- `session_id` — refresh token session UUID (used for revocation)
 
----
-
-## Аутентификация через Google OAuth
-
-Поток:
-1. Клиент получает Google ID Token (через Google Sign-In SDK)
-2. `POST /auth/google` → backend валидирует ID Token через `idtoken.Validate`
-3. Если email найден в БД → выдаются токены
-4. Если email не найден → создаётся новый пользователь с ролью `pharmacist` и выдаются токены
+**Refresh Token** — random string (`crypto/rand`). Only its **SHA-256 hash** is stored in the DB. The raw token is sent to the client via `httpOnly; Secure; SameSite=Strict` cookie scoped to `/auth`.
 
 ---
 
-## Защита от кражи Refresh Token
+## User Roles
 
-При повторном использовании **уже отозванного** refresh token происходит **token theft detection**:
-- `sessionRepo.RevokeAllForUser()` — отзываются **все** активные сессии пользователя
-- Возвращается `401 Unauthorized`
+Roles are defined as a PostgreSQL ENUM `user_role`:
 
----
-
-## Ротация токенов
-
-При каждом `/auth/refresh`:
-1. Старая сессия помечается `revoked_at = NOW()`
-2. Создаётся новая сессия с новым refresh token
-3. Выдаётся новый access token
+| Role | Description |
+|------|-------------|
+| `admin` | System administrator |
+| `qp` | Qualified Person (QP) — authorizes batch release |
+| `warehouse_manager` | Warehouse manager |
+| `storekeeper` | Storekeeper |
+| `pharmacist` | Pharmacist (default role on user creation) |
 
 ---
 
-## OTP-коды (Valkey)
+## Google OAuth Flow
 
-OTP-коды **не хранятся в PostgreSQL** — только в Valkey.
-- Ключ: `otp:user:<user_id>` (Hash), TTL 600 сек
-- Подробности: [valkey-cache.md](../valkey-cache.md)
+1. Client obtains a Google ID Token (via Google Sign-In SDK)
+2. `POST /auth/google` → backend validates the ID Token via `idtoken.Validate`
+3. If email exists in DB → issue tokens
+4. If email not found → create new user with role `pharmacist` → issue tokens
+
+---
+
+## Refresh Token Theft Detection
+
+When a **revoked** refresh token is reused:
+- `sessionRepo.RevokeAllForUser()` — **all** active sessions for the user are revoked
+- Returns `401 Unauthorized`
+
+---
+
+## Token Rotation
+
+On every `/auth/refresh`:
+1. Old session is marked `revoked_at = NOW()`
+2. New session is created with a new refresh token
+3. New access token is issued
+
+---
+
+## OTP Codes (Valkey)
+
+OTP codes are stored **only in Valkey**, never in PostgreSQL.
+- Key: `otp:user:<user_id>` (Hash), TTL 600 sec
+- Details: [../../docs/valkey-cache.md](../valkey-cache.md)

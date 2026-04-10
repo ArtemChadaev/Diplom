@@ -1,91 +1,105 @@
-# Backend — Архитектура и стек
+# Backend — Architecture & Onion Layers
 
-> Часть документации `backend.md`. Описывает онион-архитектуру, технологии и точку входа.
-
----
-
-## Стек технологий
-
-| Компонент          | Библиотека / Инструмент                    | Версия  |
-|--------------------|---------------------------------------------|---------| 
-| HTTP-роутер        | `github.com/go-chi/chi/v5`                  | v5.1.0  |
-| ORM / БД-доступ    | `gorm.io/gorm` + `gorm.io/driver/postgres`  | v1.31.1 |
-| JWT               | `github.com/golang-jwt/jwt/v5`              | v5.3.1  |
-| UUID               | `github.com/google/uuid`                    | v1.6.0  |
-| Конфигурация       | `github.com/ilyakaznacheev/cleanenv`         | v1.5.0  |
-| Google OAuth       | `google.golang.org/api/idtoken`             | —       |
-| Логирование        | stdlib `log/slog`                           | —       |
-| Миграции БД        | SQL-файлы (`migrate/`), `golang-migrate`    | —       |
-| СУБД               | PostgreSQL (pgx/v5 под капотом GORM)        | —       |
+← [Back to Main README](../../README.md) | [Setup & Local Run →](./README.md)
 
 ---
 
-## Луковая архитектура (Onion Architecture)
+## Onion Architecture
 
-Бэкенд разбит на 4 концентрических слоя. Зависимости идут только **снаружи внутрь**: обработчики зависят от сервисов, сервисы — от репозиториев (через интерфейсы домена), ядро домена не зависит ни от чего.
+The backend is split into 4 concentric layers. Dependencies flow **inward only**: handlers depend on services, services depend on repositories via domain interfaces, and the domain core depends on nothing.
 
 ```
 ┌──────────────────────────────────────────────────────────────┐
 │  Handler  (internal/handler)                                  │
-│   HTTP-обработчики, DTO запросов/ответов, middleware           │
+│   HTTP handlers, request/response DTOs, middleware            │
 │                                                               │
 │  ┌────────────────────────────────────────────────────────┐   │
 │  │  Service  (internal/service)                           │   │
-│  │   Бизнес-логика, оркестрация репозиториев              │   │
+│  │   Business logic, repository orchestration             │   │
 │  │                                                         │   │
 │  │  ┌──────────────────────────────────────────────────┐  │   │
 │  │  │  Repository  (internal/repository)               │  │   │
-│  │  │   GORM-реализации, DAO-объекты, SQL-запросы      │  │   │
+│  │  │   GORM implementations, DAO objects, SQL queries │  │   │
 │  │  │                                                   │  │   │
 │  │  │  ┌────────────────────────────────────────────┐  │  │   │
 │  │  │  │  Domain  (internal/domain)                 │  │  │   │
-│  │  │  │   Чистые модели, интерфейсы, ошибки        │  │  │   │
+│  │  │  │   Pure models, interfaces, errors          │  │  │   │
 │  │  │  └────────────────────────────────────────────┘  │  │   │
 │  │  └──────────────────────────────────────────────────┘  │   │
 │  └────────────────────────────────────────────────────────┘   │
 └──────────────────────────────────────────────────────────────┘
 ```
 
-### Принцип инверсии зависимостей (DI)
+### Layer Reference
 
-Все слои общаются через **интерфейсы**, определённые в `internal/domain`:
+| Layer | Package | Tags | Responsibility |
+|-------|---------|------|----------------|
+| **Handler (HTTP)** | `internal/handler` | — | Parse request, validate, call service |
+| **DTO** | `internal/handler/dto` | `json`, `validate` | API request/response shapes |
+| **Domain** | `internal/domain` | *(none)* | Pure Go structs, business interfaces |
+| **Service** | `internal/service` | — | Business logic, orchestration |
+| **Repository** | `internal/repository` | — | Interface implementations |
+| **DAO** | `internal/repository/dao` | `gorm` | DB table mirrors for GORM |
 
-- `domain.UserRepository` — интерфейс для работы с пользователями
-- `domain.SessionRepository` — интерфейс для работы с сессиями (refresh-токены)
-- `domain.AuthService` — интерфейс бизнес-логики аутентификации
-- `domain.TokenService` — интерфейс для создания/валидации JWT
-- `domain.EmployeeProfileService` / `EmployeeProfileRepository` — интерфейсы профилей
-
-Конкретные реализации находятся в `repository/` и `service/`. Это позволяет мокировать их в тестах.
-
----
-
-## Точка входа (`cmd/main.go`)
-
-Запускает приложение в строгом порядке:
-
-1. **Логгер** (`internal/pkg/logger`) — `slog.Logger` с контекстом запроса
-2. **Конфигурация** (`config.Load()`) — `cleanenv` читает `.env` → env → завершает с ошибкой если обязательные переменные отсутствуют
-3. **Graceful shutdown** — `signal.NotifyContext` перехватывает `SIGINT`/`SIGTERM`
-4. **База данных** — `repository.NewPostgresDB()` → GORM + pgx
-5. **Слои** — `Repository → Service → Handler` (инъекция зависимостей вручную)
-6. **HTTP-сервер** — `domain.Server` (обёртка над `net/http.Server`)
-7. **Bootstrap** — `bootstrap.SeedAdmin()` создаёт первого admin-пользователя если его нет
+> **Rule:** Domain models know nothing about JSON or GORM. All tags live exclusively in DTO or DAO layers.
 
 ---
 
-## Конфигурация (`internal/config/config.go`)
+## Dependency Injection
 
-Читается через `cleanenv`. Все env-переменные:
+All layers communicate through **interfaces** defined in `internal/domain`:
 
-| Переменная         | Обязательна | Описание                                |
-|--------------------|:-----------:|-----------------------------------------|
-| `PORT`             | нет (8080)  | Порт HTTP-сервера                       |
-| `DB_HOST`          | **да**      | Хост PostgreSQL                         |
-| `DB_PORT`          | нет (5432)  | Порт PostgreSQL                         |
-| `DB_USER`          | **да**      | Пользователь БД                         |
-| `DB_NAME`          | **да**      | Имя БД                                  |
-| `DB_PASSWORD`      | **да**      | Пароль БД                               |
-| `JWT_SECRET`       | **да**      | Секрет для подписи JWT                  |
-| `ADMIN_EMAIL`      | **да**      | Email первого администратора            |
-| `GOOGLE_CLIENT_ID` | нет         | Client ID для Google OAuth              |
+- `domain.UserRepository` — user data access
+- `domain.SessionRepository` — refresh token / session management
+- `domain.AuthService` — authentication business logic
+- `domain.TokenService` — JWT creation and validation
+- `domain.EmployeeProfileService` / `EmployeeProfileRepository` — employee profiles
+
+Concrete implementations live in `repository/` and `service/`. This allows full mocking in tests.
+
+---
+
+## Entry Point (`cmd/main.go`)
+
+Application starts in strict order:
+
+1. **Logger** (`internal/pkg/logger`) — `slog.Logger` with request context enrichment
+2. **Config** (`config.Load()`) — `cleanenv` reads `.env` → env vars → exits on missing required vars
+3. **Graceful shutdown** — `signal.NotifyContext` catches `SIGINT` / `SIGTERM`
+4. **Database** — `repository.NewPostgresDB()` → GORM + pgx
+5. **Layers** — `Repository → Service → Handler` (manual dependency injection)
+6. **HTTP Server** — `domain.Server` (wrapper over `net/http.Server`)
+7. **Bootstrap** — `bootstrap.SeedAdmin()` creates the first admin user if not present
+
+---
+
+## System Architecture Diagram (Frontend ↔ Backend)
+
+```mermaid
+graph LR
+    subgraph "Frontend (Next.js 16)"
+        A[Client Components] -- Interaction --> B[React State / Zod]
+        C[Server Components] -- Initial Data --> D[Next.js Fetch Cache]
+    end
+
+    subgraph "Communication"
+        API[REST API / JSON]
+        Auth[JWT + HttpOnly Cookie]
+    end
+
+    subgraph "Backend (Go 1.23+)"
+        H[Chi Router / Middleware] --> S[Service Layer]
+        S --> R[Repository Layer — GORM/PostgreSQL]
+        S --> V[Valkey Cache — OTP / Rate Limit]
+    end
+
+    A <--> API
+    C <--> API
+    B <--> Auth
+```
+
+**Key principles:**
+1. **Stateless API** — backend holds no in-memory session state; uses JWT + PostgreSQL/Valkey
+2. **Onion Architecture** — strict layer separation (see above)
+3. **App Router (Next.js)** — Server Components for initial data + SEO; Client Components for interactive forms
+4. **Shared DTO** — Go backend structs correspond to TypeScript interfaces on the frontend

@@ -1,33 +1,41 @@
-# Backend — Логирование
+# Backend — Logging
 
-> Часть документации `backend.md`. Описывает систему структурированного логирования.
+← [Back to Main README](../../README.md) | [Architecture →](./architecture.md)
 
 ---
 
-## Система логирования
+## Logging System
 
-Используется stdlib `log/slog` со структурированным выводом.
+Uses stdlib `log/slog` with structured output via a custom context-aware wrapper.
 
-### Компоненты
+> **Critical Rule:** Never use `fmt.Println`, `fmt.Printf`, or any `fmt` print functions for logs or debug output.
+> Always use the project logger:
+> ```go
+> log := logger.FromContext(ctx)
+> log.Info("...", "key", value)
+> ```
+> Name the logger variable `log`, not `logger`.
 
-- `internal/pkg/logger` — обёртка:
-  - Настройка формата: `APP_ENV=production` → JSON, иначе text
-  - Контекстное обогащение: `logger.WithUserID(ctx, id)`
-- `logger.FromContext(ctx)` — извлекает логгер из контекста (создаётся в `AuthRequired` middleware)
-- Кастомный `loggingMiddleware` в `Handler` логирует каждый запрос:
-  - метод, путь, статус, latency, request_id
+### Components
 
-### Уровни логов
+- `internal/pkg/logger` — wrapper:
+  - Format selection: `APP_ENV=production` → JSON output, otherwise text
+  - Context enrichment: `logger.WithUserID(ctx, id)`
+- `logger.FromContext(ctx)` — extracts logger from context (injected by `AuthRequired` middleware)
+- Custom `loggingMiddleware` in `Handler` logs every request:
+  - method, path, status, latency, request_id
 
-| Событие                              | Уровень |
-|--------------------------------------|---------|
-| Отсутствие `.env` файла              | `WARN`  |
-| Успешный старт сервера               | `INFO`  |
-| Входящий HTTP-запрос                 | `INFO`  |
-| Ошибки бизнес-логики (AppError)      | `ERROR` |
-| Критические ошибки (panic recovery)  | `ERROR` |
+### Log Levels
 
-### Пример лога запроса
+| Event | Level |
+|-------|-------|
+| Missing `.env` file | `WARN` |
+| Successful server start | `INFO` |
+| Incoming HTTP request | `INFO` |
+| Business logic errors (`AppError`) | `ERROR` |
+| Critical errors (panic recovery) | `ERROR` |
+
+### Request Log Example
 
 ```json
 {
