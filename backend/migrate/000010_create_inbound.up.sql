@@ -1,33 +1,36 @@
 -- ============================================================
 -- 000010_create_inbound.up.sql
--- Inbound receipts + positions — new tables for acceptance workflow.
+-- Inbound receipts + items.
 -- ============================================================
 
-CREATE TABLE inbound_receipts (
+CREATE TYPE inbound_status AS ENUM ('draft', 'received', 'completed', 'cancelled');
+
+CREATE TABLE inbound_receivings (
     id                   UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    supplier_id          UUID NOT NULL REFERENCES suppliers(id),
-    purchase_type        purchase_type NOT NULL,
     invoice_number       VARCHAR(100) NOT NULL,
-    country_of_origin    VARCHAR(3) NOT NULL,          -- ISO country code
-    manufacturer         VARCHAR(255) NOT NULL,
-    vat_rate             SMALLINT NOT NULL,             -- 0, 10, 20
-    is_jnvlp_controlled  BOOLEAN NOT NULL DEFAULT false,
-    jnvlp_markup         NUMERIC(5,2),
-    -- Acceptance protocol
-    qp_user_id           INT REFERENCES users(id),
-    inspection_date      DATE,
-    inspection_result    VARCHAR(20),                   -- 'approved' | 'rejected'
-    inspection_notes     TEXT,
-    -- Attachments
-    photo_urls           TEXT[] DEFAULT '{}',           -- photos of damaged packaging
-    digital_signature_id UUID,                          -- detached УКЭП signature reference
-    -- Meta
-    created_by           INT NOT NULL REFERENCES users(id),
-    created_at           TIMESTAMPTZ DEFAULT NOW()
+    invoice_date         DATE NOT NULL,
+    supplier_id          UUID NOT NULL REFERENCES suppliers(id),
+    status               inbound_status NOT NULL DEFAULT 'draft',
+    total_amount         NUMERIC(10, 2) NOT NULL DEFAULT 0,
+    vat_amount           NUMERIC(10, 2) NOT NULL DEFAULT 0,
+    notes                TEXT,
+    received_by          INT, 
+    created_at           TIMESTAMPTZ DEFAULT NOW(),
+    updated_at           TIMESTAMPTZ DEFAULT NOW()
 );
 
-CREATE TABLE inbound_positions (
-    id         UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    inbound_id UUID NOT NULL REFERENCES inbound_receipts(id) ON DELETE CASCADE,
-    batch_id   UUID NOT NULL REFERENCES batches(id)
+CREATE TABLE inbound_items (
+    id               UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    inbound_id       UUID NOT NULL REFERENCES inbound_receivings(id) ON DELETE CASCADE,
+    product_id       UUID NOT NULL REFERENCES products(id),
+    batch_number     VARCHAR(100) NOT NULL,
+    expiration_date  DATE NOT NULL,
+    quantity         INT NOT NULL,
+    price_netto      NUMERIC(10, 2) NOT NULL,
+    vat_rate         NUMERIC(5, 2) NOT NULL,
+    price_brutto     NUMERIC(10, 2) NOT NULL,
+    cert_number      VARCHAR(255),
+    zone_id          UUID NOT NULL REFERENCES warehouse_zones(id),
+    created_at       TIMESTAMPTZ DEFAULT NOW(),
+    updated_at       TIMESTAMPTZ DEFAULT NOW()
 );

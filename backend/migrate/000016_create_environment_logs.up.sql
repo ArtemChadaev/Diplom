@@ -19,6 +19,6 @@ CREATE TABLE environment_logs (
 -- Вместо UNIQUE внутри CREATE TABLE используем UNIQUE INDEX
 -- Это позволяет использовать приведение к DATE
 CREATE UNIQUE INDEX idx_env_logs_unique_shift
-    ON environment_logs (zone_id, CAST(recorded_at AS DATE), shift);
+    ON environment_logs (zone_id, CAST(recorded_at AT TIME ZONE 'UTC' AS DATE), shift);
 
 CREATE INDEX idx_env_logs_zone_date ON environment_logs(zone_id, recorded_at);
