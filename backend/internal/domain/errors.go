@@ -23,6 +23,16 @@ var (
 	ErrOTPNotFound    = errors.New("no active OTP code found")
 	ErrOTPMaxAttempts = errors.New("max OTP attempts reached")
 	ErrOTPInvalid     = errors.New("invalid OTP code")
+
+	ErrConflict        = errors.New("conflict: resource already exists")
+	ErrProductNotFound  = errors.New("product not found")
+	ErrSupplierNotFound = errors.New("supplier not found")
+	ErrZoneNotFound     = errors.New("zone not found")
+	ErrInboundNotFound  = errors.New("inbound receiving not found")
+	ErrOrderNotFound            = errors.New("order not found")
+	ErrInventorySessionNotFound = errors.New("inventory session not found")
+	ErrClaimNotFound            = errors.New("claim not found")
+	ErrBatchNotFound            = errors.New("batch not found")
 )
 
 // AppError is a structured application error that carries

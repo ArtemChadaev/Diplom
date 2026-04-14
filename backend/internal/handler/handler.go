@@ -53,6 +53,11 @@ func (h *Handler) Router() chi.Router {
 	r.Use(h_middleware.InjectIPAddress) // Записывает IP клиента в контекст (используется аудит-логом)
 	r.Use(h_middleware.RequestLogger)
 	
+	// Healthcheck
+	r.Get("/health", func(w http.ResponseWriter, r *http.Request) {
+		writeJSON(w, http.StatusOK, map[string]string{"status": "ok"})
+	})
+	
 	// Public Auth Routes (OAuth only + OTP)
 	r.Route("/auth", func(r chi.Router) {
 		r.Post("/google", h.googleLogin)
@@ -94,6 +99,98 @@ func (h *Handler) Router() chi.Router {
 			})
 		})
 
+		// Reference data
+		r.Route("/ref", func(r chi.Router) {
+			r.Get("/countries", h.listCountries)
+			r.Get("/atc", h.searchATC)
+		})
+
+		// Product management
+		r.Route("/products", func(r chi.Router) {
+			r.Get("/", h.listProducts)
+			r.Get("/{id}", h.getProduct)
+			r.Post("/", h.createProduct)
+			r.Patch("/{id}", h.patchProduct)
+			r.Delete("/{id}", h.deleteProduct)
+		})
+
+		// Supplier management
+		r.Route("/suppliers", func(r chi.Router) {
+			r.Get("/", h.listSuppliers)
+			r.Get("/{id}", h.getSupplier)
+			r.Post("/", h.createSupplier)
+			r.Patch("/{id}", h.patchSupplier)
+			r.Delete("/{id}", h.deleteSupplier)
+		})
+
+		// Warehouse zoning
+		r.Route("/zones", func(r chi.Router) {
+			r.Get("/", h.listZones)
+			r.Get("/{id}", h.getZone)
+			r.Post("/", h.createZone)
+			r.Patch("/{id}", h.patchZone)
+			r.Delete("/{id}", h.deleteZone)
+		})
+
+		// Inbound receiving
+		r.Route("/inbound", func(r chi.Router) {
+			r.Get("/", h.listInbounds)
+			r.Get("/{id}", h.getInbound)
+			r.Post("/", h.createInbound)
+			r.Patch("/{id}/status", h.updateInboundStatus)
+			r.Delete("/{id}", h.deleteInbound)
+		})
+
+		// Environment logs
+		r.Route("/env", func(r chi.Router) {
+			r.Get("/logs", h.listEnvLogs)
+			r.Post("/logs", h.recordEnvLogs)
+		})
+
+		// Orders
+		r.Route("/orders", func(r chi.Router) {
+			r.Get("/", h.listOrders)
+			r.Get("/{id}", h.getOrder)
+			r.Post("/", h.createOrder)
+			r.Patch("/{id}/status", h.updateOrderStatus)
+		})
+
+		// Inventory
+		r.Route("/inventory", func(r chi.Router) {
+			r.Get("/", h.listInventorySessions)
+			r.Get("/{id}", h.getInventorySession)
+			r.Post("/", h.startInventorySession)
+			r.Post("/{id}/count", h.submitInventoryCount)
+			r.Post("/{id}/finish", h.finishInventorySession)
+		})
+
+		// Claims
+		r.Route("/claims", func(r chi.Router) {
+			r.Get("/", h.listClaims)
+			r.Get("/{id}", h.getClaim)
+			r.Post("/", h.createClaim)
+			r.Patch("/{id}/status", h.updateClaimStatus)
+		})
+
+		// System Settings
+		r.Route("/settings", func(r chi.Router) {
+			r.Get("/", h.listSettings)
+			r.Patch("/{key}", h.updateSetting)
+		})
+
+		// Batches (Standing stock)
+		r.Route("/batches", func(r chi.Router) {
+			r.Get("/", h.listBatches)
+			r.Get("/{id}", h.getBatch)
+			r.Patch("/{id}/status", h.updateBatchStatus)
+			r.Post("/{id}/transfer", h.transferBatch)
+		})
+
+		// Recalled (Blocked series)
+		r.Route("/recalled", func(r chi.Router) {
+			r.Get("/", h.listRecalled)
+			r.Get("/check/{serial}", h.checkBatch)
+		})
 	})
 
 	return r

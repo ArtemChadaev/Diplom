@@ -1,8 +1,621 @@
 definitions:
+  github_com_ima_diplom-backend_internal_domain.BatchStatus:
+    enum:
+    - quarantine
+    - available
+    - rejected
+    - blocked
+    type: string
+    x-enum-varnames:
+    - BatchStatusQuarantine
+    - BatchStatusAvailable
+    - BatchStatusRejected
+    - BatchStatusBlocked
+  github_com_ima_diplom-backend_internal_domain.ClaimStatus:
+    enum:
+    - new
+    - review
+    - resolved
+    - rejected
+    type: string
+    x-enum-varnames:
+    - ClaimStatusNew
+    - ClaimStatusUnderReview
+    - ClaimStatusResolved
+    - ClaimStatusRejected
+  github_com_ima_diplom-backend_internal_domain.InboundStatus:
+    enum:
+    - draft
+    - received
+    - completed
+    - cancelled
+    type: string
+    x-enum-comments:
+      InboundStatusCompleted: Items put away, stock updated
+      InboundStatusDraft: Plan created
+      InboundStatusReceived: Physical arrival, verification in progress
+    x-enum-descriptions:
+    - Plan created
+    - Physical arrival, verification in progress
+    - Items put away, stock updated
+    - ""
+    x-enum-varnames:
+    - InboundStatusDraft
+    - InboundStatusReceived
+    - InboundStatusCompleted
+    - InboundStatusCancelled
+  github_com_ima_diplom-backend_internal_domain.InventoryStatus:
+    enum:
+    - draft
+    - active
+    - completed
+    type: string
+    x-enum-varnames:
+    - InventoryStatusDraft
+    - InventoryStatusActive
+    - InventoryStatusCompleted
+  github_com_ima_diplom-backend_internal_domain.OrderStatus:
+    enum:
+    - new
+    - assembling
+    - assembled
+    - shipped
+    - cancelled
+    type: string
+    x-enum-comments:
+      OrderStatusAssembled: Ready for shipment
+      OrderStatusAssembling: Storekeeper picking items
+      OrderStatusNew: Order created
+      OrderStatusShipped: Left warehouse
+    x-enum-descriptions:
+    - Order created
+    - Storekeeper picking items
+    - Ready for shipment
+    - Left warehouse
+    - ""
+    x-enum-varnames:
+    - OrderStatusNew
+    - OrderStatusAssembling
+    - OrderStatusAssembled
+    - OrderStatusShipped
+    - OrderStatusCancelled
+  github_com_ima_diplom-backend_internal_domain.ZoneType:
+    enum:
+    - ambient
+    - cool
+    - cold
+    - narcotic
+    - quarantine
+    type: string
+    x-enum-comments:
+      ZoneTypeAmbient: 15-25°C
+      ZoneTypeColdStorage: 2-8°C
+      ZoneTypeCool: 8-15°C
+      ZoneTypeNarcotic: Locked storage
+      ZoneTypeQuarantine: Quality control
+    x-enum-descriptions:
+    - 15-25°C
+    - 8-15°C
+    - 2-8°C
+    - Locked storage
+    - Quality control
+    x-enum-varnames:
+    - ZoneTypeAmbient
+    - ZoneTypeCool
+    - ZoneTypeColdStorage
+    - ZoneTypeNarcotic
+    - ZoneTypeQuarantine
+  github_com_ima_diplom-backend_internal_handler_dto.ATCCodeResponse:
+    properties:
+      code:
+        example: J01CA04
+        type: string
+      name_ru:
+        example: Амоксициллин
+        type: string
+    type: object
+  github_com_ima_diplom-backend_internal_handler_dto.BatchListResponse:
+    properties:
+      batches:
+        items:
+          $ref: '#/definitions/github_com_ima_diplom-backend_internal_handler_dto.BatchResponse'
+        type: array
+      total:
+        type: integer
+    type: object
+  github_com_ima_diplom-backend_internal_handler_dto.BatchResponse:
+    properties:
+      expiry_date:
+        type: string
+      id:
+        type: string
+      manufacture_date:
+        type: string
+      product_id:
+        type: string
+      quantity:
+        type: integer
+      serial_number:
+        type: string
+      status:
+        $ref: '#/definitions/github_com_ima_diplom-backend_internal_domain.BatchStatus'
+      updated_at:
+        type: string
+      zone_id:
+        type: string
+    type: object
+  github_com_ima_diplom-backend_internal_handler_dto.ClaimListResponse:
+    properties:
+      claims:
+        items:
+          $ref: '#/definitions/github_com_ima_diplom-backend_internal_handler_dto.ClaimResponse'
+        type: array
+      total:
+        type: integer
+    type: object
+  github_com_ima_diplom-backend_internal_handler_dto.ClaimResponse:
+    properties:
+      created_at:
+        type: string
+      created_by:
+        type: integer
+      description:
+        type: string
+      id:
+        type: string
+      inbound_id:
+        type: string
+      order_id:
+        type: string
+      status:
+        $ref: '#/definitions/github_com_ima_diplom-backend_internal_domain.ClaimStatus'
+      title:
+        type: string
+      updated_at:
+        type: string
+    type: object
+  github_com_ima_diplom-backend_internal_handler_dto.CountItem:
+    properties:
+      batch_number:
+        type: string
+      physical_qty:
+        type: integer
+      product_id:
+        type: string
+      reason:
+        type: string
+      system_qty:
+        type: integer
+    required:
+    - batch_number
+    - product_id
+    type: object
+  github_com_ima_diplom-backend_internal_handler_dto.CountryResponse:
+    properties:
+      code:
+        example: RUS
+        type: string
+      name_ru:
+        example: РФ
+        type: string
+    type: object
+  github_com_ima_diplom-backend_internal_handler_dto.CreateClaimRequest:
+    properties:
+      description:
+        type: string
+      inbound_id:
+        type: string
+      order_id:
+        type: string
+      title:
+        type: string
+    required:
+    - description
+    - title
+    type: object
+  github_com_ima_diplom-backend_internal_handler_dto.CreateInboundItem:
+    properties:
+      batch_number:
+        type: string
+      cert_number:
+        type: string
+      expiration_date:
+        type: string
+      price_brutto:
+        type: number
+      price_netto:
+        type: number
+      product_id:
+        type: string
+      quantity:
+        minimum: 1
+        type: integer
+      vat_rate:
+        type: number
+      zone_id:
+        type: string
+    required:
+    - batch_number
+    - expiration_date
+    - price_netto
+    - product_id
+    - quantity
+    - zone_id
+    type: object
+  github_com_ima_diplom-backend_internal_handler_dto.CreateInboundRequest:
+    properties:
+      invoice_date:
+        type: string
+      invoice_number:
+        type: string
+      items:
+        items:
+          $ref: '#/definitions/github_com_ima_diplom-backend_internal_handler_dto.CreateInboundItem'
+        type: array
+      notes:
+        type: string
+      supplier_id:
+        type: string
+    required:
+    - invoice_date
+    - invoice_number
+    - items
+    - supplier_id
+    type: object
+  github_com_ima_diplom-backend_internal_handler_dto.CreateOrderItem:
+    properties:
+      product_id:
+        type: string
+      quantity:
+        minimum: 1
+        type: integer
+    required:
+    - product_id
+    - quantity
+    type: object
+  github_com_ima_diplom-backend_internal_handler_dto.CreateOrderRequest:
+    properties:
+      customer_name:
+        type: string
+      items:
+        items:
+          $ref: '#/definitions/github_com_ima_diplom-backend_internal_handler_dto.CreateOrderItem'
+        type: array
+      priority:
+        maximum: 3
+        minimum: 1
+        type: integer
+    required:
+    - customer_name
+    - items
+    type: object
+  github_com_ima_diplom-backend_internal_handler_dto.CreateProductRequest:
+    properties:
+      atc_code:
+        type: string
+      dosage_form:
+        type: string
+      generic_name:
+        type: string
+      is_jnvlp:
+        type: boolean
+      manufacturer_id:
+        type: string
+      name:
+        type: string
+      package_size:
+        minimum: 1
+        type: integer
+      photo_url:
+        type: string
+      sku:
+        type: string
+      storage_conditions:
+        type: string
+      strength:
+        type: string
+    required:
+    - atc_code
+    - dosage_form
+    - generic_name
+    - name
+    - package_size
+    - sku
+    - strength
+    type: object
+  github_com_ima_diplom-backend_internal_handler_dto.CreateSupplierRequest:
+    properties:
+      address:
+        type: string
+      contact_name:
+        type: string
+      email:
+        type: string
+      inn:
+        type: string
+      kpp:
+        type: string
+      name:
+        type: string
+      phone:
+        type: string
+    required:
+    - inn
+    - kpp
+    - name
+    type: object
+  github_com_ima_diplom-backend_internal_handler_dto.CreateZoneRequest:
+    properties:
+      capacity:
+        type: integer
+      description:
+        type: string
+      name:
+        type: string
+      temp_max:
+        type: number
+      temp_min:
+        type: number
+      type:
+        allOf:
+        - $ref: '#/definitions/github_com_ima_diplom-backend_internal_domain.ZoneType'
+        enum:
+        - ambient
+        - cool
+        - cold
+        - narcotic
+        - quarantine
+    required:
+    - name
+    - type
+    type: object
+  github_com_ima_diplom-backend_internal_handler_dto.EnvLogListResponse:
+    properties:
+      logs:
+        items:
+          $ref: '#/definitions/github_com_ima_diplom-backend_internal_handler_dto.EnvLogResponse'
+        type: array
+      total:
+        type: integer
+    type: object
+  github_com_ima_diplom-backend_internal_handler_dto.EnvLogResponse:
+    properties:
+      humidity:
+        type: number
+      id:
+        type: string
+      notes:
+        type: string
+      recorded_at:
+        type: string
+      recorded_by:
+        type: integer
+      temperature:
+        type: number
+      zone_id:
+        type: string
+    type: object
   github_com_ima_diplom-backend_internal_handler_dto.ErrorResponse:
     properties:
       error:
         type: string
+    type: object
+  github_com_ima_diplom-backend_internal_handler_dto.InboundItemResponse:
+    properties:
+      batch_number:
+        type: string
+      cert_number:
+        type: string
+      expiration_date:
+        type: string
+      id:
+        type: string
+      price_brutto:
+        type: number
+      price_netto:
+        type: number
+      product_id:
+        type: string
+      quantity:
+        type: integer
+      vat_rate:
+        type: number
+      zone_id:
+        type: string
+    type: object
+  github_com_ima_diplom-backend_internal_handler_dto.InboundListResponse:
+    properties:
+      inbounds:
+        items:
+          $ref: '#/definitions/github_com_ima_diplom-backend_internal_handler_dto.InboundResponse'
+        type: array
+      total:
+        type: integer
+    type: object
+  github_com_ima_diplom-backend_internal_handler_dto.InboundResponse:
+    properties:
+      created_at:
+        type: string
+      id:
+        type: string
+      invoice_date:
+        type: string
+      invoice_number:
+        type: string
+      items:
+        items:
+          $ref: '#/definitions/github_com_ima_diplom-backend_internal_handler_dto.InboundItemResponse'
+        type: array
+      notes:
+        type: string
+      received_by:
+        type: integer
+      status:
+        $ref: '#/definitions/github_com_ima_diplom-backend_internal_domain.InboundStatus'
+      supplier_id:
+        type: string
+      total_amount:
+        type: number
+      updated_at:
+        type: string
+      vat_amount:
+        type: number
+    type: object
+  github_com_ima_diplom-backend_internal_handler_dto.InventoryItemResponse:
+    properties:
+      batch_number:
+        type: string
+      id:
+        type: string
+      physical_qty:
+        type: integer
+      product_id:
+        type: string
+      reason:
+        type: string
+      system_qty:
+        type: integer
+    type: object
+  github_com_ima_diplom-backend_internal_handler_dto.InventorySessionResponse:
+    properties:
+      completed_at:
+        type: string
+      id:
+        type: string
+      items:
+        items:
+          $ref: '#/definitions/github_com_ima_diplom-backend_internal_handler_dto.InventoryItemResponse'
+        type: array
+      started_at:
+        type: string
+      started_by:
+        type: integer
+      status:
+        $ref: '#/definitions/github_com_ima_diplom-backend_internal_domain.InventoryStatus'
+      zone_id:
+        type: string
+    type: object
+  github_com_ima_diplom-backend_internal_handler_dto.OrderItemResponse:
+    properties:
+      id:
+        type: string
+      picked_qty:
+        type: integer
+      product_id:
+        type: string
+      quantity:
+        type: integer
+    type: object
+  github_com_ima_diplom-backend_internal_handler_dto.OrderListResponse:
+    properties:
+      orders:
+        items:
+          $ref: '#/definitions/github_com_ima_diplom-backend_internal_handler_dto.OrderResponse'
+        type: array
+      total:
+        type: integer
+    type: object
+  github_com_ima_diplom-backend_internal_handler_dto.OrderResponse:
+    properties:
+      created_at:
+        type: string
+      created_by:
+        type: integer
+      customer_name:
+        type: string
+      id:
+        type: string
+      items:
+        items:
+          $ref: '#/definitions/github_com_ima_diplom-backend_internal_handler_dto.OrderItemResponse'
+        type: array
+      order_number:
+        type: string
+      priority:
+        type: integer
+      status:
+        $ref: '#/definitions/github_com_ima_diplom-backend_internal_domain.OrderStatus'
+      updated_at:
+        type: string
+    type: object
+  github_com_ima_diplom-backend_internal_handler_dto.ProductListResponse:
+    properties:
+      products:
+        items:
+          $ref: '#/definitions/github_com_ima_diplom-backend_internal_handler_dto.ProductResponse'
+        type: array
+      total:
+        type: integer
+    type: object
+  github_com_ima_diplom-backend_internal_handler_dto.ProductResponse:
+    properties:
+      atc_code:
+        type: string
+      created_at:
+        type: string
+      deleted_at:
+        type: string
+      dosage_form:
+        type: string
+      generic_name:
+        type: string
+      id:
+        type: string
+      is_jnvlp:
+        type: boolean
+      manufacturer_id:
+        type: string
+      name:
+        type: string
+      package_size:
+        type: integer
+      photo_url:
+        type: string
+      sku:
+        type: string
+      storage_conditions:
+        type: string
+      strength:
+        type: string
+      updated_at:
+        type: string
+    type: object
+  github_com_ima_diplom-backend_internal_handler_dto.RecalledBatchResponse:
+    properties:
+      id:
+        type: string
+      issued_at:
+        type: string
+      product_name:
+        type: string
+      recall_reason:
+        type: string
+      ru_number:
+        type: string
+      serial_number:
+        type: string
+      synced_at:
+        type: string
+    type: object
+  github_com_ima_diplom-backend_internal_handler_dto.RecalledCheckResponse:
+    properties:
+      details:
+        $ref: '#/definitions/github_com_ima_diplom-backend_internal_handler_dto.RecalledBatchResponse'
+      is_recalled:
+        type: boolean
+    type: object
+  github_com_ima_diplom-backend_internal_handler_dto.RecordEnvLogRequest:
+    properties:
+      humidity:
+        type: number
+      notes:
+        type: string
+      temperature:
+        type: number
+      zone_id:
+        type: string
+    required:
+    - zone_id
     type: object
   github_com_ima_diplom-backend_internal_handler_dto.RegisterRequest:
     properties:
@@ -16,9 +629,1170 @@ definitions:
       message:
         type: string
     type: object
+  github_com_ima_diplom-backend_internal_handler_dto.StartInventoryRequest:
+    properties:
+      zone_id:
+        type: string
+    required:
+    - zone_id
+    type: object
+  github_com_ima_diplom-backend_internal_handler_dto.SubmitCountRequest:
+    properties:
+      items:
+        items:
+          $ref: '#/definitions/github_com_ima_diplom-backend_internal_handler_dto.CountItem'
+        type: array
+    required:
+    - items
+    type: object
+  github_com_ima_diplom-backend_internal_handler_dto.SupplierListResponse:
+    properties:
+      suppliers:
+        items:
+          $ref: '#/definitions/github_com_ima_diplom-backend_internal_handler_dto.SupplierResponse'
+        type: array
+      total:
+        type: integer
+    type: object
+  github_com_ima_diplom-backend_internal_handler_dto.SupplierResponse:
+    properties:
+      address:
+        type: string
+      contact_name:
+        type: string
+      created_at:
+        type: string
+      email:
+        type: string
+      id:
+        type: string
+      inn:
+        type: string
+      is_active:
+        type: boolean
+      kpp:
+        type: string
+      name:
+        type: string
+      phone:
+        type: string
+      updated_at:
+        type: string
+    type: object
+  github_com_ima_diplom-backend_internal_handler_dto.SystemSettingResponse:
+    properties:
+      key:
+        type: string
+      value:
+        type: string
+    type: object
+  github_com_ima_diplom-backend_internal_handler_dto.TransferBatchRequest:
+    properties:
+      target_zone_id:
+        type: string
+    required:
+    - target_zone_id
+    type: object
+  github_com_ima_diplom-backend_internal_handler_dto.UpdateBatchStatusRequest:
+    properties:
+      status:
+        $ref: '#/definitions/github_com_ima_diplom-backend_internal_domain.BatchStatus'
+    required:
+    - status
+    type: object
+  github_com_ima_diplom-backend_internal_handler_dto.UpdateClaimStatusRequest:
+    properties:
+      status:
+        $ref: '#/definitions/github_com_ima_diplom-backend_internal_domain.ClaimStatus'
+    required:
+    - status
+    type: object
+  github_com_ima_diplom-backend_internal_handler_dto.UpdateInboundStatusRequest:
+    properties:
+      status:
+        allOf:
+        - $ref: '#/definitions/github_com_ima_diplom-backend_internal_domain.InboundStatus'
+        enum:
+        - draft
+        - received
+        - completed
+        - cancelled
+    required:
+    - status
+    type: object
+  github_com_ima_diplom-backend_internal_handler_dto.UpdateOrderStatusRequest:
+    properties:
+      status:
+        $ref: '#/definitions/github_com_ima_diplom-backend_internal_domain.OrderStatus'
+    required:
+    - status
+    type: object
+  github_com_ima_diplom-backend_internal_handler_dto.UpdateProductRequest:
+    properties:
+      atc_code:
+        type: string
+      dosage_form:
+        type: string
+      generic_name:
+        type: string
+      is_jnvlp:
+        type: boolean
+      manufacturer_id:
+        type: string
+      name:
+        type: string
+      package_size:
+        type: integer
+      photo_url:
+        type: string
+      storage_conditions:
+        type: string
+      strength:
+        type: string
+    type: object
+  github_com_ima_diplom-backend_internal_handler_dto.UpdateSettingRequest:
+    properties:
+      value:
+        type: string
+    required:
+    - value
+    type: object
+  github_com_ima_diplom-backend_internal_handler_dto.UpdateSupplierRequest:
+    properties:
+      address:
+        type: string
+      contact_name:
+        type: string
+      email:
+        type: string
+      is_active:
+        type: boolean
+      kpp:
+        type: string
+      name:
+        type: string
+      phone:
+        type: string
+    type: object
+  github_com_ima_diplom-backend_internal_handler_dto.UpdateZoneRequest:
+    properties:
+      capacity:
+        type: integer
+      description:
+        type: string
+      is_active:
+        type: boolean
+      name:
+        type: string
+      temp_max:
+        type: number
+      temp_min:
+        type: number
+      type:
+        $ref: '#/definitions/github_com_ima_diplom-backend_internal_domain.ZoneType'
+    type: object
+  github_com_ima_diplom-backend_internal_handler_dto.ZoneResponse:
+    properties:
+      capacity:
+        type: integer
+      created_at:
+        type: string
+      description:
+        type: string
+      id:
+        type: string
+      is_active:
+        type: boolean
+      name:
+        type: string
+      temp_max:
+        type: number
+      temp_min:
+        type: number
+      type:
+        $ref: '#/definitions/github_com_ima_diplom-backend_internal_domain.ZoneType'
+      updated_at:
+        type: string
+    type: object
 info:
   contact: {}
 paths:
+  /api/v1/batches:
+    get:
+      description: Returns a paginated list of batches across all or specific zones
+      parameters:
+      - description: Filter by product UUID
+        in: query
+        name: product_id
+        type: string
+      - description: Filter by zone UUID
+        in: query
+        name: zone_id
+        type: string
+      - description: Filter by status
+        in: query
+        name: status
+        type: string
+      - description: Page size
+        in: query
+        name: limit
+        type: integer
+      - description: Offset
+        in: query
+        name: offset
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_ima_diplom-backend_internal_handler_dto.BatchListResponse'
+      summary: List product batches (Inventory)
+      tags:
+      - Batches
+  /api/v1/batches/{id}:
+    get:
+      description: Returns detailed info about a specific batch including quantity
+        and expiry
+      parameters:
+      - description: Batch UUID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_ima_diplom-backend_internal_handler_dto.BatchResponse'
+      summary: Get batch by ID
+      tags:
+      - Batches
+  /api/v1/batches/{id}/status:
+    patch:
+      consumes:
+      - application/json
+      description: Manually changes batch status (e.g. Quarantine -> Available)
+      parameters:
+      - description: Batch UUID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: New status
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/github_com_ima_diplom-backend_internal_handler_dto.UpdateBatchStatusRequest'
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+      summary: Update batch status
+      tags:
+      - Batches
+  /api/v1/batches/{id}/transfer:
+    post:
+      consumes:
+      - application/json
+      description: Moves stock series from one warehouse zone to another
+      parameters:
+      - description: Batch UUID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Target zone info
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/github_com_ima_diplom-backend_internal_handler_dto.TransferBatchRequest'
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+      summary: Transfer batch to another zone
+      tags:
+      - Batches
+  /api/v1/claims:
+    get:
+      description: Returns a paginated list of claims
+      parameters:
+      - description: Page size
+        in: query
+        name: limit
+        type: integer
+      - description: Offset
+        in: query
+        name: offset
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_ima_diplom-backend_internal_handler_dto.ClaimListResponse'
+      summary: List claims and defects
+      tags:
+      - Claims
+    post:
+      consumes:
+      - application/json
+      description: Registers a new quality control issue or delivery defect
+      parameters:
+      - description: Claim data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/github_com_ima_diplom-backend_internal_handler_dto.CreateClaimRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/github_com_ima_diplom-backend_internal_handler_dto.ClaimResponse'
+      summary: Create claim or defect
+      tags:
+      - Claims
+  /api/v1/claims/{id}:
+    get:
+      description: Returns detailed info about a single claim
+      parameters:
+      - description: Claim UUID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_ima_diplom-backend_internal_handler_dto.ClaimResponse'
+      summary: Get claim by ID
+      tags:
+      - Claims
+  /api/v1/claims/{id}/status:
+    patch:
+      consumes:
+      - application/json
+      description: Changes the resolution status of a claim (e.g. New -> Resolved)
+      parameters:
+      - description: Claim UUID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: New status
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/github_com_ima_diplom-backend_internal_handler_dto.UpdateClaimStatusRequest'
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+      summary: Update claim status
+      tags:
+      - Claims
+  /api/v1/env/logs:
+    get:
+      description: Returns a paginated list of temperature/humidity logs
+      parameters:
+      - description: Filter by zone UUID
+        in: query
+        name: zone_id
+        type: string
+      - description: Page size
+        in: query
+        name: limit
+        type: integer
+      - description: Offset
+        in: query
+        name: offset
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_ima_diplom-backend_internal_handler_dto.EnvLogListResponse'
+      summary: List environment logs
+      tags:
+      - Environment
+    post:
+      consumes:
+      - application/json
+      description: Records temperature and humidity for one or more zones
+      parameters:
+      - description: List of logs
+        in: body
+        name: request
+        required: true
+        schema:
+          items:
+            $ref: '#/definitions/github_com_ima_diplom-backend_internal_handler_dto.RecordEnvLogRequest'
+          type: array
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+      summary: Batch record environment logs
+      tags:
+      - Environment
+  /api/v1/inbound:
+    get:
+      description: Returns a paginated list of inbound records
+      parameters:
+      - description: Page size
+        in: query
+        name: limit
+        type: integer
+      - description: Offset
+        in: query
+        name: offset
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_ima_diplom-backend_internal_handler_dto.InboundListResponse'
+      summary: List inbound receivings
+      tags:
+      - Inbound
+    post:
+      consumes:
+      - application/json
+      description: Creates a new inbound record (Draft status)
+      parameters:
+      - description: Inbound data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/github_com_ima_diplom-backend_internal_handler_dto.CreateInboundRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/github_com_ima_diplom-backend_internal_handler_dto.InboundResponse'
+      summary: Create inbound receiving
+      tags:
+      - Inbound
+  /api/v1/inbound/{id}:
+    delete:
+      description: Permanently deletes an inbound record (Draft status only, Admin
+        only)
+      parameters:
+      - description: Inbound UUID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+      summary: Delete inbound receiving
+      tags:
+      - Inbound
+    get:
+      description: Returns detailed info about a single inbound record including items
+      parameters:
+      - description: Inbound UUID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_ima_diplom-backend_internal_handler_dto.InboundResponse'
+      summary: Get inbound receiving by ID
+      tags:
+      - Inbound
+  /api/v1/inbound/{id}/status:
+    patch:
+      consumes:
+      - application/json
+      description: Changes the status of an inbound record (e.g. Received -> Completed)
+      parameters:
+      - description: Inbound UUID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: New status
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/github_com_ima_diplom-backend_internal_handler_dto.UpdateInboundStatusRequest'
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+      summary: Update inbound status
+      tags:
+      - Inbound
+  /api/v1/inventory:
+    get:
+      description: Returns a paginated list of inventory audit sessions
+      parameters:
+      - description: Page size
+        in: query
+        name: limit
+        type: integer
+      - description: Offset
+        in: query
+        name: offset
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/github_com_ima_diplom-backend_internal_handler_dto.InventorySessionResponse'
+            type: array
+      summary: List inventory sessions
+      tags:
+      - Inventory
+    post:
+      consumes:
+      - application/json
+      description: Initiates a new audit session for a specific zone
+      parameters:
+      - description: Zone info
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/github_com_ima_diplom-backend_internal_handler_dto.StartInventoryRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/github_com_ima_diplom-backend_internal_handler_dto.InventorySessionResponse'
+      summary: Start inventory session
+      tags:
+      - Inventory
+  /api/v1/inventory/{id}:
+    get:
+      description: Returns detailed info about a single audit session including results
+      parameters:
+      - description: Session UUID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_ima_diplom-backend_internal_handler_dto.InventorySessionResponse'
+      summary: Get inventory session by ID
+      tags:
+      - Inventory
+  /api/v1/inventory/{id}/count:
+    post:
+      consumes:
+      - application/json
+      description: Records physical quantities for products within an active session
+      parameters:
+      - description: Session UUID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Counts data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/github_com_ima_diplom-backend_internal_handler_dto.SubmitCountRequest'
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+      summary: Submit inventory counts
+      tags:
+      - Inventory
+  /api/v1/inventory/{id}/finish:
+    post:
+      description: Closes an active session, marking it as completed
+      parameters:
+      - description: Session UUID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+      summary: Finish inventory session
+      tags:
+      - Inventory
+  /api/v1/orders:
+    get:
+      description: Returns a paginated list of orders, sorted by priority and date
+      parameters:
+      - description: Page size
+        in: query
+        name: limit
+        type: integer
+      - description: Offset
+        in: query
+        name: offset
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_ima_diplom-backend_internal_handler_dto.OrderListResponse'
+      summary: List shipping orders
+      tags:
+      - Orders
+    post:
+      consumes:
+      - application/json
+      description: Registers a new order for subsequent assembly and shipment
+      parameters:
+      - description: Order data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/github_com_ima_diplom-backend_internal_handler_dto.CreateOrderRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/github_com_ima_diplom-backend_internal_handler_dto.OrderResponse'
+      summary: Create shipping order
+      tags:
+      - Orders
+  /api/v1/orders/{id}:
+    get:
+      description: Returns detailed info about a single order including items
+      parameters:
+      - description: Order UUID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_ima_diplom-backend_internal_handler_dto.OrderResponse'
+      summary: Get order by ID
+      tags:
+      - Orders
+  /api/v1/orders/{id}/status:
+    patch:
+      consumes:
+      - application/json
+      description: Changes the status of an order (e.g. Assembling -> Assembled)
+      parameters:
+      - description: Order UUID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: New status
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/github_com_ima_diplom-backend_internal_handler_dto.UpdateOrderStatusRequest'
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+      summary: Update order status
+      tags:
+      - Orders
+  /api/v1/products:
+    get:
+      description: Returns a paginated list of products with optional filtering
+      parameters:
+      - description: Search by name, generic name or SKU
+        in: query
+        name: q
+        type: string
+      - description: Filter by JNVLP status
+        in: query
+        name: is_jnvlp
+        type: boolean
+      - description: Filter by ATC code
+        in: query
+        name: atc_code
+        type: string
+      - description: Page size
+        in: query
+        name: limit
+        type: integer
+      - description: Offset
+        in: query
+        name: offset
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_ima_diplom-backend_internal_handler_dto.ProductListResponse'
+      summary: List products
+      tags:
+      - Products
+    post:
+      consumes:
+      - application/json
+      description: Creates a new product (Admin or Warehouse Manager only)
+      parameters:
+      - description: Product data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/github_com_ima_diplom-backend_internal_handler_dto.CreateProductRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/github_com_ima_diplom-backend_internal_handler_dto.ProductResponse'
+      summary: Create product
+      tags:
+      - Products
+  /api/v1/products/{id}:
+    delete:
+      description: Marks a product as deleted (Admin only)
+      parameters:
+      - description: Product UUID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+      summary: Delete (soft) product
+      tags:
+      - Products
+    get:
+      description: Returns detailed info about a single product
+      parameters:
+      - description: Product UUID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_ima_diplom-backend_internal_handler_dto.ProductResponse'
+      summary: Get product by ID
+      tags:
+      - Products
+    patch:
+      consumes:
+      - application/json
+      description: Updates specific fields of an existing product (Admin or Warehouse
+        Manager only)
+      parameters:
+      - description: Product UUID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Partial update data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/github_com_ima_diplom-backend_internal_handler_dto.UpdateProductRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_ima_diplom-backend_internal_handler_dto.ProductResponse'
+      summary: Partial update product
+      tags:
+      - Products
+  /api/v1/recalled:
+    get:
+      description: Returns a paginated list of blocked pharmaceutical series from
+        the central register
+      parameters:
+      - description: Page size
+        in: query
+        name: limit
+        type: integer
+      - description: Offset
+        in: query
+        name: offset
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/github_com_ima_diplom-backend_internal_handler_dto.RecalledBatchResponse'
+            type: array
+      summary: List recalled batches
+      tags:
+      - Recalled
+  /api/v1/recalled/check/{serial}:
+    get:
+      description: Verifies if a specific serial number is blocked for pharmaceutical
+        circulation
+      parameters:
+      - description: Series Number
+        in: path
+        name: serial
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_ima_diplom-backend_internal_handler_dto.RecalledCheckResponse'
+      summary: Check series for recall
+      tags:
+      - Recalled
+  /api/v1/ref/atc:
+    get:
+      description: Search for ATC (Anatomical Therapeutic Chemical) codes by partial
+        code or name
+      parameters:
+      - description: Search query
+        in: query
+        name: q
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/github_com_ima_diplom-backend_internal_handler_dto.ATCCodeResponse'
+            type: array
+      summary: Search ATC codes
+      tags:
+      - References
+  /api/v1/ref/countries:
+    get:
+      description: Returns a list of all countries in ISO alpha-3 format
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/github_com_ima_diplom-backend_internal_handler_dto.CountryResponse'
+            type: array
+      summary: List countries
+      tags:
+      - References
+  /api/v1/settings:
+    get:
+      description: Returns all global system parameters
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/github_com_ima_diplom-backend_internal_handler_dto.SystemSettingResponse'
+            type: array
+      summary: List system settings
+      tags:
+      - Settings
+  /api/v1/settings/{key}:
+    patch:
+      consumes:
+      - application/json
+      description: Changes a specific global system parameter (Admin only)
+      parameters:
+      - description: Setting key
+        in: path
+        name: key
+        required: true
+        type: string
+      - description: New value
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/github_com_ima_diplom-backend_internal_handler_dto.UpdateSettingRequest'
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+      summary: Update system setting
+      tags:
+      - Settings
+  /api/v1/suppliers:
+    get:
+      description: Returns a paginated list of suppliers
+      parameters:
+      - description: Page size
+        in: query
+        name: limit
+        type: integer
+      - description: Offset
+        in: query
+        name: offset
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_ima_diplom-backend_internal_handler_dto.SupplierListResponse'
+      summary: List suppliers
+      tags:
+      - Suppliers
+    post:
+      consumes:
+      - application/json
+      description: Creates a new supplier (Admin or Warehouse Manager only)
+      parameters:
+      - description: Supplier data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/github_com_ima_diplom-backend_internal_handler_dto.CreateSupplierRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/github_com_ima_diplom-backend_internal_handler_dto.SupplierResponse'
+      summary: Create supplier
+      tags:
+      - Suppliers
+  /api/v1/suppliers/{id}:
+    delete:
+      description: Permanently deletes a supplier (Admin only)
+      parameters:
+      - description: Supplier UUID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+      summary: Delete supplier
+      tags:
+      - Suppliers
+    get:
+      description: Returns detailed info about a single supplier
+      parameters:
+      - description: Supplier UUID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_ima_diplom-backend_internal_handler_dto.SupplierResponse'
+      summary: Get supplier by ID
+      tags:
+      - Suppliers
+    patch:
+      consumes:
+      - application/json
+      description: Updates specific fields of an existing supplier (Admin or Warehouse
+        Manager only)
+      parameters:
+      - description: Supplier UUID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Partial update data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/github_com_ima_diplom-backend_internal_handler_dto.UpdateSupplierRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_ima_diplom-backend_internal_handler_dto.SupplierResponse'
+      summary: Partial update supplier
+      tags:
+      - Suppliers
+  /api/v1/zones:
+    get:
+      description: Returns all warehouse zones
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/github_com_ima_diplom-backend_internal_handler_dto.ZoneResponse'
+            type: array
+      summary: List warehouse zones
+      tags:
+      - Zones
+    post:
+      consumes:
+      - application/json
+      description: Creates a new zone (Admin or Warehouse Manager only)
+      parameters:
+      - description: Zone data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/github_com_ima_diplom-backend_internal_handler_dto.CreateZoneRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/github_com_ima_diplom-backend_internal_handler_dto.ZoneResponse'
+      summary: Create warehouse zone
+      tags:
+      - Zones
+  /api/v1/zones/{id}:
+    delete:
+      description: Permanently deletes a zone (Admin only)
+      parameters:
+      - description: Zone UUID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+      summary: Delete warehouse zone
+      tags:
+      - Zones
+    get:
+      description: Returns detailed info about a single zone
+      parameters:
+      - description: Zone UUID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_ima_diplom-backend_internal_handler_dto.ZoneResponse'
+      summary: Get warehouse zone by ID
+      tags:
+      - Zones
+    patch:
+      consumes:
+      - application/json
+      description: Updates specific fields of an existing zone (Admin or Warehouse
+        Manager only)
+      parameters:
+      - description: Zone UUID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Partial update data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/github_com_ima_diplom-backend_internal_handler_dto.UpdateZoneRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_ima_diplom-backend_internal_handler_dto.ZoneResponse'
+      summary: Partial update warehouse zone
+      tags:
+      - Zones
   /auth/register:
     post:
       consumes:

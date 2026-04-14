@@ -165,7 +165,10 @@ func insertAuditLog(db *gorm.DB, action string, oldValues, newValues json.RawMes
 		EntityID:  extractPKValue(db),
 		OldValues: oldValues,
 		NewValues: newValues,
-		IPAddress: logger.IPAddressFromContext(ctx),
+	}
+
+	if ip := logger.IPAddressFromContext(ctx); ip != "" {
+		entry.IPAddress = &ip
 	}
 
 	if uid := logger.UserIDFromContext(ctx); uid != 0 {
@@ -192,13 +195,28 @@ func stmtContext(db *gorm.DB) context.Context {
 // primaryKeyCondition builds a "col = 'val'" WHERE clause for the primary key
 // of the statement model. Returns empty string when the schema is unavailable.
 func primaryKeyCondition(db *gorm.DB) string {
-	if db.Statement.Schema == nil {
+	if db.Statement.Schema == nil || db.Statement.Model == nil {
 		return ""
 	}
+	
+	modelVal := reflect.Indirect(reflect.ValueOf(db.Statement.Model))
+	if modelVal.Kind() == reflect.Slice {
+		if modelVal.Len() == 0 {
+			return ""
+		}
+		modelVal = reflect.Indirect(modelVal.Index(0))
+	}
+	if modelVal.Kind() != reflect.Struct {
+		return ""
+	}
+	
+	// Create a pointer to the struct so field.ValueOf works correctly
+	ptr := reflect.New(modelVal.Type())
+	ptr.Elem().Set(modelVal)
+
 	var parts []string
-	modelVal := reflect.ValueOf(db.Statement.Model)
 	for _, f := range db.Statement.Schema.PrimaryFields {
-		val, zero := f.ValueOf(db.Statement.Context, modelVal)
+		val, zero := f.ValueOf(db.Statement.Context, ptr)
 		if zero {
 			continue
 		}
@@ -212,9 +230,23 @@ func extractPKValue(db *gorm.DB) string {
 	if db.Statement.Schema == nil || db.Statement.Model == nil {
 		return ""
 	}
-	modelVal := reflect.ValueOf(db.Statement.Model)
+	
+	modelVal := reflect.Indirect(reflect.ValueOf(db.Statement.Model))
+	if modelVal.Kind() == reflect.Slice {
+		if modelVal.Len() == 0 {
+			return ""
+		}
+		modelVal = reflect.Indirect(modelVal.Index(0))
+	}
+	if modelVal.Kind() != reflect.Struct {
+		return ""
+	}
+
+	ptr := reflect.New(modelVal.Type())
+	ptr.Elem().Set(modelVal)
+
 	for _, f := range db.Statement.Schema.PrimaryFields {
-		val, _ := f.ValueOf(db.Statement.Context, modelVal)
+		val, _ := f.ValueOf(db.Statement.Context, ptr)
 		return fmt.Sprintf("%v", val)
 	}
 	return ""

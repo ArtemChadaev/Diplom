@@ -23,7 +23,7 @@ CREATE TYPE batch_status AS ENUM (
 
 -- Warehouse zone type
 CREATE TYPE zone_type AS ENUM (
-    'general',
+    'ambient',
     'cold_chain',
     'flammable',
     'safe_strong'   -- safe/narcotic (НС/ПВ)
@@ -47,10 +47,10 @@ CREATE TYPE purchase_type AS ENUM ('direct', 'tender', 'state');
 CREATE TYPE order_type AS ENUM ('regular', 'cito');
 
 -- Order status
-CREATE TYPE order_status AS ENUM ('new', 'assembling', 'ready', 'shipped', 'cancelled');
+CREATE TYPE order_status AS ENUM ('new', 'assembling', 'assembled', 'shipped', 'cancelled');
 
 -- Inventory status
-CREATE TYPE inventory_status AS ENUM ('draft', 'in_progress', 'completed', 'cancelled');
+CREATE TYPE inventory_status AS ENUM ('draft', 'active', 'completed', 'cancelled');
 
 -- GDP training result
 CREATE TYPE training_result AS ENUM ('pass', 'fail');

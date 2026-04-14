@@ -15,7 +15,7 @@ type AuditLogDAO struct {
 	EntityID  string          `gorm:"column:entity_id;type:varchar(100)"`
 	OldValues json.RawMessage `gorm:"column:old_values;type:jsonb"`
 	NewValues json.RawMessage `gorm:"column:new_values;type:jsonb"`
-	IPAddress string          `gorm:"column:ip_address;type:inet"`
+	IPAddress *string         `gorm:"column:ip_address;type:inet"`
 	// Immutability chain fields (Phase 3, currently NULL / mock):
 	PrevHash string `gorm:"column:prev_hash;type:text"`
 	LogHash  string `gorm:"column:log_hash;type:text"`

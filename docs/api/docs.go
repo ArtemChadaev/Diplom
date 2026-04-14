@@ -15,6 +15,1482 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
+        "/api/v1/batches": {
+            "get": {
+                "description": "Returns a paginated list of batches across all or specific zones",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Batches"
+                ],
+                "summary": "List product batches (Inventory)",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Filter by product UUID",
+                        "name": "product_id",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Filter by zone UUID",
+                        "name": "zone_id",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Filter by status",
+                        "name": "status",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Page size",
+                        "name": "limit",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Offset",
+                        "name": "offset",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_ima_diplom-backend_internal_handler_dto.BatchListResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/batches/{id}": {
+            "get": {
+                "description": "Returns detailed info about a specific batch including quantity and expiry",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Batches"
+                ],
+                "summary": "Get batch by ID",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Batch UUID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_ima_diplom-backend_internal_handler_dto.BatchResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/batches/{id}/status": {
+            "patch": {
+                "description": "Manually changes batch status (e.g. Quarantine -\u003e Available)",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Batches"
+                ],
+                "summary": "Update batch status",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Batch UUID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "New status",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/github_com_ima_diplom-backend_internal_handler_dto.UpdateBatchStatusRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    }
+                }
+            }
+        },
+        "/api/v1/batches/{id}/transfer": {
+            "post": {
+                "description": "Moves stock series from one warehouse zone to another",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Batches"
+                ],
+                "summary": "Transfer batch to another zone",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Batch UUID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Target zone info",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/github_com_ima_diplom-backend_internal_handler_dto.TransferBatchRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    }
+                }
+            }
+        },
+        "/api/v1/claims": {
+            "get": {
+                "description": "Returns a paginated list of claims",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Claims"
+                ],
+                "summary": "List claims and defects",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Page size",
+                        "name": "limit",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Offset",
+                        "name": "offset",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_ima_diplom-backend_internal_handler_dto.ClaimListResponse"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "Registers a new quality control issue or delivery defect",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Claims"
+                ],
+                "summary": "Create claim or defect",
+                "parameters": [
+                    {
+                        "description": "Claim data",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/github_com_ima_diplom-backend_internal_handler_dto.CreateClaimRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_ima_diplom-backend_internal_handler_dto.ClaimResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/claims/{id}": {
+            "get": {
+                "description": "Returns detailed info about a single claim",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Claims"
+                ],
+                "summary": "Get claim by ID",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Claim UUID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_ima_diplom-backend_internal_handler_dto.ClaimResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/claims/{id}/status": {
+            "patch": {
+                "description": "Changes the resolution status of a claim (e.g. New -\u003e Resolved)",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Claims"
+                ],
+                "summary": "Update claim status",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Claim UUID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "New status",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/github_com_ima_diplom-backend_internal_handler_dto.UpdateClaimStatusRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    }
+                }
+            }
+        },
+        "/api/v1/env/logs": {
+            "get": {
+                "description": "Returns a paginated list of temperature/humidity logs",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Environment"
+                ],
+                "summary": "List environment logs",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Filter by zone UUID",
+                        "name": "zone_id",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Page size",
+                        "name": "limit",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Offset",
+                        "name": "offset",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_ima_diplom-backend_internal_handler_dto.EnvLogListResponse"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "Records temperature and humidity for one or more zones",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Environment"
+                ],
+                "summary": "Batch record environment logs",
+                "parameters": [
+                    {
+                        "description": "List of logs",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/github_com_ima_diplom-backend_internal_handler_dto.RecordEnvLogRequest"
+                            }
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    }
+                }
+            }
+        },
+        "/api/v1/inbound": {
+            "get": {
+                "description": "Returns a paginated list of inbound records",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Inbound"
+                ],
+                "summary": "List inbound receivings",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Page size",
+                        "name": "limit",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Offset",
+                        "name": "offset",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_ima_diplom-backend_internal_handler_dto.InboundListResponse"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "Creates a new inbound record (Draft status)",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Inbound"
+                ],
+                "summary": "Create inbound receiving",
+                "parameters": [
+                    {
+                        "description": "Inbound data",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/github_com_ima_diplom-backend_internal_handler_dto.CreateInboundRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_ima_diplom-backend_internal_handler_dto.InboundResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/inbound/{id}": {
+            "get": {
+                "description": "Returns detailed info about a single inbound record including items",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Inbound"
+                ],
+                "summary": "Get inbound receiving by ID",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Inbound UUID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_ima_diplom-backend_internal_handler_dto.InboundResponse"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "description": "Permanently deletes an inbound record (Draft status only, Admin only)",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Inbound"
+                ],
+                "summary": "Delete inbound receiving",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Inbound UUID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    }
+                }
+            }
+        },
+        "/api/v1/inbound/{id}/status": {
+            "patch": {
+                "description": "Changes the status of an inbound record (e.g. Received -\u003e Completed)",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Inbound"
+                ],
+                "summary": "Update inbound status",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Inbound UUID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "New status",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/github_com_ima_diplom-backend_internal_handler_dto.UpdateInboundStatusRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    }
+                }
+            }
+        },
+        "/api/v1/inventory": {
+            "get": {
+                "description": "Returns a paginated list of inventory audit sessions",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Inventory"
+                ],
+                "summary": "List inventory sessions",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Page size",
+                        "name": "limit",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Offset",
+                        "name": "offset",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/github_com_ima_diplom-backend_internal_handler_dto.InventorySessionResponse"
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "Initiates a new audit session for a specific zone",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Inventory"
+                ],
+                "summary": "Start inventory session",
+                "parameters": [
+                    {
+                        "description": "Zone info",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/github_com_ima_diplom-backend_internal_handler_dto.StartInventoryRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_ima_diplom-backend_internal_handler_dto.InventorySessionResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/inventory/{id}": {
+            "get": {
+                "description": "Returns detailed info about a single audit session including results",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Inventory"
+                ],
+                "summary": "Get inventory session by ID",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Session UUID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_ima_diplom-backend_internal_handler_dto.InventorySessionResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/inventory/{id}/count": {
+            "post": {
+                "description": "Records physical quantities for products within an active session",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Inventory"
+                ],
+                "summary": "Submit inventory counts",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Session UUID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Counts data",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/github_com_ima_diplom-backend_internal_handler_dto.SubmitCountRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    }
+                }
+            }
+        },
+        "/api/v1/inventory/{id}/finish": {
+            "post": {
+                "description": "Closes an active session, marking it as completed",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Inventory"
+                ],
+                "summary": "Finish inventory session",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Session UUID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    }
+                }
+            }
+        },
+        "/api/v1/orders": {
+            "get": {
+                "description": "Returns a paginated list of orders, sorted by priority and date",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Orders"
+                ],
+                "summary": "List shipping orders",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Page size",
+                        "name": "limit",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Offset",
+                        "name": "offset",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_ima_diplom-backend_internal_handler_dto.OrderListResponse"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "Registers a new order for subsequent assembly and shipment",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Orders"
+                ],
+                "summary": "Create shipping order",
+                "parameters": [
+                    {
+                        "description": "Order data",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/github_com_ima_diplom-backend_internal_handler_dto.CreateOrderRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_ima_diplom-backend_internal_handler_dto.OrderResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/orders/{id}": {
+            "get": {
+                "description": "Returns detailed info about a single order including items",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Orders"
+                ],
+                "summary": "Get order by ID",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Order UUID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_ima_diplom-backend_internal_handler_dto.OrderResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/orders/{id}/status": {
+            "patch": {
+                "description": "Changes the status of an order (e.g. Assembling -\u003e Assembled)",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Orders"
+                ],
+                "summary": "Update order status",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Order UUID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "New status",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/github_com_ima_diplom-backend_internal_handler_dto.UpdateOrderStatusRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    }
+                }
+            }
+        },
+        "/api/v1/products": {
+            "get": {
+                "description": "Returns a paginated list of products with optional filtering",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Products"
+                ],
+                "summary": "List products",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Search by name, generic name or SKU",
+                        "name": "q",
+                        "in": "query"
+                    },
+                    {
+                        "type": "boolean",
+                        "description": "Filter by JNVLP status",
+                        "name": "is_jnvlp",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Filter by ATC code",
+                        "name": "atc_code",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Page size",
+                        "name": "limit",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Offset",
+                        "name": "offset",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_ima_diplom-backend_internal_handler_dto.ProductListResponse"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "Creates a new product (Admin or Warehouse Manager only)",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Products"
+                ],
+                "summary": "Create product",
+                "parameters": [
+                    {
+                        "description": "Product data",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/github_com_ima_diplom-backend_internal_handler_dto.CreateProductRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_ima_diplom-backend_internal_handler_dto.ProductResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/products/{id}": {
+            "get": {
+                "description": "Returns detailed info about a single product",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Products"
+                ],
+                "summary": "Get product by ID",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Product UUID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_ima_diplom-backend_internal_handler_dto.ProductResponse"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "description": "Marks a product as deleted (Admin only)",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Products"
+                ],
+                "summary": "Delete (soft) product",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Product UUID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    }
+                }
+            },
+            "patch": {
+                "description": "Updates specific fields of an existing product (Admin or Warehouse Manager only)",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Products"
+                ],
+                "summary": "Partial update product",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Product UUID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Partial update data",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/github_com_ima_diplom-backend_internal_handler_dto.UpdateProductRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_ima_diplom-backend_internal_handler_dto.ProductResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/recalled": {
+            "get": {
+                "description": "Returns a paginated list of blocked pharmaceutical series from the central register",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Recalled"
+                ],
+                "summary": "List recalled batches",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Page size",
+                        "name": "limit",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Offset",
+                        "name": "offset",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/github_com_ima_diplom-backend_internal_handler_dto.RecalledBatchResponse"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/recalled/check/{serial}": {
+            "get": {
+                "description": "Verifies if a specific serial number is blocked for pharmaceutical circulation",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Recalled"
+                ],
+                "summary": "Check series for recall",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Series Number",
+                        "name": "serial",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_ima_diplom-backend_internal_handler_dto.RecalledCheckResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/ref/atc": {
+            "get": {
+                "description": "Search for ATC (Anatomical Therapeutic Chemical) codes by partial code or name",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "References"
+                ],
+                "summary": "Search ATC codes",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Search query",
+                        "name": "q",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/github_com_ima_diplom-backend_internal_handler_dto.ATCCodeResponse"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/ref/countries": {
+            "get": {
+                "description": "Returns a list of all countries in ISO alpha-3 format",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "References"
+                ],
+                "summary": "List countries",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/github_com_ima_diplom-backend_internal_handler_dto.CountryResponse"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/settings": {
+            "get": {
+                "description": "Returns all global system parameters",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Settings"
+                ],
+                "summary": "List system settings",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/github_com_ima_diplom-backend_internal_handler_dto.SystemSettingResponse"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/settings/{key}": {
+            "patch": {
+                "description": "Changes a specific global system parameter (Admin only)",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Settings"
+                ],
+                "summary": "Update system setting",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Setting key",
+                        "name": "key",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "New value",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/github_com_ima_diplom-backend_internal_handler_dto.UpdateSettingRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    }
+                }
+            }
+        },
+        "/api/v1/suppliers": {
+            "get": {
+                "description": "Returns a paginated list of suppliers",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Suppliers"
+                ],
+                "summary": "List suppliers",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Page size",
+                        "name": "limit",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Offset",
+                        "name": "offset",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_ima_diplom-backend_internal_handler_dto.SupplierListResponse"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "Creates a new supplier (Admin or Warehouse Manager only)",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Suppliers"
+                ],
+                "summary": "Create supplier",
+                "parameters": [
+                    {
+                        "description": "Supplier data",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/github_com_ima_diplom-backend_internal_handler_dto.CreateSupplierRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_ima_diplom-backend_internal_handler_dto.SupplierResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/suppliers/{id}": {
+            "get": {
+                "description": "Returns detailed info about a single supplier",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Suppliers"
+                ],
+                "summary": "Get supplier by ID",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Supplier UUID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_ima_diplom-backend_internal_handler_dto.SupplierResponse"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "description": "Permanently deletes a supplier (Admin only)",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Suppliers"
+                ],
+                "summary": "Delete supplier",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Supplier UUID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    }
+                }
+            },
+            "patch": {
+                "description": "Updates specific fields of an existing supplier (Admin or Warehouse Manager only)",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Suppliers"
+                ],
+                "summary": "Partial update supplier",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Supplier UUID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Partial update data",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/github_com_ima_diplom-backend_internal_handler_dto.UpdateSupplierRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_ima_diplom-backend_internal_handler_dto.SupplierResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/zones": {
+            "get": {
+                "description": "Returns all warehouse zones",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Zones"
+                ],
+                "summary": "List warehouse zones",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/github_com_ima_diplom-backend_internal_handler_dto.ZoneResponse"
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "Creates a new zone (Admin or Warehouse Manager only)",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Zones"
+                ],
+                "summary": "Create warehouse zone",
+                "parameters": [
+                    {
+                        "description": "Zone data",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/github_com_ima_diplom-backend_internal_handler_dto.CreateZoneRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_ima_diplom-backend_internal_handler_dto.ZoneResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/zones/{id}": {
+            "get": {
+                "description": "Returns detailed info about a single zone",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Zones"
+                ],
+                "summary": "Get warehouse zone by ID",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Zone UUID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_ima_diplom-backend_internal_handler_dto.ZoneResponse"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "description": "Permanently deletes a zone (Admin only)",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Zones"
+                ],
+                "summary": "Delete warehouse zone",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Zone UUID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    }
+                }
+            },
+            "patch": {
+                "description": "Updates specific fields of an existing zone (Admin or Warehouse Manager only)",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Zones"
+                ],
+                "summary": "Partial update warehouse zone",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Zone UUID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Partial update data",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/github_com_ima_diplom-backend_internal_handler_dto.UpdateZoneRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_ima_diplom-backend_internal_handler_dto.ZoneResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/auth/register": {
             "post": {
                 "description": "Создаёт нового пользователя с минимальной ролью (pharmacist).",
@@ -69,10 +1545,901 @@ const docTemplate = `{
         }
     },
     "definitions": {
+        "github_com_ima_diplom-backend_internal_domain.BatchStatus": {
+            "type": "string",
+            "enum": [
+                "quarantine",
+                "available",
+                "rejected",
+                "blocked"
+            ],
+            "x-enum-varnames": [
+                "BatchStatusQuarantine",
+                "BatchStatusAvailable",
+                "BatchStatusRejected",
+                "BatchStatusBlocked"
+            ]
+        },
+        "github_com_ima_diplom-backend_internal_domain.ClaimStatus": {
+            "type": "string",
+            "enum": [
+                "new",
+                "review",
+                "resolved",
+                "rejected"
+            ],
+            "x-enum-varnames": [
+                "ClaimStatusNew",
+                "ClaimStatusUnderReview",
+                "ClaimStatusResolved",
+                "ClaimStatusRejected"
+            ]
+        },
+        "github_com_ima_diplom-backend_internal_domain.InboundStatus": {
+            "type": "string",
+            "enum": [
+                "draft",
+                "received",
+                "completed",
+                "cancelled"
+            ],
+            "x-enum-comments": {
+                "InboundStatusCompleted": "Items put away, stock updated",
+                "InboundStatusDraft": "Plan created",
+                "InboundStatusReceived": "Physical arrival, verification in progress"
+            },
+            "x-enum-descriptions": [
+                "Plan created",
+                "Physical arrival, verification in progress",
+                "Items put away, stock updated",
+                ""
+            ],
+            "x-enum-varnames": [
+                "InboundStatusDraft",
+                "InboundStatusReceived",
+                "InboundStatusCompleted",
+                "InboundStatusCancelled"
+            ]
+        },
+        "github_com_ima_diplom-backend_internal_domain.InventoryStatus": {
+            "type": "string",
+            "enum": [
+                "draft",
+                "active",
+                "completed"
+            ],
+            "x-enum-varnames": [
+                "InventoryStatusDraft",
+                "InventoryStatusActive",
+                "InventoryStatusCompleted"
+            ]
+        },
+        "github_com_ima_diplom-backend_internal_domain.OrderStatus": {
+            "type": "string",
+            "enum": [
+                "new",
+                "assembling",
+                "assembled",
+                "shipped",
+                "cancelled"
+            ],
+            "x-enum-comments": {
+                "OrderStatusAssembled": "Ready for shipment",
+                "OrderStatusAssembling": "Storekeeper picking items",
+                "OrderStatusNew": "Order created",
+                "OrderStatusShipped": "Left warehouse"
+            },
+            "x-enum-descriptions": [
+                "Order created",
+                "Storekeeper picking items",
+                "Ready for shipment",
+                "Left warehouse",
+                ""
+            ],
+            "x-enum-varnames": [
+                "OrderStatusNew",
+                "OrderStatusAssembling",
+                "OrderStatusAssembled",
+                "OrderStatusShipped",
+                "OrderStatusCancelled"
+            ]
+        },
+        "github_com_ima_diplom-backend_internal_domain.ZoneType": {
+            "type": "string",
+            "enum": [
+                "ambient",
+                "cool",
+                "cold",
+                "narcotic",
+                "quarantine"
+            ],
+            "x-enum-comments": {
+                "ZoneTypeAmbient": "15-25°C",
+                "ZoneTypeColdStorage": "2-8°C",
+                "ZoneTypeCool": "8-15°C",
+                "ZoneTypeNarcotic": "Locked storage",
+                "ZoneTypeQuarantine": "Quality control"
+            },
+            "x-enum-descriptions": [
+                "15-25°C",
+                "8-15°C",
+                "2-8°C",
+                "Locked storage",
+                "Quality control"
+            ],
+            "x-enum-varnames": [
+                "ZoneTypeAmbient",
+                "ZoneTypeCool",
+                "ZoneTypeColdStorage",
+                "ZoneTypeNarcotic",
+                "ZoneTypeQuarantine"
+            ]
+        },
+        "github_com_ima_diplom-backend_internal_handler_dto.ATCCodeResponse": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "string",
+                    "example": "J01CA04"
+                },
+                "name_ru": {
+                    "type": "string",
+                    "example": "Амоксициллин"
+                }
+            }
+        },
+        "github_com_ima_diplom-backend_internal_handler_dto.BatchListResponse": {
+            "type": "object",
+            "properties": {
+                "batches": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/github_com_ima_diplom-backend_internal_handler_dto.BatchResponse"
+                    }
+                },
+                "total": {
+                    "type": "integer"
+                }
+            }
+        },
+        "github_com_ima_diplom-backend_internal_handler_dto.BatchResponse": {
+            "type": "object",
+            "properties": {
+                "expiry_date": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "manufacture_date": {
+                    "type": "string"
+                },
+                "product_id": {
+                    "type": "string"
+                },
+                "quantity": {
+                    "type": "integer"
+                },
+                "serial_number": {
+                    "type": "string"
+                },
+                "status": {
+                    "$ref": "#/definitions/github_com_ima_diplom-backend_internal_domain.BatchStatus"
+                },
+                "updated_at": {
+                    "type": "string"
+                },
+                "zone_id": {
+                    "type": "string"
+                }
+            }
+        },
+        "github_com_ima_diplom-backend_internal_handler_dto.ClaimListResponse": {
+            "type": "object",
+            "properties": {
+                "claims": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/github_com_ima_diplom-backend_internal_handler_dto.ClaimResponse"
+                    }
+                },
+                "total": {
+                    "type": "integer"
+                }
+            }
+        },
+        "github_com_ima_diplom-backend_internal_handler_dto.ClaimResponse": {
+            "type": "object",
+            "properties": {
+                "created_at": {
+                    "type": "string"
+                },
+                "created_by": {
+                    "type": "integer"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "inbound_id": {
+                    "type": "string"
+                },
+                "order_id": {
+                    "type": "string"
+                },
+                "status": {
+                    "$ref": "#/definitions/github_com_ima_diplom-backend_internal_domain.ClaimStatus"
+                },
+                "title": {
+                    "type": "string"
+                },
+                "updated_at": {
+                    "type": "string"
+                }
+            }
+        },
+        "github_com_ima_diplom-backend_internal_handler_dto.CountItem": {
+            "type": "object",
+            "required": [
+                "batch_number",
+                "product_id"
+            ],
+            "properties": {
+                "batch_number": {
+                    "type": "string"
+                },
+                "physical_qty": {
+                    "type": "integer"
+                },
+                "product_id": {
+                    "type": "string"
+                },
+                "reason": {
+                    "type": "string"
+                },
+                "system_qty": {
+                    "type": "integer"
+                }
+            }
+        },
+        "github_com_ima_diplom-backend_internal_handler_dto.CountryResponse": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "string",
+                    "example": "RUS"
+                },
+                "name_ru": {
+                    "type": "string",
+                    "example": "РФ"
+                }
+            }
+        },
+        "github_com_ima_diplom-backend_internal_handler_dto.CreateClaimRequest": {
+            "type": "object",
+            "required": [
+                "description",
+                "title"
+            ],
+            "properties": {
+                "description": {
+                    "type": "string"
+                },
+                "inbound_id": {
+                    "type": "string"
+                },
+                "order_id": {
+                    "type": "string"
+                },
+                "title": {
+                    "type": "string"
+                }
+            }
+        },
+        "github_com_ima_diplom-backend_internal_handler_dto.CreateInboundItem": {
+            "type": "object",
+            "required": [
+                "batch_number",
+                "expiration_date",
+                "price_netto",
+                "product_id",
+                "quantity",
+                "zone_id"
+            ],
+            "properties": {
+                "batch_number": {
+                    "type": "string"
+                },
+                "cert_number": {
+                    "type": "string"
+                },
+                "expiration_date": {
+                    "type": "string"
+                },
+                "price_brutto": {
+                    "type": "number"
+                },
+                "price_netto": {
+                    "type": "number"
+                },
+                "product_id": {
+                    "type": "string"
+                },
+                "quantity": {
+                    "type": "integer",
+                    "minimum": 1
+                },
+                "vat_rate": {
+                    "type": "number"
+                },
+                "zone_id": {
+                    "type": "string"
+                }
+            }
+        },
+        "github_com_ima_diplom-backend_internal_handler_dto.CreateInboundRequest": {
+            "type": "object",
+            "required": [
+                "invoice_date",
+                "invoice_number",
+                "items",
+                "supplier_id"
+            ],
+            "properties": {
+                "invoice_date": {
+                    "type": "string"
+                },
+                "invoice_number": {
+                    "type": "string"
+                },
+                "items": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/github_com_ima_diplom-backend_internal_handler_dto.CreateInboundItem"
+                    }
+                },
+                "notes": {
+                    "type": "string"
+                },
+                "supplier_id": {
+                    "type": "string"
+                }
+            }
+        },
+        "github_com_ima_diplom-backend_internal_handler_dto.CreateOrderItem": {
+            "type": "object",
+            "required": [
+                "product_id",
+                "quantity"
+            ],
+            "properties": {
+                "product_id": {
+                    "type": "string"
+                },
+                "quantity": {
+                    "type": "integer",
+                    "minimum": 1
+                }
+            }
+        },
+        "github_com_ima_diplom-backend_internal_handler_dto.CreateOrderRequest": {
+            "type": "object",
+            "required": [
+                "customer_name",
+                "items"
+            ],
+            "properties": {
+                "customer_name": {
+                    "type": "string"
+                },
+                "items": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/github_com_ima_diplom-backend_internal_handler_dto.CreateOrderItem"
+                    }
+                },
+                "priority": {
+                    "type": "integer",
+                    "maximum": 3,
+                    "minimum": 1
+                }
+            }
+        },
+        "github_com_ima_diplom-backend_internal_handler_dto.CreateProductRequest": {
+            "type": "object",
+            "required": [
+                "atc_code",
+                "dosage_form",
+                "generic_name",
+                "name",
+                "package_size",
+                "sku",
+                "strength"
+            ],
+            "properties": {
+                "atc_code": {
+                    "type": "string"
+                },
+                "dosage_form": {
+                    "type": "string"
+                },
+                "generic_name": {
+                    "type": "string"
+                },
+                "is_jnvlp": {
+                    "type": "boolean"
+                },
+                "manufacturer_id": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "package_size": {
+                    "type": "integer",
+                    "minimum": 1
+                },
+                "photo_url": {
+                    "type": "string"
+                },
+                "sku": {
+                    "type": "string"
+                },
+                "storage_conditions": {
+                    "type": "string"
+                },
+                "strength": {
+                    "type": "string"
+                }
+            }
+        },
+        "github_com_ima_diplom-backend_internal_handler_dto.CreateSupplierRequest": {
+            "type": "object",
+            "required": [
+                "inn",
+                "kpp",
+                "name"
+            ],
+            "properties": {
+                "address": {
+                    "type": "string"
+                },
+                "contact_name": {
+                    "type": "string"
+                },
+                "email": {
+                    "type": "string"
+                },
+                "inn": {
+                    "type": "string"
+                },
+                "kpp": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "phone": {
+                    "type": "string"
+                }
+            }
+        },
+        "github_com_ima_diplom-backend_internal_handler_dto.CreateZoneRequest": {
+            "type": "object",
+            "required": [
+                "name",
+                "type"
+            ],
+            "properties": {
+                "capacity": {
+                    "type": "integer"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "temp_max": {
+                    "type": "number"
+                },
+                "temp_min": {
+                    "type": "number"
+                },
+                "type": {
+                    "enum": [
+                        "ambient",
+                        "cool",
+                        "cold",
+                        "narcotic",
+                        "quarantine"
+                    ],
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/github_com_ima_diplom-backend_internal_domain.ZoneType"
+                        }
+                    ]
+                }
+            }
+        },
+        "github_com_ima_diplom-backend_internal_handler_dto.EnvLogListResponse": {
+            "type": "object",
+            "properties": {
+                "logs": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/github_com_ima_diplom-backend_internal_handler_dto.EnvLogResponse"
+                    }
+                },
+                "total": {
+                    "type": "integer"
+                }
+            }
+        },
+        "github_com_ima_diplom-backend_internal_handler_dto.EnvLogResponse": {
+            "type": "object",
+            "properties": {
+                "humidity": {
+                    "type": "number"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "notes": {
+                    "type": "string"
+                },
+                "recorded_at": {
+                    "type": "string"
+                },
+                "recorded_by": {
+                    "type": "integer"
+                },
+                "temperature": {
+                    "type": "number"
+                },
+                "zone_id": {
+                    "type": "string"
+                }
+            }
+        },
         "github_com_ima_diplom-backend_internal_handler_dto.ErrorResponse": {
             "type": "object",
             "properties": {
                 "error": {
+                    "type": "string"
+                }
+            }
+        },
+        "github_com_ima_diplom-backend_internal_handler_dto.InboundItemResponse": {
+            "type": "object",
+            "properties": {
+                "batch_number": {
+                    "type": "string"
+                },
+                "cert_number": {
+                    "type": "string"
+                },
+                "expiration_date": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "price_brutto": {
+                    "type": "number"
+                },
+                "price_netto": {
+                    "type": "number"
+                },
+                "product_id": {
+                    "type": "string"
+                },
+                "quantity": {
+                    "type": "integer"
+                },
+                "vat_rate": {
+                    "type": "number"
+                },
+                "zone_id": {
+                    "type": "string"
+                }
+            }
+        },
+        "github_com_ima_diplom-backend_internal_handler_dto.InboundListResponse": {
+            "type": "object",
+            "properties": {
+                "inbounds": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/github_com_ima_diplom-backend_internal_handler_dto.InboundResponse"
+                    }
+                },
+                "total": {
+                    "type": "integer"
+                }
+            }
+        },
+        "github_com_ima_diplom-backend_internal_handler_dto.InboundResponse": {
+            "type": "object",
+            "properties": {
+                "created_at": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "invoice_date": {
+                    "type": "string"
+                },
+                "invoice_number": {
+                    "type": "string"
+                },
+                "items": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/github_com_ima_diplom-backend_internal_handler_dto.InboundItemResponse"
+                    }
+                },
+                "notes": {
+                    "type": "string"
+                },
+                "received_by": {
+                    "type": "integer"
+                },
+                "status": {
+                    "$ref": "#/definitions/github_com_ima_diplom-backend_internal_domain.InboundStatus"
+                },
+                "supplier_id": {
+                    "type": "string"
+                },
+                "total_amount": {
+                    "type": "number"
+                },
+                "updated_at": {
+                    "type": "string"
+                },
+                "vat_amount": {
+                    "type": "number"
+                }
+            }
+        },
+        "github_com_ima_diplom-backend_internal_handler_dto.InventoryItemResponse": {
+            "type": "object",
+            "properties": {
+                "batch_number": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "physical_qty": {
+                    "type": "integer"
+                },
+                "product_id": {
+                    "type": "string"
+                },
+                "reason": {
+                    "type": "string"
+                },
+                "system_qty": {
+                    "type": "integer"
+                }
+            }
+        },
+        "github_com_ima_diplom-backend_internal_handler_dto.InventorySessionResponse": {
+            "type": "object",
+            "properties": {
+                "completed_at": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "items": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/github_com_ima_diplom-backend_internal_handler_dto.InventoryItemResponse"
+                    }
+                },
+                "started_at": {
+                    "type": "string"
+                },
+                "started_by": {
+                    "type": "integer"
+                },
+                "status": {
+                    "$ref": "#/definitions/github_com_ima_diplom-backend_internal_domain.InventoryStatus"
+                },
+                "zone_id": {
+                    "type": "string"
+                }
+            }
+        },
+        "github_com_ima_diplom-backend_internal_handler_dto.OrderItemResponse": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "string"
+                },
+                "picked_qty": {
+                    "type": "integer"
+                },
+                "product_id": {
+                    "type": "string"
+                },
+                "quantity": {
+                    "type": "integer"
+                }
+            }
+        },
+        "github_com_ima_diplom-backend_internal_handler_dto.OrderListResponse": {
+            "type": "object",
+            "properties": {
+                "orders": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/github_com_ima_diplom-backend_internal_handler_dto.OrderResponse"
+                    }
+                },
+                "total": {
+                    "type": "integer"
+                }
+            }
+        },
+        "github_com_ima_diplom-backend_internal_handler_dto.OrderResponse": {
+            "type": "object",
+            "properties": {
+                "created_at": {
+                    "type": "string"
+                },
+                "created_by": {
+                    "type": "integer"
+                },
+                "customer_name": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "items": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/github_com_ima_diplom-backend_internal_handler_dto.OrderItemResponse"
+                    }
+                },
+                "order_number": {
+                    "type": "string"
+                },
+                "priority": {
+                    "type": "integer"
+                },
+                "status": {
+                    "$ref": "#/definitions/github_com_ima_diplom-backend_internal_domain.OrderStatus"
+                },
+                "updated_at": {
+                    "type": "string"
+                }
+            }
+        },
+        "github_com_ima_diplom-backend_internal_handler_dto.ProductListResponse": {
+            "type": "object",
+            "properties": {
+                "products": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/github_com_ima_diplom-backend_internal_handler_dto.ProductResponse"
+                    }
+                },
+                "total": {
+                    "type": "integer"
+                }
+            }
+        },
+        "github_com_ima_diplom-backend_internal_handler_dto.ProductResponse": {
+            "type": "object",
+            "properties": {
+                "atc_code": {
+                    "type": "string"
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "deleted_at": {
+                    "type": "string"
+                },
+                "dosage_form": {
+                    "type": "string"
+                },
+                "generic_name": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "is_jnvlp": {
+                    "type": "boolean"
+                },
+                "manufacturer_id": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "package_size": {
+                    "type": "integer"
+                },
+                "photo_url": {
+                    "type": "string"
+                },
+                "sku": {
+                    "type": "string"
+                },
+                "storage_conditions": {
+                    "type": "string"
+                },
+                "strength": {
+                    "type": "string"
+                },
+                "updated_at": {
+                    "type": "string"
+                }
+            }
+        },
+        "github_com_ima_diplom-backend_internal_handler_dto.RecalledBatchResponse": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "string"
+                },
+                "issued_at": {
+                    "type": "string"
+                },
+                "product_name": {
+                    "type": "string"
+                },
+                "recall_reason": {
+                    "type": "string"
+                },
+                "ru_number": {
+                    "type": "string"
+                },
+                "serial_number": {
+                    "type": "string"
+                },
+                "synced_at": {
+                    "type": "string"
+                }
+            }
+        },
+        "github_com_ima_diplom-backend_internal_handler_dto.RecalledCheckResponse": {
+            "type": "object",
+            "properties": {
+                "details": {
+                    "$ref": "#/definitions/github_com_ima_diplom-backend_internal_handler_dto.RecalledBatchResponse"
+                },
+                "is_recalled": {
+                    "type": "boolean"
+                }
+            }
+        },
+        "github_com_ima_diplom-backend_internal_handler_dto.RecordEnvLogRequest": {
+            "type": "object",
+            "required": [
+                "zone_id"
+            ],
+            "properties": {
+                "humidity": {
+                    "type": "number"
+                },
+                "notes": {
+                    "type": "string"
+                },
+                "temperature": {
+                    "type": "number"
+                },
+                "zone_id": {
                     "type": "string"
                 }
             }
@@ -92,6 +2459,292 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "message": {
+                    "type": "string"
+                }
+            }
+        },
+        "github_com_ima_diplom-backend_internal_handler_dto.StartInventoryRequest": {
+            "type": "object",
+            "required": [
+                "zone_id"
+            ],
+            "properties": {
+                "zone_id": {
+                    "type": "string"
+                }
+            }
+        },
+        "github_com_ima_diplom-backend_internal_handler_dto.SubmitCountRequest": {
+            "type": "object",
+            "required": [
+                "items"
+            ],
+            "properties": {
+                "items": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/github_com_ima_diplom-backend_internal_handler_dto.CountItem"
+                    }
+                }
+            }
+        },
+        "github_com_ima_diplom-backend_internal_handler_dto.SupplierListResponse": {
+            "type": "object",
+            "properties": {
+                "suppliers": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/github_com_ima_diplom-backend_internal_handler_dto.SupplierResponse"
+                    }
+                },
+                "total": {
+                    "type": "integer"
+                }
+            }
+        },
+        "github_com_ima_diplom-backend_internal_handler_dto.SupplierResponse": {
+            "type": "object",
+            "properties": {
+                "address": {
+                    "type": "string"
+                },
+                "contact_name": {
+                    "type": "string"
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "email": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "inn": {
+                    "type": "string"
+                },
+                "is_active": {
+                    "type": "boolean"
+                },
+                "kpp": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "phone": {
+                    "type": "string"
+                },
+                "updated_at": {
+                    "type": "string"
+                }
+            }
+        },
+        "github_com_ima_diplom-backend_internal_handler_dto.SystemSettingResponse": {
+            "type": "object",
+            "properties": {
+                "key": {
+                    "type": "string"
+                },
+                "value": {
+                    "type": "string"
+                }
+            }
+        },
+        "github_com_ima_diplom-backend_internal_handler_dto.TransferBatchRequest": {
+            "type": "object",
+            "required": [
+                "target_zone_id"
+            ],
+            "properties": {
+                "target_zone_id": {
+                    "type": "string"
+                }
+            }
+        },
+        "github_com_ima_diplom-backend_internal_handler_dto.UpdateBatchStatusRequest": {
+            "type": "object",
+            "required": [
+                "status"
+            ],
+            "properties": {
+                "status": {
+                    "$ref": "#/definitions/github_com_ima_diplom-backend_internal_domain.BatchStatus"
+                }
+            }
+        },
+        "github_com_ima_diplom-backend_internal_handler_dto.UpdateClaimStatusRequest": {
+            "type": "object",
+            "required": [
+                "status"
+            ],
+            "properties": {
+                "status": {
+                    "$ref": "#/definitions/github_com_ima_diplom-backend_internal_domain.ClaimStatus"
+                }
+            }
+        },
+        "github_com_ima_diplom-backend_internal_handler_dto.UpdateInboundStatusRequest": {
+            "type": "object",
+            "required": [
+                "status"
+            ],
+            "properties": {
+                "status": {
+                    "enum": [
+                        "draft",
+                        "received",
+                        "completed",
+                        "cancelled"
+                    ],
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/github_com_ima_diplom-backend_internal_domain.InboundStatus"
+                        }
+                    ]
+                }
+            }
+        },
+        "github_com_ima_diplom-backend_internal_handler_dto.UpdateOrderStatusRequest": {
+            "type": "object",
+            "required": [
+                "status"
+            ],
+            "properties": {
+                "status": {
+                    "$ref": "#/definitions/github_com_ima_diplom-backend_internal_domain.OrderStatus"
+                }
+            }
+        },
+        "github_com_ima_diplom-backend_internal_handler_dto.UpdateProductRequest": {
+            "type": "object",
+            "properties": {
+                "atc_code": {
+                    "type": "string"
+                },
+                "dosage_form": {
+                    "type": "string"
+                },
+                "generic_name": {
+                    "type": "string"
+                },
+                "is_jnvlp": {
+                    "type": "boolean"
+                },
+                "manufacturer_id": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "package_size": {
+                    "type": "integer"
+                },
+                "photo_url": {
+                    "type": "string"
+                },
+                "storage_conditions": {
+                    "type": "string"
+                },
+                "strength": {
+                    "type": "string"
+                }
+            }
+        },
+        "github_com_ima_diplom-backend_internal_handler_dto.UpdateSettingRequest": {
+            "type": "object",
+            "required": [
+                "value"
+            ],
+            "properties": {
+                "value": {
+                    "type": "string"
+                }
+            }
+        },
+        "github_com_ima_diplom-backend_internal_handler_dto.UpdateSupplierRequest": {
+            "type": "object",
+            "properties": {
+                "address": {
+                    "type": "string"
+                },
+                "contact_name": {
+                    "type": "string"
+                },
+                "email": {
+                    "type": "string"
+                },
+                "is_active": {
+                    "type": "boolean"
+                },
+                "kpp": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "phone": {
+                    "type": "string"
+                }
+            }
+        },
+        "github_com_ima_diplom-backend_internal_handler_dto.UpdateZoneRequest": {
+            "type": "object",
+            "properties": {
+                "capacity": {
+                    "type": "integer"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "is_active": {
+                    "type": "boolean"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "temp_max": {
+                    "type": "number"
+                },
+                "temp_min": {
+                    "type": "number"
+                },
+                "type": {
+                    "$ref": "#/definitions/github_com_ima_diplom-backend_internal_domain.ZoneType"
+                }
+            }
+        },
+        "github_com_ima_diplom-backend_internal_handler_dto.ZoneResponse": {
+            "type": "object",
+            "properties": {
+                "capacity": {
+                    "type": "integer"
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "is_active": {
+                    "type": "boolean"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "temp_max": {
+                    "type": "number"
+                },
+                "temp_min": {
+                    "type": "number"
+                },
+                "type": {
+                    "$ref": "#/definitions/github_com_ima_diplom-backend_internal_domain.ZoneType"
+                },
+                "updated_at": {
                     "type": "string"
                 }
             }
