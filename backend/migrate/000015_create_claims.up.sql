@@ -1,29 +1,20 @@
 -- ============================================================
 -- 000015_create_claims.up.sql
--- Claims (рекламации), claim photos, recalled batches — Phase 3.
+-- Claims.
 -- ============================================================
+
+CREATE TYPE claim_status AS ENUM ('open', 'in_progress', 'resolved', 'closed');
 
 CREATE TABLE claims (
     id                   UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    type                 claim_type NOT NULL,
-    batch_id             UUID REFERENCES batches(id),
-    product_id           UUID NOT NULL REFERENCES products(id),
-    status               VARCHAR(20) NOT NULL DEFAULT 'open',
-    -- 'open', 'blocked', 'closed'
-    digital_signature_id UUID,   -- signature approving block/return (not implemented)
-    source               TEXT,
-    notes                TEXT,
-    resolution           TEXT,
-    created_by           INT NOT NULL REFERENCES users(id),
+    title                VARCHAR(255) NOT NULL,
+    description          TEXT,
+    inbound_id           UUID REFERENCES inbound_receivings(id),
+    order_id             UUID REFERENCES orders(id),
+    status               claim_status NOT NULL DEFAULT 'open',
+    created_by           INT NOT NULL,
     created_at           TIMESTAMPTZ DEFAULT NOW(),
-    closed_at            TIMESTAMPTZ
-);
-
-CREATE TABLE claim_photos (
-    id          UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    claim_id    UUID NOT NULL REFERENCES claims(id) ON DELETE CASCADE,
-    url         TEXT NOT NULL,
-    uploaded_at TIMESTAMPTZ DEFAULT NOW()
+    updated_at           TIMESTAMPTZ DEFAULT NOW()
 );
 
 -- ============================================================

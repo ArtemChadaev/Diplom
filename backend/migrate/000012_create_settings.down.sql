@@ -1,1 +1,1 @@
-DROP TABLE IF EXISTS settings;
+DROP TABLE IF EXISTS system_settings;

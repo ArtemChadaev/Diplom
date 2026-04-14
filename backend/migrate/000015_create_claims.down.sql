@@ -1,3 +1,3 @@
-DROP TABLE IF EXISTS recalled_batches;
-DROP TABLE IF EXISTS claim_photos;
-DROP TABLE IF EXISTS claims;
+DROP TABLE IF EXISTS recalled_batches CASCADE;
+DROP TABLE IF EXISTS claims CASCADE;
+DROP TYPE IF EXISTS claim_status;
