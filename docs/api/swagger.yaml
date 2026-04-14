@@ -1,4 +1,56 @@
+definitions:
+  github_com_ima_diplom-backend_internal_handler_dto.ErrorResponse:
+    properties:
+      error:
+        type: string
+    type: object
+  github_com_ima_diplom-backend_internal_handler_dto.RegisterRequest:
+    properties:
+      email:
+        type: string
+    type: object
+  github_com_ima_diplom-backend_internal_handler_dto.RegisterResponse:
+    properties:
+      expires_in:
+        type: integer
+      message:
+        type: string
+    type: object
 info:
   contact: {}
-paths: {}
+paths:
+  /auth/register:
+    post:
+      consumes:
+      - application/json
+      description: Создаёт нового пользователя с минимальной ролью (pharmacist).
+      parameters:
+      - description: Email для регистрации
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/github_com_ima_diplom-backend_internal_handler_dto.RegisterRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/github_com_ima_diplom-backend_internal_handler_dto.RegisterResponse'
+        "400":
+          description: email is required
+          schema:
+            $ref: '#/definitions/github_com_ima_diplom-backend_internal_handler_dto.ErrorResponse'
+        "409":
+          description: email already registered
+          schema:
+            $ref: '#/definitions/github_com_ima_diplom-backend_internal_handler_dto.ErrorResponse'
+        "500":
+          description: failed to register
+          schema:
+            $ref: '#/definitions/github_com_ima_diplom-backend_internal_handler_dto.ErrorResponse'
+      summary: Регистрация нового пользователя по email
+      tags:
+      - auth
 swagger: "2.0"

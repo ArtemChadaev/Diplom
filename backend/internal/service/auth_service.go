@@ -181,6 +181,34 @@ func hmacSHA256(data, secret string) string {
 	return hex.EncodeToString(h.Sum(nil))
 }
 
+func (s *authService) RegisterByEmail(ctx context.Context, email string) error {
+	taken, err := s.userRepo.IsEmailTaken(ctx, email)
+	if err != nil {
+		return err
+	}
+	if taken {
+		return domain.ErrEmailTaken
+	}
+
+	newUser := &domain.User{
+		Email: email,
+		Role:  domain.RolePharmacist, // lowest-privilege role
+	}
+	created, err := s.userRepo.Create(ctx, newUser)
+	if err != nil {
+		return err
+	}
+
+	// Reuse OTP generation logic
+	code := generateOTPCode()
+	hash := hmacSHA256(code, s.otpHMACSecret)
+	if err := s.otpRepo.Store(ctx, created.ID, hash); err != nil {
+		return err
+	}
+
+	return s.mailer.SendOTP(ctx, email, code)
+}
+
 func (s *authService) SendOTPCode(ctx context.Context, email string) error {
 	user, err := s.userRepo.FindByEmail(ctx, email)
 	if err != nil {

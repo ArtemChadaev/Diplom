@@ -24,3 +24,12 @@ type SendCodeResponse struct {
 	Message   string `json:"message"`
 	ExpiresIn int    `json:"expires_in"`
 }
+
+type RegisterRequest struct {
+	Email string `json:"email"`
+}
+
+type RegisterResponse struct {
+	Message   string `json:"message"`
+	ExpiresIn int    `json:"expires_in"`
+}

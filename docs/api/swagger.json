@@ -3,5 +3,87 @@
     "info": {
         "contact": {}
     },
-    "paths": {}
+    "paths": {
+        "/auth/register": {
+            "post": {
+                "description": "Создаёт нового пользователя с минимальной ролью (pharmacist).",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "auth"
+                ],
+                "summary": "Регистрация нового пользователя по email",
+                "parameters": [
+                    {
+                        "description": "Email для регистрации",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/github_com_ima_diplom-backend_internal_handler_dto.RegisterRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_ima_diplom-backend_internal_handler_dto.RegisterResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "email is required",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_ima_diplom-backend_internal_handler_dto.ErrorResponse"
+                        }
+                    },
+                    "409": {
+                        "description": "email already registered",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_ima_diplom-backend_internal_handler_dto.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "failed to register",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_ima_diplom-backend_internal_handler_dto.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "github_com_ima_diplom-backend_internal_handler_dto.ErrorResponse": {
+            "type": "object",
+            "properties": {
+                "error": {
+                    "type": "string"
+                }
+            }
+        },
+        "github_com_ima_diplom-backend_internal_handler_dto.RegisterRequest": {
+            "type": "object",
+            "properties": {
+                "email": {
+                    "type": "string"
+                }
+            }
+        },
+        "github_com_ima_diplom-backend_internal_handler_dto.RegisterResponse": {
+            "type": "object",
+            "properties": {
+                "expires_in": {
+                    "type": "integer"
+                },
+                "message": {
+                    "type": "string"
+                }
+            }
+        }
+    }
 }

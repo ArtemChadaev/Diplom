@@ -179,3 +179,47 @@ func (h *Handler) verifyCode(w http.ResponseWriter, r *http.Request) {
 
 	writeJSON(w, http.StatusOK, resp)
 }
+
+// @Summary     Регистрация нового пользователя по email
+// @Description Создаёт нового пользователя с минимальной ролью (pharmacist).
+//              Аккаунт остаётся неактивным до тех пор, пока администратор
+//              не назначит пользователю рабочую роль. Сразу после создания
+//              на указанный email отправляется одноразовый OTP-код (действует
+//              10 минут), который нужно подтвердить через POST /auth/verify-code.
+// @Tags        auth
+// @Accept      json
+// @Produce     json
+// @Param       body  body      dto.RegisterRequest   true  "Email для регистрации"
+// @Success     201   {object}  dto.RegisterResponse
+// @Failure     400   {object}  dto.ErrorResponse     "email is required"
+// @Failure     409   {object}  dto.ErrorResponse     "email already registered"
+// @Failure     500   {object}  dto.ErrorResponse     "failed to register"
+// @Router      /auth/register [post]
+func (h *Handler) register(w http.ResponseWriter, r *http.Request) {
+	var req dto.RegisterRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		writeError(w, http.StatusBadRequest, "invalid request body")
+		return
+	}
+
+	if req.Email == "" {
+		writeError(w, http.StatusBadRequest, "email is required")
+		return
+	}
+
+	if err := h.service.Auth.RegisterByEmail(r.Context(), req.Email); err != nil {
+		if errors.Is(err, domain.ErrEmailTaken) {
+			writeError(w, http.StatusConflict, "email already registered")
+			return
+		}
+		logger.FromContext(r.Context()).Error("failed to register user", "email", req.Email, "error", err)
+		writeError(w, http.StatusInternalServerError, "failed to register")
+		return
+	}
+
+	resp := dto.RegisterResponse{
+		Message:   "registered",
+		ExpiresIn: 600, // 10 minutes
+	}
+	writeJSON(w, http.StatusCreated, resp)
+}

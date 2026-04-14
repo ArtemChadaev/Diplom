@@ -7,9 +7,10 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
+	"github.com/go-chi/cors"
+	"github.com/ima/diplom-backend/internal/config"
 	"github.com/ima/diplom-backend/internal/domain"
 	h_middleware "github.com/ima/diplom-backend/internal/handler/middleware"
-	"github.com/ima/diplom-backend/internal/config"
 	"github.com/ima/diplom-backend/internal/service"
 )
 
@@ -17,7 +18,7 @@ type Handler struct {
 	service             service.Service
 	tokenSvc            domain.TokenService
 	cfg                 *config.Config
-	userRepo           domain.UserRepository
+	userRepo            domain.UserRepository
 	employeeProfileRepo domain.EmployeeProfileRepository
 }
 
@@ -26,7 +27,7 @@ func NewHandler(service *service.Service, tokenSvc domain.TokenService, cfg *con
 		service:             *service,
 		tokenSvc:            tokenSvc,
 		cfg:                 cfg,
-		userRepo:           userRepo,
+		userRepo:            userRepo,
 		employeeProfileRepo: employeeProfileRepo,
 	}
 }
@@ -34,16 +35,28 @@ func NewHandler(service *service.Service, tokenSvc domain.TokenService, cfg *con
 func (h *Handler) Router() chi.Router {
 	r := chi.NewRouter()
 
+	r.Use(cors.Handler(cors.Options{
+		AllowedOrigins:   []string{"http://localhost:3000"},
+		AllowedMethods:   []string{"GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"},
+		AllowedHeaders:   []string{"Accept", "Authorization", "Content-Type", "X-CSRF-Token"},
+		ExposedHeaders:   []string{"Link"},
+		AllowCredentials: true,
+		MaxAge:           300,
+	}))
+
 	r.Use(middleware.RequestID)
+	r.Use(middleware.CleanPath)       // Убирает двойные слэши //
+	r.Use(middleware.RedirectSlashes) // Направляет /path/ на /path
 	r.Use(middleware.Recoverer)
 	r.Use(middleware.Timeout(60 * time.Second))
 	r.Use(middleware.Heartbeat("/ping"))
+	r.Use(h_middleware.InjectIPAddress) // Записывает IP клиента в контекст (используется аудит-логом)
 	r.Use(h_middleware.RequestLogger)
-
-
+	
 	// Public Auth Routes (OAuth only + OTP)
 	r.Route("/auth", func(r chi.Router) {
 		r.Post("/google", h.googleLogin)
+		r.Post("/register", h.register)
 		r.Post("/refresh", h.refresh)
 		r.Post("/logout", h.logout)
 		r.Post("/send-code", h.sendCode)

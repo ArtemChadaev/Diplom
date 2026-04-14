@@ -46,6 +46,14 @@ type AuthService interface {
 	AssignRole(ctx context.Context, adminID int, adminRole UserRole, targetUserID int, role UserRole) error
 	SetBlocked(ctx context.Context, adminID int, adminRole UserRole, targetUserID int, blocked bool) error
 
+	// Registration
+	// RegisterByEmail creates a new user with the lowest-privilege role (pharmacist)
+	// if the email is not already registered. The account is inactive until an admin
+	// assigns a higher role. Immediately after creation, an OTP code is dispatched
+	// to the given email so the user can verify their identity via POST /auth/verify-code.
+	// Returns ErrEmailTaken if the address is already in use.
+	RegisterByEmail(ctx context.Context, email string) error
+
 	// OTP
 	SendOTPCode(ctx context.Context, email string) error
 	VerifyOTPCode(ctx context.Context, email, code string, meta SessionMeta) (*TokenPair, error)

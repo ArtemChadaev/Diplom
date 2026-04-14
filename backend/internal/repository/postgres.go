@@ -3,6 +3,7 @@ package repository
 import (
 	"log/slog"
 
+	"github.com/ima/diplom-backend/internal/repository/hooks"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
@@ -23,6 +24,11 @@ func NewPostgresDB(cfg PostgresConfig) (*gorm.DB, error) {
 	// Подключение через GORM
 	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
 	if err != nil {
+		return nil, err
+	}
+
+	// Регистрируем плагин аудит-лога — перехватывает все CREATE/UPDATE/DELETE.
+	if err = db.Use(&hooks.AuditPlugin{}); err != nil {
 		return nil, err
 	}
 

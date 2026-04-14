@@ -12,6 +12,7 @@ type contextKey string
 const (
 	keyRequestID contextKey = "request_id"
 	keyUserID    contextKey = "user_id"
+	keyIPAddress contextKey = "ip_address"
 )
 
 // Setup initialises the global slog logger.
@@ -38,6 +39,23 @@ func WithRequestID(ctx context.Context, requestID string) context.Context {
 // WithUserID stores a user ID in the context.
 func WithUserID(ctx context.Context, userID int) context.Context {
 	return context.WithValue(ctx, keyUserID, userID)
+}
+
+// WithIPAddress stores the request IP address in the context.
+func WithIPAddress(ctx context.Context, ip string) context.Context {
+	return context.WithValue(ctx, keyIPAddress, ip)
+}
+
+// IPAddressFromContext returns the IP address stored in ctx, or empty string.
+func IPAddressFromContext(ctx context.Context) string {
+	ip, _ := ctx.Value(keyIPAddress).(string)
+	return ip
+}
+
+// UserIDFromContext returns the user ID stored in ctx by WithUserID, or 0.
+func UserIDFromContext(ctx context.Context) int {
+	uid, _ := ctx.Value(keyUserID).(int)
+	return uid
 }
 
 // FromContext returns a *slog.Logger pre-enriched with
