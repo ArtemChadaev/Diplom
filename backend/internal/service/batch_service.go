@@ -48,7 +48,10 @@ func (s *batchService) UpdateStatus(ctx context.Context, callerRole domain.UserR
 }
 
 func (s *batchService) TransferBatch(ctx context.Context, callerRole domain.UserRole, id string, targetZoneID string) error {
-	// Storekeepers can move goods
+	// Storekeeper, WarehouseManager and Admin can move goods; Pharmacist cannot
+	if callerRole == domain.RolePharmacist {
+		return domain.ErrInsufficientPerms
+	}
 	batch, err := s.repo.GetByID(ctx, id)
 	if err != nil {
 		return err
