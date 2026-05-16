@@ -1,6 +1,6 @@
 services:
   backend:
-    image: ghcr.io/ArtemChadaev/pharma-backend:${APP_TAG:-latest}
+    image: ghcr.io/artemchadaev/diplom-backend:${APP_TAG:-latest}
     profiles: ["backend-all", "all"]
     env_file:
       - .env
@@ -16,7 +16,7 @@ services:
     restart: unless-stopped
 
   frontend:
-    image: ghcr.io/ArtemChadaev/pharma-frontend:${APP_TAG:-latest}
+    image: ghcr.io/artemchadaev/diplom-frontend:${APP_TAG:-latest}
     profiles: ["all"] 
     env_file:
       - .env
@@ -52,7 +52,7 @@ services:
     restart: unless-stopped
 
   migrate:
-    image: ghcr.io/ArtemChadaev/pharma-migrate:${APP_TAG:-latest}
+    image: ghcr.io/artemchadaev/diplom-migrate:${APP_TAG:-latest}
     profiles: ["backend-all", "all"]
     command:
       - -path=/migrations/
@@ -66,7 +66,7 @@ services:
       - app_network
 
   migrate-down:
-    image: ghcr.io/ArtemChadaev/pharma-migrate:${APP_TAG:-latest}
+    image: ghcr.io/artemchadaev/diplom-migrate:${APP_TAG:-latest}
     profiles: [ "tools" ] 
     command:
       - -path=/migrations/
