@@ -11,6 +11,7 @@ import (
 	"github.com/ima/diplom-backend/internal/pkg/logger"
 )
 
+//TODO: почему нету описания путей тут всех, а только часть
 // NOTE: register and login endpoints removed — authentication is OAuth-only.
 // Use POST /auth/google for Google OAuth login.
 
@@ -182,10 +183,12 @@ func (h *Handler) verifyCode(w http.ResponseWriter, r *http.Request) {
 
 // @Summary     Регистрация нового пользователя по email
 // @Description Создаёт нового пользователя с минимальной ролью (pharmacist).
-//              Аккаунт остаётся неактивным до тех пор, пока администратор
-//              не назначит пользователю рабочую роль. Сразу после создания
-//              на указанный email отправляется одноразовый OTP-код (действует
-//              10 минут), который нужно подтвердить через POST /auth/verify-code.
+//
+//	Аккаунт остаётся неактивным до тех пор, пока администратор
+//	не назначит пользователю рабочую роль. Сразу после создания
+//	на указанный email отправляется одноразовый OTP-код (действует
+//	10 минут), который нужно подтвердить через POST /auth/verify-code.
+//
 // @Tags        auth
 // @Accept      json
 // @Produce     json
@@ -222,4 +225,22 @@ func (h *Handler) register(w http.ResponseWriter, r *http.Request) {
 		ExpiresIn: 600, // 10 minutes
 	}
 	writeJSON(w, http.StatusCreated, resp)
+}
+
+// @Summary     Проверка доступа к логам (Caddy forward_auth)
+// @Description Используется Caddy как точка forward_auth перед проксированием на Dozzle.
+//
+//	Caddy перенаправляет сюда оригинальный запрос с заголовком Authorization.
+//	AuthRequired проверяет JWT, RequireRole проверяет роль admin.
+//	Если оба middleware прошли — возвращает 200 OK и Caddy пускает к логам.
+//
+// @Tags        auth
+// @Produce     json
+// @Security    BearerAuth
+// @Success     200  {object}  map[string]string  "ok"
+// @Failure     401  "missing or invalid token"
+// @Failure     403  "insufficient permissions (not admin)"
+// @Router      /admin/auth/check-logs-auth [get]
+func (h *Handler) checkLogsAuth(w http.ResponseWriter, r *http.Request) {
+	writeJSON(w, http.StatusOK, map[string]string{"status": "ok"})
 }

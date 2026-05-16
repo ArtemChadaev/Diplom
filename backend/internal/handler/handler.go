@@ -52,12 +52,12 @@ func (h *Handler) Router() chi.Router {
 	r.Use(middleware.Heartbeat("/ping"))
 	r.Use(h_middleware.InjectIPAddress) // Записывает IP клиента в контекст (используется аудит-логом)
 	r.Use(h_middleware.RequestLogger)
-	
+
 	// Healthcheck
 	r.Get("/health", func(w http.ResponseWriter, r *http.Request) {
 		writeJSON(w, http.StatusOK, map[string]string{"status": "ok"})
 	})
-	
+
 	// Public Auth Routes (OAuth only + OTP)
 	r.Route("/auth", func(r chi.Router) {
 		r.Post("/google", h.googleLogin)
@@ -81,6 +81,9 @@ func (h *Handler) Router() chi.Router {
 		// Admin routes
 		r.Route("/admin", func(r chi.Router) {
 			r.Use(h_middleware.RequireRole(domain.RoleAdmin))
+
+			// Caddy forward_auth gate: validates JWT + admin role before proxying to Dozzle
+			r.Get("/auth/check-logs-auth", h.checkLogsAuth)
 
 			r.Patch("/users/{id}/role", h.adminAssignRole)
 			r.Patch("/users/{id}/blocked", h.adminSetBlocked)
