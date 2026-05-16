@@ -5,7 +5,7 @@ WORKDIR /app
 RUN corepack enable pnpm
 
 COPY package.json pnpm-lock.yaml ./
-RUN pnpm config set ignore-scripts false && pnpm install
+RUN pnpm install --ignore-scripts
 
 # Stage 2: Builder
 FROM node:22-alpine AS builder
