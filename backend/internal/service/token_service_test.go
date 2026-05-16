@@ -96,8 +96,12 @@ func TestTokenService_ParseAccessToken_Tampered(t *testing.T) {
 	raw, err := svc.GenerateAccessToken(testUser(1, domain.RolePharmacist), uuid.New())
 	require.NoError(t, err)
 
-	// Flip the last character of the signature segment
-	tampered := raw[:len(raw)-1] + "X"
+	// Flip the last character of the signature segment reliably
+	lastChar := "X"
+	if raw[len(raw)-1] == 'X' {
+		lastChar = "Y"
+	}
+	tampered := raw[:len(raw)-1] + lastChar
 	claims, err := svc.ParseAccessToken(tampered)
 	assert.Error(t, err)
 	assert.Nil(t, claims)
