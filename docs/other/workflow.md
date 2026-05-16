@@ -87,7 +87,7 @@ Where `<scope>` is one of: `backend`, `frontend`, `all`.
 
 ### Pre-commit (local)
 - **Backend:** `golangci-lint run`
-- **Frontend:** `eslint` via `npm run lint`
+- **Frontend:** `eslint` via `pnpm lint`
 
 ### Pull Request Checks
 - Backend: `go test ./...` — unit + integration tests

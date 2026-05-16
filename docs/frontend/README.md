@@ -35,8 +35,9 @@ Next.js 16 App Router application for the Pharmaceutical ERP system. TypeScript-
 ## Local Development
 
 ```bash
-npm install
-npm run dev    # http://localhost:3000
+cd frontend
+pnpm install
+pnpm dev    # http://localhost:3000
 ```
 
 Or via Docker Compose from the monorepo root:
@@ -208,7 +209,7 @@ TDD cycle for every hook with non-trivial logic:
 2. Write the test  →  hooks/use-xxx.test.ts
 3. Present test for approval
 4. Implement the hook  →  hooks/use-xxx.ts
-5. Confirm: npm test -- use-xxx passes
+5. Confirm: `pnpm test -- use-xxx` passes
 ```
 
 **Exempt from mandatory tests** (same rule as backend):

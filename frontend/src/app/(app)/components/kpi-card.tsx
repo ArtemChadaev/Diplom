@@ -31,12 +31,12 @@ export function KpiCard({
             desc: "text-muted-foreground",
         },
         warning: {
-            wrapper: "bg-card border border-l-4 border-l-yellow-500 shadow-sm",
-            iconBg: "bg-yellow-100",
-            iconColor: "text-yellow-700",
-            title: "text-muted-foreground/60",
-            value: "text-yellow-700",
-            desc: "text-muted-foreground",
+            wrapper: "bg-card border border-l-4 border-l-warning shadow-sm",
+            iconBg: "bg-warning-subtle",
+            iconColor: "text-warning",
+            title: "text-warning/70",
+            value: "text-warning",
+            desc: "text-warning/80",
         },
         error: {
             wrapper: "bg-card border border-l-4 border-l-destructive shadow-sm",
@@ -47,19 +47,19 @@ export function KpiCard({
             desc: "text-destructive/80",
         },
         success: {
-            wrapper: "bg-card border border-l-4 border-l-green-500 shadow-sm",
-            iconBg: "bg-green-500/10",
-            iconColor: "text-green-600",
-            title: "text-green-600/60",
-            value: "text-green-600",
-            desc: "text-green-600/80",
+            wrapper: "bg-card border border-l-4 border-l-success shadow-sm",
+            iconBg: "bg-success-subtle",
+            iconColor: "text-success",
+            title: "text-success/60",
+            value: "text-success",
+            desc: "text-success/80",
         }
     };
 
     const currentStyle = styles[state];
 
     return (
-        <div className={cn("md:col-span-4 p-6 rounded-xl flex flex-col justify-between group transition-all duration-300", currentStyle.wrapper)}>
+        <div className={cn("md:col-span-4 p-6 rounded-xl flex flex-col justify-between group transition-all duration-300 cursor-default", currentStyle.wrapper)}>
             <div className="flex justify-between items-start mb-4">
                 <div className={cn("p-2 rounded-lg", currentStyle.iconBg, currentStyle.iconColor)}>
                     {icon}
