@@ -3,13 +3,13 @@ name: CI/CD Build and Deploy (Even Tags Only)
 on:
   push:
     tags:
-      - 'v*.*.0' # Срабатывает только на релизные теги (оканчивающиеся на .0, например v0.5.0, v1.2.0). Хотфиксы (v0.5.1) игнорируются.
+      - "v*.*.0" # Срабатывает только на релизные теги (оканчивающиеся на .0, например v0.5.0, v1.2.0). Хотфиксы (v0.5.1) игнорируются.
 
 env:
   REGISTRY: ghcr.io
-  BACKEND_IMAGE_NAME: ghcr.io/${{ github.repository }}-backend
-  FRONTEND_IMAGE_NAME: ghcr.io/${{ github.repository }}-frontend
-  MIGRATE_IMAGE_NAME: ghcr.io/${{ github.repository }}-migrate
+  BACKEND_IMAGE_NAME: ghcr.io/artemchadaev/diplom-backend
+  FRONTEND_IMAGE_NAME: ghcr.io/artemchadaev/diplom-frontend
+  MIGRATE_IMAGE_NAME: ghcr.io/artemchadaev/diplom-migrate
 
 jobs:
   build-and-push:
@@ -73,7 +73,7 @@ jobs:
           script: |
             mkdir -p ~/pharma-app
             cd ~/pharma-app
-            
+
             # Генерация .env файла на сервере из секретов GitHub
             cat <<EOF > .env
             ENV=production
@@ -82,25 +82,25 @@ jobs:
             OTP_HMAC_SECRET=${{ secrets.OTP_HMAC_SECRET }}
             UploadDir=./uploads
             JWT_SECRET=${{ secrets.JWT_SECRET }}
-            
+
             FRONTEND_PORT=${{ secrets.FRONTEND_PORT }}
             NEXT_PUBLIC_API_URL=${{ secrets.NEXT_PUBLIC_API_URL }}
-            
+
             DB_HOST=postgres
             DB_PORT=${{ secrets.DB_PORT }}
             DB_USER=${{ secrets.DB_USER }}
             DB_PASSWORD=${{ secrets.DB_PASSWORD }}
             DB_NAME=${{ secrets.DB_NAME }}
-            
+
             VALKEY_HOST=valkey
             VALKEY_PORT=${{ secrets.VALKEY_PORT }}
-            
+
             SMTP_SERVER=${{ secrets.SMTP_SERVER }}
             SMTP_PORT=${{ secrets.SMTP_PORT }}
             SMTP_USER=${{ secrets.SMTP_USER }}
             SMTP_PASS=${{ secrets.SMTP_PASS }}
             EOF
-            
+
             echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u "${{ github.actor }}" --password-stdin
             export APP_TAG=${{ github.ref_name }}
             docker compose pull
