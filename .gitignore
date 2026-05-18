@@ -6,4 +6,4 @@
 # macOS
 .DS_Store
 
-.frontend_old
+frontend_old/

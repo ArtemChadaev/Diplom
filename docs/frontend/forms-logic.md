@@ -1,6 +1,6 @@
 # Forms — Business Logic Reference
 
-← [Back to Frontend Overview](./README.md) | [Form UI Specs →](./forms/) | [Conventions →](./conventions.md)
+← [Back to Frontend Overview](./README.md) | [Form UI Specs →](./forms/) | [Conventions →](./conventions.md) | [Архитектура FSD →](./fsd.md)
 
 > **Authority:** This is the single source of truth for all form **logic**: Zod schemas, API contracts, error handling, and post-submit behavior.
 > UI design, component selection, and layout are documented in the individual [form files](./forms/).
@@ -23,34 +23,34 @@
 
 ---
 
-## Hook Location Convention
+## Расположение логики (FSD Конвенция)
 
-Every form's logic lives in a dedicated hook:
+Вся логика форм размещается в соответствующих слайсах `features/`:
 
 ```
-frontend/src/hooks/
-├── use-auth-login.ts          → form 01
-├── use-auth-login.test.ts
-├── use-otp-verify.ts          → form 01b
-├── use-otp-verify.test.ts
-├── use-employee-profile.ts    → form 02
-├── use-inbound-receiving.ts   → form 03
-├── use-warehouse-zones.ts     → form 04
-├── use-environment-log.ts     → form 05
-├── use-order-assembly.ts      → form 06
-├── use-claims.ts              → form 07
-├── use-product-card.ts        → form 08
-└── use-inventory.ts           → form 09
+frontend/src/features/
+├── auth/
+│   ├── login/model/use-auth-login.ts        → form 01
+│   └── otp-verify/model/use-otp-verify.ts   → form 01b
+├── employee/profile/model/use-employee-profile.ts → form 02
+├── inbound/receiving/model/use-inbound-receiving.ts → form 03
+├── warehouse/
+│   ├── zones/model/use-warehouse-zones.ts   → form 04
+│   └── environment/model/use-environment-log.ts → form 05
+├── order/assembly/model/use-order-assembly.ts → form 06
+├── claims/model/use-claims.ts               → form 07
+├── product/card/model/use-product-card.ts   → form 08
+└── inventory/model/use-inventory.ts         → form 09
 ```
 
-> Hook test file lives in the **same directory** as the hook (`use-xxx.test.ts`).
-> Component test file lives in the **same directory** as the component (`my-form.test.tsx`).
+> Тесты логики размещаются в той же папке `model/` рядом с хуком (`use-xxx.test.ts`).
+> Тесты UI-компонентов размещаются в папке `ui/` рядом с компонентом (`my-form.test.tsx`).
 
 ---
 
 ## 1. Auth — Login
 
-UI spec: [forms/01-auth-login.md](./forms/01-auth-login.md) | Hook: `hooks/use-auth-login.ts`
+UI spec: [forms/01-auth-login.md](./forms/01-auth-login.md) | Слайс: `features/auth/login`
 
 ### Required Fields
 
@@ -114,7 +114,7 @@ type UserDTO = {
 
 ## 2. Auth — Email OTP Verify
 
-UI spec: [forms/01b-email-otp-verify.md](./forms/01b-email-otp-verify.md) | Hook: `hooks/use-otp-verify.ts`
+UI spec: [forms/01b-email-otp-verify.md](./forms/01b-email-otp-verify.md) | Слайс: `features/auth/otp-verify`
 
 ### Required Fields
 
@@ -178,8 +178,8 @@ When all 6 digits are entered, the form submits automatically:
 ### Email State Between Steps
 
 ```ts
-// In Login form after successful send-code:
-router.push(`/auth/verify?email=${encodeURIComponent(email)}`)
+// In Login form after successful send-code (React Router):
+navigate(`/auth/verify?email=${encodeURIComponent(email)}`)
 ```
 
 ### Error Handling
@@ -195,7 +195,7 @@ router.push(`/auth/verify?email=${encodeURIComponent(email)}`)
 
 ## 3. Employee Profile
 
-UI spec: [forms/02-employee-profile.md](./forms/02-employee-profile.md) | Hook: `hooks/use-employee-profile.ts`
+UI spec: [forms/02-employee-profile.md](./forms/02-employee-profile.md) | Слайс: `features/employee/profile`
 
 ### Required Fields
 
@@ -266,7 +266,7 @@ POST  /api/v1/admin/users/:id/send-login-link
 
 ## 4. Inbound Receiving
 
-UI spec: [forms/03-inbound-receiving.md](./forms/03-inbound-receiving.md) | Hook: `hooks/use-inbound-receiving.ts`
+UI spec: [forms/03-inbound-receiving.md](./forms/03-inbound-receiving.md) | Слайс: `features/inbound/receiving`
 
 ### Required Fields
 
@@ -347,7 +347,7 @@ Body: { qp_user_id, inspection_date, result: "approved"|"rejected", notes }
 
 ## 5. Warehouse Zoning
 
-UI spec: [forms/04-warehouse-zoning.md](./forms/04-warehouse-zoning.md) | Hook: `hooks/use-warehouse-zones.ts`
+UI spec: [forms/04-warehouse-zoning.md](./forms/04-warehouse-zoning.md) | Слайс: `features/warehouse/zones`
 
 ### Zod Schema (zone creation, admin only)
 
@@ -394,7 +394,7 @@ PUT  /api/v1/zones/:id   (admin)
 
 ## 6. Environment Log
 
-UI spec: [forms/05-environment-log.md](./forms/05-environment-log.md) | Hook: `hooks/use-environment-log.ts`
+UI spec: [forms/05-environment-log.md](./forms/05-environment-log.md) | Слайс: `features/warehouse/environment`
 
 ### Required Fields
 
@@ -460,7 +460,7 @@ GET /api/v1/environment-log/export?from=...&to=...  (admin / QP only → Excel)
 
 ## 7. Assembly & Shipment (FEFO)
 
-UI spec: [forms/06-assembly-shipment-fefo.md](./forms/06-assembly-shipment-fefo.md) | Hook: `hooks/use-order-assembly.ts`
+UI spec: [forms/06-assembly-shipment-fefo.md](./forms/06-assembly-shipment-fefo.md) | Слайс: `features/order/assembly`
 
 ### API Endpoints
 
@@ -523,7 +523,7 @@ POST /api/v1/orders/:id/ship
 
 ## 8. Claims & Defects
 
-UI spec: [forms/07-claims-defects.md](./forms/07-claims-defects.md) | Hook: `hooks/use-claims.ts`
+UI spec: [forms/07-claims-defects.md](./forms/07-claims-defects.md) | Слайс: `features/claims`
 
 ### Required Fields
 
@@ -597,7 +597,7 @@ Unblock requires mandatory `reason` field.
 
 ## 9. Product Card
 
-UI spec: [forms/08-product-card.md](./forms/08-product-card.md) | Hook: `hooks/use-product-card.ts`
+UI spec: [forms/08-product-card.md](./forms/08-product-card.md) | Слайс: `features/product/card`
 
 ### Required Fields
 
@@ -684,7 +684,7 @@ INN, trade name, SKU, barcode, registration #, DataMatrix (GTIN).
 
 ## 10. Inventory
 
-UI spec: [forms/09-inventory.md](./forms/09-inventory.md) | Hook: `hooks/use-inventory.ts`
+UI spec: [forms/09-inventory.md](./forms/09-inventory.md) | Слайс: `features/inventory`
 
 ### Zod Schema (item entry)
 

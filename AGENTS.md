@@ -2,7 +2,7 @@
 
 > **FOR AI AGENTS & DEVELOPERS:** This file is your absolute starting point. It acts as the master directory. Start here to navigate the project, understand boundaries, and find technical specs. Do **not** guess rules; follow the links below.
 
-A full-stack ERP system for pharmaceutical warehouse management, covering drug batch lifecycle from inbound receiving to order shipment. Built with a **Go** backend (clean/onion architecture) and a **Next.js 16** frontend.
+A full-stack ERP system for pharmaceutical warehouse management, covering drug batch lifecycle from inbound receiving to order shipment. Built with a **Go** backend (clean/onion architecture) and a **React 19 + Vite + FSD** frontend.
 
 ---
 
@@ -11,12 +11,12 @@ A full-stack ERP system for pharmaceutical warehouse management, covering drug b
 If you need to write code, design a component, or understand logic, you **MUST** read the specific README/SOP for that domain first.
 
 ### 🖥️ Frontend Sector
-Where to look if you are writing React components, forms, hooks, or styles.
-* **[Frontend Directives (Read First!)](./docs/frontend/README.md)** — The entry point. Explains rule separations and gives you links to:
-  * **[Conventions](./docs/frontend/conventions.md)** (Styling, Tailwind v4 variables, HTTP)
+Where to look if you are writing React components, forms, business logic, or styles.
+* **[Frontend Directives (Read First!)](./docs/frontend/README.md)** — The entry point. Explains FSD architecture and gives you links to:
+  * **[Conventions](./docs/frontend/conventions.md)** (React 19, Vite, Tailwind v4 variables, HTTP)
   * **[Forms Logic](./docs/frontend/forms-logic.md)** (API calls, Zod schemas, validation)
   * **[Forms Specs](./docs/frontend/forms/)** (shadcn UI guidelines per form)
-  * **[Hooks rules](./docs/frontend/hooks.md)** (Where all frontend business logic lives)
+  * **[FSD Architecture](./docs/frontend/fsd.md)** (Feature-Sliced Design rules & business logic slices)
 
 ### 🔧 Backend Sector
 Where to look if you are modifying handlers, services, repositories, or DB migrations.
