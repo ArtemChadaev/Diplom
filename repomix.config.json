@@ -1,0 +1,27 @@
+{
+    "output": {
+        "filePath": "repomix-output.md",
+        "style": "markdown",
+        "removeComments": false,
+        "showLineNumbers": true
+    },
+    "ignore": {
+        "customPatterns": [
+            "**/.next/**",
+            "**/node_modules/**",
+            "**/.git/**",
+            "**/dist/**",
+            "**/*.png",
+            "**/*.jpg",
+            "**/*.ico",
+            "**/*.svg",
+            "**/.env*",
+            "**/repomix-output*",
+            "tmp/**",
+            "bin/**",
+            "**/*.exe",
+            "**/vendor/**"
+        ],
+        "useGitignore": true
+    }
+}
