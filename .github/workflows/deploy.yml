@@ -90,33 +90,8 @@ jobs:
             mkdir -p ~/pharma-app
             cd ~/pharma-app
 
-            # Генерация .env файла на сервере из секретов GitHub
-            cat <<EOF > .env
-            ENV=production
-            PORT=${{ secrets.APP_PORT }}
-            ADMIN_EMAIL=${{ secrets.ADMIN_EMAIL }}
-            OTP_HMAC_SECRET=${{ secrets.OTP_HMAC_SECRET }}
-            UploadDir=./uploads
-            JWT_SECRET=${{ secrets.JWT_SECRET }}
-
-            FRONTEND_PORT=${{ secrets.FRONTEND_PORT }}
-            NEXT_PUBLIC_API_URL=${{ secrets.NEXT_PUBLIC_API_URL }}
-
-            DB_HOST=postgres
-            DB_PORT=${{ secrets.DB_PORT }}
-            DB_USER=${{ secrets.DB_USER }}
-            DB_PASSWORD=${{ secrets.DB_PASSWORD }}
-            DB_NAME=${{ secrets.DB_NAME }}
-
-            VALKEY_HOST=valkey
-            VALKEY_PORT=${{ secrets.VALKEY_PORT }}
-
-            SMTP_SERVER=${{ secrets.SMTP_SERVER }}
-            SMTP_PORT=${{ secrets.SMTP_PORT }}
-            SMTP_USER=${{ secrets.SMTP_USER }}
-            SMTP_PASS=${{ secrets.SMTP_PASS }}
-            ALLOWED_ORIGINS=${{ secrets.ALLOWED_ORIGINS }}
-            EOF
+            # Записываем .env из одного секрета ENV_FILE
+            printf '%s' '${{ secrets.ENV_FILE }}' > .env
 
             echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u "${{ github.actor }}" --password-stdin
             export APP_TAG=${{ github.ref_name }}
