@@ -16,7 +16,7 @@
 | **Unit (Frontend)** | `Vitest`, `React Testing Library` | Тестирование UI-компонентов и Zod-схем. |
 | **Integration** | `httptest`, `sqlmock`, `testcontainers` | Проверка API-эндпоинтов с участием реальной БД (или Docker). |
 | **E2E (End-to-End)** | `Playwright` | Проверка полных пользовательских путей в браузере. |
-| **Security** | `gosec`, `npm audit`, `OWASP ZAP` | Статический анализ кода и сканирование уязвимостей. |
+| **Security** | `gosec`, `pnpm audit`, `OWASP ZAP` | Статический анализ кода и сканирование уязвимостей. |
 
 ---
 

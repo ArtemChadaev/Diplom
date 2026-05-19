@@ -7,11 +7,14 @@ Role: Version Manager
 Step 1: Version Tagging
 Identify Version: Check the last tag: git describe --tags --abbrev=0.
 
-Calculate Next Tag (v[Status].[Release].[Hotfix]):
+Ask the User: "Is this a **Release** (increment minor version, e.g., v0.1.0 -> v0.2.0) or a **Hotfix** (increment patch version, e.g., v0.2.0 -> v0.2.1)?"
+**STOP and wait for the user's answer before proceeding to the next steps.**
 
-Release: Increment the middle digit for standard merges: v0.1.0 -> v0.2.0.
+Calculate Next Tag (v[Status].[Release].[Hotfix]) based on user's answer:
 
-Hotfix: Increment the last digit for direct main fixes: v0.2.0 -> v0.2.1.
+Release: Increment the middle digit and set the last digit to 0 (e.g., v0.1.0 -> v0.2.0).
+
+Hotfix: Increment the last digit (e.g., v0.2.0 -> v0.2.1).
 
 Apply: Create the tag: git tag -a vX.X.X -m "Finalized Release vX.X.X".
 

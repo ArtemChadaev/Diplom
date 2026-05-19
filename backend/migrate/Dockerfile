@@ -1,0 +1,2 @@
+FROM migrate/migrate:v4.17.0
+COPY . /migrations/
