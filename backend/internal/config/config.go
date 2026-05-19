@@ -3,13 +3,13 @@ package config
 import (
 	"context"
 	"errors"
-	
+
 	"github.com/ilyakaznacheev/cleanenv"
 	"github.com/ima/diplom-backend/internal/pkg/logger"
 )
 
 type Config struct {
-	Env  string `env:"ENV" env-default:"development"`
+	Env string `env:"ENV" env-default:"development"`
 	// env-default задает значение, если переменной нет ни в .env, ни в системе
 	Port string `env:"PORT" env-default:"8080"`
 
@@ -33,12 +33,12 @@ type Config struct {
 	// Gmail SMTP
 	MAILER_SMTP_SERVER string `env:"SMTP_SERVER" env-default:"smtp.gmail.com"`
 	MAILER_SMTP_PORT   string `env:"SMTP_PORT" env-default:"587"`
-	MAILER_USERNAME   string `env:"SMTP_USER" env-required:"true"`
-	MAILER_PASSWORD   string `env:"SMTP_PASS" env-required:"true"`
+	MAILER_USERNAME    string `env:"SMTP_USER" env-required:"true"`
+	MAILER_PASSWORD    string `env:"SMTP_PASS" env-required:"true"`
 
-	OTPHMACSecret string `env:"OTP_HMAC_SECRET" env-required:"true"`
-	UploadDir     string `env:"UPLOAD_DIR" env-default:"./uploads"`
-	AllowedOrigins []string `env:"ALLOWED_ORIGINS" env-separator:"," env-default:"http://localhost:3000,http://localhost:5173,http://127.0.0.1:3000,http://127.0.0.1:5173,https://pharma-hub.ru,https://phasma-hub.ru"`
+	OTPHMACSecret  string   `env:"OTP_HMAC_SECRET" env-required:"true"`
+	UploadDir      string   `env:"UPLOAD_DIR" env-default:"./uploads"`
+	AllowedOrigins []string `env:"ALLOWED_ORIGINS" env-separator:"," env-default:"http://localhost:3000,http://localhost:5173,http://127.0.0.1:3000,http://127.0.0.1:5173,https://pharma-hub.ru"`
 }
 
 func Load() (*Config, error) {
