@@ -16,9 +16,9 @@ var (
 	ErrTokenExpired            = errors.New("token expired")
 	ErrInvalidToken            = errors.New("invalid token")
 	ErrSessionNotFound         = errors.New("session not found or terminated")
-	ErrInvalidTelegram         = errors.New("invalid telegram auth data")
 	ErrInsufficientPerms       = errors.New("insufficient permissions for this operation")
 	ErrEmployeeProfileNotFound = errors.New("employee profile not found")
+	ErrInvalidEmployeeCode     = errors.New("invalid employee code format")
 
 	ErrOTPNotFound    = errors.New("no active OTP code found")
 	ErrOTPMaxAttempts = errors.New("max OTP attempts reached")

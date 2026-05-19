@@ -22,7 +22,6 @@ type User struct {
 	ID          int
 	Email       string    // primary identity (unique, not null)
 	GoogleID    *string   // nullable — set when linked via Google OAuth
-	TelegramID  *int64    // nullable — set when linked via Telegram
 	Role        UserRole
 	NsPvAccess  bool      // access to narcotic/psychotropic substances (НС/ПВ)
 	UkepBound   bool      // qualified electronic signature linked
@@ -54,14 +53,12 @@ type UserRepository interface {
 	FindByID(ctx context.Context, id int) (*User, error)
 	FindByEmail(ctx context.Context, email string) (*User, error)
 	FindByGoogleID(ctx context.Context, googleID string) (*User, error)
-	FindByTelegramID(ctx context.Context, telegramID int64) (*User, error)
 	IsEmailTaken(ctx context.Context, email string) (bool, error)
 
 	// Mutation
 	Create(ctx context.Context, u *User) (*User, error)
 	UpdateRole(ctx context.Context, userID int, role UserRole) error
 	LinkGoogle(ctx context.Context, userID int, googleID string) error
-	LinkTelegram(ctx context.Context, userID int, telegramID int64) error
 	SetNsPvAccess(ctx context.Context, userID int, access bool) error
 	SetBlocked(ctx context.Context, userID int, blocked bool) error
 

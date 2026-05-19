@@ -100,6 +100,7 @@ func (r *employeeProfileRepository) List(ctx context.Context, limit, offset int)
 
 func buildProfileUpdateMap(input domain.UpdateEmployeeProfileInput) map[string]any {
 	m := make(map[string]any)
+	if input.EmployeeCode != nil       { m["employee_code"] = *input.EmployeeCode }
 	if input.FullName != nil           { m["full_name"] = *input.FullName }
 	if input.CorporateEmail != nil     { m["corporate_email"] = *input.CorporateEmail }
 	if input.Phone != nil              { m["phone"] = *input.Phone }

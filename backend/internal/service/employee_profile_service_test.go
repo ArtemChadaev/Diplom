@@ -92,7 +92,7 @@ func TestEmployeeProfileService_GetProfile(t *testing.T) {
 
 // Scenario: Admin-only profile update with profile existence check
 //
-//	Covers: admin success, non-admin rejection, profile not found
+//	Covers: admin success, non-admin rejection, profile not found, employee_code validation
 func TestEmployeeProfileService_UpdateProfile(t *testing.T) {
 	ctx := context.Background()
 	callerID := 1
@@ -102,30 +102,61 @@ func TestEmployeeProfileService_UpdateProfile(t *testing.T) {
 	updatedProfile := &domain.EmployeeProfile{ID: uint(profileID), UserID: uint(targetUserID), FullName: "Updated Name"}
 	input := domain.UpdateEmployeeProfileInput{}
 
+	codeValid := "IT-001"
+	inputWithValidCode := domain.UpdateEmployeeProfileInput{EmployeeCode: &codeValid}
+	profileWithCode := &domain.EmployeeProfile{ID: uint(profileID), UserID: uint(targetUserID), EmployeeCode: codeValid}
+
+	codeInvalid := "invalid-123"
+	inputWithInvalidCode := domain.UpdateEmployeeProfileInput{EmployeeCode: &codeInvalid}
+
 	tests := []struct {
 		name       string
 		callerRole domain.UserRole
+		input      domain.UpdateEmployeeProfileInput
 		wantErr    error
+		wantResult *domain.EmployeeProfile
 		setupRepo  func(*mocks.MockEmployeeProfileRepository)
 	}{
 		{
 			name:       "admin updates profile successfully",
 			callerRole: domain.RoleAdmin,
+			input:      input,
 			wantErr:    nil,
+			wantResult: updatedProfile,
 			setupRepo: func(r *mocks.MockEmployeeProfileRepository) {
 				r.On("FindByUserID", ctx, targetUserID).Return(profile, nil)
 				r.On("Update", ctx, profileID, input).Return(updatedProfile, nil)
 			},
 		},
 		{
+			name:       "admin updates profile with valid employee_code successfully",
+			callerRole: domain.RoleAdmin,
+			input:      inputWithValidCode,
+			wantErr:    nil,
+			wantResult: profileWithCode,
+			setupRepo: func(r *mocks.MockEmployeeProfileRepository) {
+				r.On("FindByUserID", ctx, targetUserID).Return(profile, nil)
+				r.On("Update", ctx, profileID, inputWithValidCode).Return(profileWithCode, nil)
+			},
+		},
+		{
+			name:       "admin tries invalid employee_code format → ErrInvalidEmployeeCode",
+			callerRole: domain.RoleAdmin,
+			input:      inputWithInvalidCode,
+			wantErr:    domain.ErrInvalidEmployeeCode,
+			setupRepo:  func(r *mocks.MockEmployeeProfileRepository) {},
+		},
+		{
 			name:       "non-admin is rejected before any repo call",
 			callerRole: domain.RoleStorekeeper,
+			input:      input,
 			wantErr:    domain.ErrInsufficientPerms,
 			setupRepo:  func(r *mocks.MockEmployeeProfileRepository) {},
 		},
 		{
 			name:       "admin, profile not found → ErrEmployeeProfileNotFound",
 			callerRole: domain.RoleAdmin,
+			input:      input,
 			wantErr:    domain.ErrEmployeeProfileNotFound,
 			setupRepo: func(r *mocks.MockEmployeeProfileRepository) {
 				r.On("FindByUserID", ctx, targetUserID).Return(nil, domain.ErrEmployeeProfileNotFound)
@@ -139,18 +170,52 @@ func TestEmployeeProfileService_UpdateProfile(t *testing.T) {
 			tc.setupRepo(repo)
 
 			svc := newEmployeeProfileService(repo)
-			got, err := svc.UpdateProfile(ctx, callerID, tc.callerRole, targetUserID, input)
+			got, err := svc.UpdateProfile(ctx, callerID, tc.callerRole, targetUserID, tc.input)
 
 			if tc.wantErr != nil {
 				assert.ErrorIs(t, err, tc.wantErr)
 				assert.Nil(t, got)
 			} else {
 				require.NoError(t, err)
-				assert.Equal(t, updatedProfile, got)
+				assert.Equal(t, tc.wantResult, got)
 			}
 			repo.AssertExpectations(t)
 		})
 	}
+}
+
+func TestEmployeeProfileService_PatchSelfProfile(t *testing.T) {
+	ctx := context.Background()
+	userID := 5
+	profileID := 10
+	profile := &domain.EmployeeProfile{ID: uint(profileID), UserID: uint(userID)}
+	updatedProfile := &domain.EmployeeProfile{ID: uint(profileID), UserID: uint(userID), FullName: "New Self Name"}
+	input := domain.UpdateEmployeeProfileInput{FullName: &updatedProfile.FullName}
+
+	t.Run("success", func(t *testing.T) {
+		repo := &mocks.MockEmployeeProfileRepository{}
+		repo.On("FindByUserID", ctx, userID).Return(profile, nil)
+		repo.On("Update", ctx, profileID, input).Return(updatedProfile, nil)
+
+		svc := newEmployeeProfileService(repo)
+		got, err := svc.PatchSelfProfile(ctx, userID, input)
+
+		require.NoError(t, err)
+		assert.Equal(t, updatedProfile, got)
+		repo.AssertExpectations(t)
+	})
+
+	t.Run("profile not found", func(t *testing.T) {
+		repo := &mocks.MockEmployeeProfileRepository{}
+		repo.On("FindByUserID", ctx, userID).Return(nil, domain.ErrEmployeeProfileNotFound)
+
+		svc := newEmployeeProfileService(repo)
+		got, err := svc.PatchSelfProfile(ctx, userID, input)
+
+		assert.ErrorIs(t, err, domain.ErrEmployeeProfileNotFound)
+		assert.Nil(t, got)
+		repo.AssertExpectations(t)
+	})
 }
 
 // ---------------------------------------------------------------------------

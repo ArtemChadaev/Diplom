@@ -9,6 +9,7 @@ import (
 // Every field is a pointer: if the JSON key is absent, the pointer is nil,
 // and the repository will NOT update that column.
 type PatchEmployeeProfileRequest struct {
+	EmployeeCode        *string         `json:"employee_code"`
 	FullName            *string         `json:"full_name"`
 	CorporateEmail      *string         `json:"corporate_email"`
 	Phone               *string         `json:"phone"`

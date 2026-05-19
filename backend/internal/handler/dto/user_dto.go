@@ -1,5 +1,10 @@
 package dto
 
+import (
+	"encoding/json"
+	"time"
+)
+
 // AssignRoleRequest — body for PATCH /admin/users/{id}/role
 type AssignRoleRequest struct {
 	Role string `json:"role"`
@@ -44,4 +49,17 @@ type PatchUserRequest struct {
 	Role              *string `json:"role,omitempty"`
 	NsPvAccess        *bool   `json:"ns_pv_access,omitempty"`
 	SpecialZoneAccess *bool   `json:"special_zone_access,omitempty"`
+}
+
+type PatchMeRequest struct {
+	FullName            *string         `json:"full_name"`
+	Phone               *string         `json:"phone"`
+	CorporateEmail      *string         `json:"corporate_email"`
+	CorporateMail       *string         `json:"corporatemail"`
+	BirthDate           *time.Time      `json:"birth_date"`
+	BirthdayDate        *time.Time      `json:"birthday_date"`
+	AvatarURL           *string         `json:"avatar_url"`
+	AvatarURL2          *string         `json:"avatarurl"`
+	MedicalBookScanURL  *string         `json:"medical_book_scan_url"`
+	GDPTrainingHistory  json.RawMessage `json:"gdp_training_history"`
 }
