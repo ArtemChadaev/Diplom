@@ -41,12 +41,14 @@ import {
 import { ReadOnlyField } from "./ReadOnlyField"
 
 export function ProfileSettingsPage() {
-  const { id } = useParams<{ id: string }>()
+  const { id: rawId } = useParams<{ id: string }>()
+  const id = rawId === "undefined" || rawId === "null" ? undefined : rawId
   const navigate = useNavigate()
   const currentUser = useUserStore((state) => state.user)
   
+  const targetId = id || (currentUser ? String(currentUser.id) : "")
   const isAdmin = currentUser?.role === "admin"
-  const isSelf = String(currentUser?.id) === String(id)
+  const isSelf = !id || String(currentUser?.id) === String(targetId)
 
   const [isLoading, setIsLoading] = useState(true)
   const [isSaving, setIsSaving] = useState(false)
@@ -133,9 +135,9 @@ export function ProfileSettingsPage() {
         const userRes = await api.get<any>(url)
 
         let empRes: any = null
-        if (isAdmin) {
+        if (isAdmin && targetId) {
           try {
-            empRes = await api.get<any>(`/admin/employees/${id}`)
+            empRes = await api.get<any>(`/admin/employees/${targetId}`)
           } catch (e) {
             console.error("No employee profile found in DB, using fallback:", e)
           }
@@ -145,7 +147,7 @@ export function ProfileSettingsPage() {
         const merged = { ...userRes, ...empRes }
 
         // Load emergency contact and telegram handle from localStorage backup
-        const backupData = localStorage.getItem(`profile_backup_${id}`)
+        const backupData = localStorage.getItem(`profile_backup_${targetId}`)
         if (backupData) {
           const parsed = JSON.parse(backupData)
           if (parsed.employee_code) merged.employee_code = parsed.employee_code
@@ -189,7 +191,7 @@ export function ProfileSettingsPage() {
     }
 
     void loadProfile()
-  }, [id, currentUser, isAdmin, isSelf, navigate])
+  }, [targetId, currentUser, isAdmin, isSelf, navigate])
 
   const handleSave = async () => {
     setIsSaving(true)
@@ -206,7 +208,7 @@ export function ProfileSettingsPage() {
         hire_date: hireDate ? hireDate.toISOString() : null,
         dismissal_date: dismissalDate ? dismissalDate.toISOString() : null,
       }
-      localStorage.setItem(`profile_backup_${id}`, JSON.stringify(backup))
+      localStorage.setItem(`profile_backup_${targetId}`, JSON.stringify(backup))
 
       if (isAdmin) {
         // 1. Update employee profile
@@ -225,15 +227,15 @@ export function ProfileSettingsPage() {
           gdp_training_history: gdpTrainingHistory,
           special_zone_access: specialZoneAccess,
         }
-        await api.patch(`/admin/employees/${id}`, empInput)
+        await api.patch(`/admin/employees/${targetId}`, empInput)
 
         // 2. Update role
-        await api.patch(`/admin/users/${id}/role`, {
+        await api.patch(`/admin/users/${targetId}/role`, {
           role: role,
         })
         
         // 3. Update blocked status
-        await api.patch(`/admin/users/${id}/blocked`, {
+        await api.patch(`/admin/users/${targetId}/blocked`, {
           blocked: isBlocked,
         })
       } else {
@@ -361,7 +363,7 @@ export function ProfileSettingsPage() {
                 </div>
                 <div className="text-center">
                   <span className="text-[10px] font-semibold text-muted-foreground uppercase tracking-widest">Аватар</span>
-                  <p className="text-[10px] text-muted-foreground mt-1">ID: #{id}</p>
+                  <p className="text-[10px] text-muted-foreground mt-1">ID: #{targetId}</p>
                 </div>
               </div>
               
