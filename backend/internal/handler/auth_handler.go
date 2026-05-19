@@ -15,6 +15,14 @@ import (
 // NOTE: register and login endpoints removed — authentication is OAuth-only.
 // Use POST /auth/google for Google OAuth login.
 
+// refresh godoc
+// @Summary      Refresh tokens
+// @Description  Reissues access token and refresh token using refresh_token cookie
+// @Tags         auth
+// @Produce      json
+// @Success      200  {object}  dto.TokenResponse
+// @Failure      401  {object}  dto.ErrorResponse  "refresh token missing or invalid session"
+// @Router       /auth/refresh [post]
 func (h *Handler) refresh(w http.ResponseWriter, r *http.Request) {
 	cookie, err := r.Cookie("refresh_token")
 	if err != nil {
@@ -65,6 +73,13 @@ func (h *Handler) refresh(w http.ResponseWriter, r *http.Request) {
 	_ = json.NewEncoder(w).Encode(resp)
 }
 
+// logout godoc
+// @Summary      Log out
+// @Description  Clears the refresh token cookie and revokes the active session
+// @Tags         auth
+// @Security     BearerAuth
+// @Success      204  "No Content"
+// @Router       /auth/logout [post]
 func (h *Handler) logout(w http.ResponseWriter, r *http.Request) {
 	cookie, err := r.Cookie("refresh_token")
 	if err != nil {
@@ -110,6 +125,19 @@ func (h *Handler) clearRefreshCookie(w http.ResponseWriter) {
 	})
 }
 
+// sendCode godoc
+// @Summary      Send OTP code
+// @Description  Sends a 6-digit OTP code to the user's email for passwordless login
+// @Tags         auth
+// @Accept       json
+// @Produce      json
+// @Param        body  body      dto.SendCodeRequest  true  "Email address to send OTP code to"
+// @Success      200   {object}  dto.SendCodeResponse
+// @Failure      400   {object}  dto.ErrorResponse  "invalid request body or email is required"
+// @Failure      404   {object}  dto.ErrorResponse  "user with this email not found"
+// @Failure      429   {object}  dto.ErrorResponse  "too many requests, try again later"
+// @Failure      500   {object}  dto.ErrorResponse  "failed to send code"
+// @Router       /auth/send-code [post]
 func (h *Handler) sendCode(w http.ResponseWriter, r *http.Request) {
 	var req dto.SendCodeRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
@@ -142,6 +170,18 @@ func (h *Handler) sendCode(w http.ResponseWriter, r *http.Request) {
 	writeJSON(w, http.StatusOK, resp)
 }
 
+// verifyCode godoc
+// @Summary      Verify OTP code
+// @Description  Verifies the OTP code sent to the user's email. Returns an access token and sets a HTTP-only refresh token cookie.
+// @Tags         auth
+// @Accept       json
+// @Produce      json
+// @Param        body  body      dto.VerifyCodeRequest  true  "Email and OTP code to verify"
+// @Success      200   {object}  dto.TokenResponse
+// @Failure      400   {object}  dto.ErrorResponse  "invalid request body or missing fields"
+// @Failure      401   {object}  dto.ErrorResponse  "invalid or expired code"
+// @Failure      500   {object}  dto.ErrorResponse  "failed to verify code"
+// @Router       /auth/verify-code [post]
 func (h *Handler) verifyCode(w http.ResponseWriter, r *http.Request) {
 	var req dto.VerifyCodeRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {

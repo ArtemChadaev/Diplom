@@ -14,6 +14,18 @@ import (
 )
 
 // adminGetEmployeeProfile handles GET /api/v1/admin/employees/{userID}
+// adminGetEmployeeProfile godoc
+// @Summary      Get employee profile (Admin)
+// @Description  Returns the details of a specific employee profile. Admin role required.
+// @Tags         Admin
+// @Security     BearerAuth
+// @Produce      json
+// @Param        userID  path      int  true  "User ID of the employee"
+// @Success      200     {object}  dto.EmployeeProfileResponse
+// @Failure      400     {object}  dto.ErrorResponse  "invalid user ID"
+// @Failure      403     {object}  dto.ErrorResponse  "insufficient permissions"
+// @Failure      404     {object}  dto.ErrorResponse  "profile not found"
+// @Router       /api/v1/admin/employees/{userID} [get]
 func (h *Handler) adminGetEmployeeProfile(w http.ResponseWriter, r *http.Request) {
 	targetUserID := mustParseIntParam(w, r, "userID")
 	if targetUserID == -1 {
@@ -33,6 +45,17 @@ func (h *Handler) adminGetEmployeeProfile(w http.ResponseWriter, r *http.Request
 }
 
 // adminListEmployeeProfiles handles GET /api/v1/admin/employees
+// adminListEmployeeProfiles godoc
+// @Summary      List employee profiles (Admin)
+// @Description  Returns a list of employee profiles with optional pagination. Admin role required.
+// @Tags         Admin
+// @Security     BearerAuth
+// @Produce      json
+// @Param        limit   query     int  false  "Limit (default 10)"
+// @Param        offset  query     int  false  "Offset (default 0)"
+// @Success      200     {array}   dto.EmployeeProfileResponse
+// @Failure      403     {object}  dto.ErrorResponse  "insufficient permissions"
+// @Router       /api/v1/admin/employees [get]
 func (h *Handler) adminListEmployeeProfiles(w http.ResponseWriter, r *http.Request) {
 	limit, _ := strconv.Atoi(r.URL.Query().Get("limit"))
 	offset, _ := strconv.Atoi(r.URL.Query().Get("offset"))
@@ -55,6 +78,20 @@ func (h *Handler) adminListEmployeeProfiles(w http.ResponseWriter, r *http.Reque
 }
 
 // adminPatchEmployeeProfile handles PATCH /api/v1/admin/employees/{userID}
+// adminPatchEmployeeProfile godoc
+// @Summary      Update employee profile (Admin)
+// @Description  Partially updates fields in an employee's profile. Admin role required.
+// @Tags         Admin
+// @Security     BearerAuth
+// @Accept       json
+// @Produce      json
+// @Param        userID  path      int  true  "User ID of the employee"
+// @Param        body    body      dto.PatchEmployeeProfileRequest  true  "Fields to update"
+// @Success      200     {object}  dto.EmployeeProfileResponse
+// @Failure      400     {object}  dto.ErrorResponse  "invalid user ID, invalid JSON or invalid fields"
+// @Failure      403     {object}  dto.ErrorResponse  "insufficient permissions"
+// @Failure      404     {object}  dto.ErrorResponse  "profile not found"
+// @Router       /api/v1/admin/employees/{userID} [patch]
 func (h *Handler) adminPatchEmployeeProfile(w http.ResponseWriter, r *http.Request) {
 	targetUserID := mustParseIntParam(w, r, "userID")
 	if targetUserID == -1 {

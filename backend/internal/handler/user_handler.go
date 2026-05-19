@@ -13,6 +13,16 @@ import (
 	"github.com/ima/diplom-backend/internal/handler/middleware"
 )
 
+// getMe godoc
+// @Summary      Get current user profile
+// @Description  Returns profile details for the authenticated user
+// @Tags         Users
+// @Security     BearerAuth
+// @Produce      json
+// @Success      200  {object}  dto.UserProfileResponse
+// @Failure      401  {object}  dto.ErrorResponse  "Unauthorized"
+// @Failure      404  {object}  dto.ErrorResponse  "user not found"
+// @Router       /api/v1/users/me [get]
 func (h *Handler) getMe(w http.ResponseWriter, r *http.Request) {
 	userID, ok := r.Context().Value(middleware.CtxUserID).(int)
 	if !ok {
@@ -34,6 +44,19 @@ func (h *Handler) getMe(w http.ResponseWriter, r *http.Request) {
 	writeJSON(w, http.StatusOK, resp)
 }
 
+// patchMe godoc
+// @Summary      Update current user profile
+// @Description  Partially updates the authenticated user's employee profile
+// @Tags         Users
+// @Security     BearerAuth
+// @Accept       json
+// @Produce      json
+// @Param        body  body      dto.PatchMeRequest  true  "Fields to update"
+// @Success      200   {object}  dto.UserProfileResponse
+// @Failure      400   {object}  dto.ErrorResponse  "invalid request body"
+// @Failure      401   {object}  dto.ErrorResponse  "Unauthorized"
+// @Failure      404   {object}  dto.ErrorResponse  "profile not found"
+// @Router       /api/v1/users/me [patch]
 func (h *Handler) patchMe(w http.ResponseWriter, r *http.Request) {
 	userID, ok := r.Context().Value(middleware.CtxUserID).(int)
 	if !ok {
@@ -97,6 +120,19 @@ func (h *Handler) patchMe(w http.ResponseWriter, r *http.Request) {
 	writeJSON(w, http.StatusOK, mapToUserProfileResponse(profile))
 }
 
+// listUsers godoc
+// @Summary      List users (Admin)
+// @Description  Returns a paginated and filtered list of all users and profiles. Admin role required.
+// @Tags         Admin
+// @Security     BearerAuth
+// @Produce      json
+// @Param        q      query     string  false  "Search query (login, email, full name)"
+// @Param        role   query     string  false  "Filter by role"
+// @Param        page   query     int     false  "Page number"
+// @Param        limit  query     int     false  "Limit"
+// @Success      200    {array}   dto.UserProfileResponse
+// @Failure      403    {object}  dto.ErrorResponse  "insufficient permissions"
+// @Router       /api/v1/admin/users [get]
 func (h *Handler) listUsers(w http.ResponseWriter, r *http.Request) {
 	q := r.URL.Query().Get("q")
 	role := r.URL.Query().Get("role")
@@ -132,6 +168,18 @@ func (h *Handler) listUsers(w http.ResponseWriter, r *http.Request) {
 	writeJSON(w, http.StatusOK, resp)
 }
 
+// getUserByID godoc
+// @Summary      Get user by ID (Admin)
+// @Description  Returns a user's details and profile. Admin role required.
+// @Tags         Admin
+// @Security     BearerAuth
+// @Produce      json
+// @Param        id   path      int  true  "User ID"
+// @Success      200  {object}  dto.UserProfileResponse
+// @Failure      400  {object}  dto.ErrorResponse  "invalid user ID"
+// @Failure      403  {object}  dto.ErrorResponse  "insufficient permissions"
+// @Failure      404  {object}  dto.ErrorResponse  "user not found"
+// @Router       /api/v1/admin/users/{id} [get]
 func (h *Handler) getUserByID(w http.ResponseWriter, r *http.Request) {
 	idStr := chi.URLParam(r, "id")
 	id, err := strconv.Atoi(idStr)
@@ -153,6 +201,20 @@ func (h *Handler) getUserByID(w http.ResponseWriter, r *http.Request) {
 	writeJSON(w, http.StatusOK, mapToUserProfileResponse(profile))
 }
 
+// patchUser godoc
+// @Summary      Update user and permissions (Admin)
+// @Description  Updates user role, ns/pv access, special zone access. Admin role required.
+// @Tags         Admin
+// @Security     BearerAuth
+// @Accept       json
+// @Produce      json
+// @Param        id    path      int  true  "User ID"
+// @Param        body  body      dto.PatchUserRequest  true  "Fields to update"
+// @Success      200   {object}  dto.UserProfileResponse
+// @Failure      400   {object}  dto.ErrorResponse  "invalid user ID or request body"
+// @Failure      403   {object}  dto.ErrorResponse  "insufficient permissions"
+// @Failure      404   {object}  dto.ErrorResponse  "user not found"
+// @Router       /api/v1/admin/users/{id} [patch]
 func (h *Handler) patchUser(w http.ResponseWriter, r *http.Request) {
 	idStr := chi.URLParam(r, "id")
 	id, err := strconv.Atoi(idStr)

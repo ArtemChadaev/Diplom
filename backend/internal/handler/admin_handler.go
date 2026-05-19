@@ -25,6 +25,20 @@ func mapAdminError(w http.ResponseWriter, err error) {
 	http.Error(w, err.Error(), http.StatusInternalServerError)
 }
 
+// adminSetBlocked godoc
+// @Summary      Block/Unblock user (Admin)
+// @Description  Toggles the blocked status of a specific user. Admin role required.
+// @Tags         Admin
+// @Security     BearerAuth
+// @Accept       json
+// @Produce      json
+// @Param        id    path      int  true  "User ID"
+// @Param        body  body      dto.SetBlockedRequest  true  "Block status"
+// @Success      200   {object}  map[string]bool  "blocked status response"
+// @Failure      400   {object}  dto.ErrorResponse  "invalid user ID or invalid JSON"
+// @Failure      403   {object}  dto.ErrorResponse  "insufficient permissions"
+// @Failure      404   {object}  dto.ErrorResponse  "user not found"
+// @Router       /api/v1/admin/users/{id}/blocked [patch]
 func (h *Handler) adminSetBlocked(w http.ResponseWriter, r *http.Request) {
 	idStr := chi.URLParam(r, "id")
 	userID, err := strconv.Atoi(idStr)
@@ -51,6 +65,20 @@ func (h *Handler) adminSetBlocked(w http.ResponseWriter, r *http.Request) {
 	_ = json.NewEncoder(w).Encode(map[string]bool{"blocked": req.Blocked})
 }
 
+// adminAssignRole godoc
+// @Summary      Assign user role (Admin)
+// @Description  Updates the role of a user. Admin role required.
+// @Tags         Admin
+// @Security     BearerAuth
+// @Accept       json
+// @Produce      json
+// @Param        id    path      int  true  "User ID"
+// @Param        body  body      dto.AssignRoleRequest  true  "New role details"
+// @Success      200   {object}  map[string]string  "assigned role response"
+// @Failure      400   {object}  dto.ErrorResponse  "invalid user ID or invalid JSON"
+// @Failure      403   {object}  dto.ErrorResponse  "insufficient permissions"
+// @Failure      404   {object}  dto.ErrorResponse  "user not found"
+// @Router       /api/v1/admin/users/{id}/role [patch]
 func (h *Handler) adminAssignRole(w http.ResponseWriter, r *http.Request) {
 	idStr := chi.URLParam(r, "id")
 	userID, err := strconv.Atoi(idStr)
@@ -78,6 +106,17 @@ func (h *Handler) adminAssignRole(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(map[string]string{"role": req.Role})
 }
 
+// adminRevokeSession godoc
+// @Summary      Revoke user session (Admin)
+// @Description  Revokes a specific active user session. Admin role required.
+// @Tags         Admin
+// @Security     BearerAuth
+// @Param        sessionID  path      string  true  "Session UUID"
+// @Success      204        "No Content"
+// @Failure      400        {object}  dto.ErrorResponse  "invalid session ID"
+// @Failure      403        {object}  dto.ErrorResponse  "insufficient permissions"
+// @Failure      404        {object}  dto.ErrorResponse  "session not found"
+// @Router       /api/v1/admin/sessions/{sessionID} [delete]
 func (h *Handler) adminRevokeSession(w http.ResponseWriter, r *http.Request) {
 	sessionIDStr := chi.URLParam(r, "sessionID")
 	sessionID, err := uuid.Parse(sessionIDStr)
@@ -98,6 +137,17 @@ func (h *Handler) adminRevokeSession(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusNoContent)
 }
 
+// revokeSession godoc
+// @Summary      Revoke own session
+// @Description  Revokes a specific active session belonging to the caller.
+// @Tags         Sessions
+// @Security     BearerAuth
+// @Param        sessionID  path      string  true  "Session UUID"
+// @Success      204        "No Content"
+// @Failure      400        {object}  dto.ErrorResponse  "invalid session ID"
+// @Failure      403        {object}  dto.ErrorResponse  "insufficient permissions (not owner and not admin)"
+// @Failure      404        {object}  dto.ErrorResponse  "session not found"
+// @Router       /api/v1/sessions/{sessionID} [delete]
 func (h *Handler) revokeSession(w http.ResponseWriter, r *http.Request) {
 	sessionIDStr := chi.URLParam(r, "sessionID")
 	sessionID, err := uuid.Parse(sessionIDStr)
