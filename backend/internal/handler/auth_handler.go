@@ -40,14 +40,20 @@ func (h *Handler) refresh(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	sameSite := http.SameSiteLaxMode
+	secure := false
+	if h.cfg.Env == "production" {
+		sameSite = http.SameSiteNoneMode
+		secure = true
+	}
 	http.SetCookie(w, &http.Cookie{
 		Name:     "refresh_token",
 		Value:    pair.RefreshToken,
 		Path:     "/auth",
 		MaxAge:   15 * 24 * 3600,
 		HttpOnly: true,
-		Secure:   h.cfg.Env == "production",
-		SameSite: http.SameSiteStrictMode,
+		Secure:   secure,
+		SameSite: sameSite,
 	})
 
 	resp := dto.TokenResponse{
@@ -163,14 +169,20 @@ func (h *Handler) verifyCode(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	vcSameSite := http.SameSiteLaxMode
+	vcSecure := false
+	if h.cfg.Env == "production" {
+		vcSameSite = http.SameSiteNoneMode
+		vcSecure = true
+	}
 	http.SetCookie(w, &http.Cookie{
 		Name:     "refresh_token",
 		Value:    pair.RefreshToken,
 		Path:     "/auth",
 		MaxAge:   15 * 24 * 3600,
 		HttpOnly: true,
-		Secure:   h.cfg.Env == "production",
-		SameSite: http.SameSiteStrictMode,
+		Secure:   vcSecure,
+		SameSite: vcSameSite,
 	})
 
 	resp := dto.TokenResponse{
