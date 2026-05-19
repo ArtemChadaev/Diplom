@@ -111,7 +111,7 @@ interface AuthState {
   role: string | null;
   user: User | null;
   setAuth: (accessToken: string, role: string, user: User | null) => void;
-  logout: () => void;
+  logout: () => Promise<void>;
 }
 
 export const useAuthStore = create<AuthState>((set) => ({
@@ -136,7 +136,15 @@ export const useAuthStore = create<AuthState>((set) => ({
       });
     }
   },
-  logout: () => {
+  logout: async () => {
+    const token = useAuthStore.getState().accessToken;
+    const email = useAuthStore.getState().user?.email;
+    const headers: Record<string, string> = {};
+    if (token) {
+      headers["Authorization"] = `Bearer ${token}`;
+    }
+    
+    // Clear local state immediately so UI updates instantly
     set({ accessToken: null, role: null, user: null });
     useUserStore.setState({
       accessToken: null,
@@ -144,5 +152,25 @@ export const useAuthStore = create<AuthState>((set) => ({
       email: null,
       isAuthenticated: false,
     });
+
+    const redirectUrl = email ? `/auth?email=${encodeURIComponent(email)}` : "/auth";
+
+    // Call backend logout endpoint
+    const baseUrl = import.meta.env.DEV 
+      ? "" 
+      : ((import.meta.env.VITE_API_URL as string | undefined) ?? "https://backend.pharma-hub.ru");
+      
+    try {
+      await fetch(`${baseUrl}/auth/logout`, {
+        method: "POST",
+        headers,
+        credentials: "include",
+        keepalive: true,
+      });
+    } catch (err) {
+      console.error("Logout request failed:", err);
+    } finally {
+      window.location.href = redirectUrl;
+    }
   },
 }));

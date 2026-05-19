@@ -84,13 +84,7 @@ async function request<T = any>(path: string, options: RequestOptions = {}): Pro
 
           return newAccessToken
         } catch (err) {
-          const email = useAuthStore.getState().user?.email
-          useAuthStore.getState().logout()
-          if (email) {
-            window.location.href = `/auth?email=${encodeURIComponent(email)}`
-          } else {
-            window.location.href = "/auth"
-          }
+          await useAuthStore.getState().logout()
           throw err
         } finally {
           refreshPromise = null
