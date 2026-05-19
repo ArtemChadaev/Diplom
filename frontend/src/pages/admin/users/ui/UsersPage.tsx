@@ -1,4 +1,6 @@
-import React from "react";
+import { UserActionsDropdown, UserRoleBadge, type UserRow } from "@/features/admin/user-actions";
+
+import { Avatar, AvatarFallback } from "@/shared/ui/avatar";
 import { 
   Table, 
   TableBody, 
@@ -7,8 +9,6 @@ import {
   TableHeader, 
   TableRow 
 } from "@/shared/ui/table";
-import { Avatar, AvatarFallback } from "@/shared/ui/avatar";
-import { UserActionsDropdown, UserRoleBadge, type UserRow } from "@/features/admin/user-actions";
 
 const mockUsers: UserRow[] = [
   {
@@ -108,8 +108,8 @@ export function UsersPage() {
                 </TableCell>
                 <TableCell>
                   <div className="flex flex-col">
-                    <span className="text-sm font-medium">{user.position || "—"}</span>
-                    <span className="text-xs text-muted-foreground">{user.department || "—"}</span>
+                    <span className="text-sm font-medium">{user.position ?? "—"}</span>
+                    <span className="text-xs text-muted-foreground">{user.department ?? "—"}</span>
                   </div>
                 </TableCell>
                 <TableCell className="text-right">

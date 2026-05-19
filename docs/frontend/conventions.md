@@ -71,18 +71,18 @@ import { Bell, Search, Package } from "lucide-react"
 
 ## 🌐 HTTP-запросы и API
 
-Для взаимодействия с бэкендом используется нативный **`fetch`** (или настроенный API-клиент в `shared/api`).
+Для взаимодействия с бэкендом настроен глобальный API-клиент на базе **Axios** в **`src/shared/api`**:
+- **`apiClient`** — для защищенных запросов (автоматически подставляет заголовок `Authorization: Bearer <accessToken>` и выполняет автоматический фоновый silent-refresh сессии при получении ошибки `401` через HttpOnly-куку с рефреш-токеном).
+- **`authClient`** — чистый экземпляр без интерцепторов (для логина, регистрации и обновления токенов).
+
+Глобальное состояние сессии и профиля пользователя управляется через стор **Zustand** в **`src/entities/user`** (с персистентностью безопасных данных в `localStorage`).
 
 ```ts
-// Пример запроса в FSD (entities/product/api/fetch-products.ts)
-const res = await fetch("/api/v1/products", {
-  headers: { Authorization: `Bearer ${token}` },
-})
-if (!res.ok) {
-  const err = await res.json()
-  throw new Error(err.error)
-}
-const data = await res.json()
+import { apiClient } from "@/shared/api";
+
+// Пример выполнения запроса с авто-авторизацией
+const res = await apiClient.get("/api/v1/products");
+const data = res.data;
 ```
 
 ---

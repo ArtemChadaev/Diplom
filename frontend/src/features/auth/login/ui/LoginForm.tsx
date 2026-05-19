@@ -1,6 +1,6 @@
-import React from "react";
-import { Input } from "@/shared/ui/input";
 import { Mail, Lock } from "lucide-react";
+
+import { Input } from "@/shared/ui/input";
 
 export function LoginForm() {
   return (

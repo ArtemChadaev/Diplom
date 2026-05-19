@@ -1,7 +1,8 @@
 "use client"
 
-import * as React from "react"
+import { MagnifyingGlassIcon, CheckIcon } from "@phosphor-icons/react"
 import { Command as CommandPrimitive } from "cmdk"
+import * as React from "react"
 
 import { cn } from "@/shared/lib/utils"
 import {
@@ -15,7 +16,7 @@ import {
   InputGroup,
   InputGroupAddon,
 } from "@/shared/ui/input-group"
-import { MagnifyingGlassIcon, CheckIcon } from "@phosphor-icons/react"
+
 
 function Command({
   className,

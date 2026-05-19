@@ -1,7 +1,8 @@
-import React from "react";
+import { EllipsisVertical, UserCheck, UserX, Settings, Trash2 } from "lucide-react";
 import { Link } from "react-router-dom";
-import { Button } from "@/shared/ui/button";
+
 import { Badge } from "@/shared/ui/badge";
+import { Button } from "@/shared/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -10,9 +11,8 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/shared/ui/dropdown-menu";
-import { EllipsisVertical, UserCheck, UserX, Settings, Trash2 } from "lucide-react";
 
-export type UserRow = {
+export interface UserRow {
   id: number;
   login: string;
   email: string | null;
@@ -24,7 +24,7 @@ export type UserRow = {
   department: string | null;
   avatar_url: string | null;
   employee_code: string;
-};
+}
 
 export function UserRoleBadge({ role, isBlocked }: { role: string, isBlocked: boolean }) {
   if (isBlocked) {
@@ -35,13 +35,13 @@ export function UserRoleBadge({ role, isBlocked }: { role: string, isBlocked: bo
     );
   }
 
-  const variants: Record<string, { label: string, className: string }> = {
+  const variants: Partial<Record<string, { label: string; className: string }>> = {
     admin: { label: "Админ", className: "bg-blue text-blue-foreground hover:bg-blue/90" },
     employee: { label: "Сотрудник", className: "bg-secondary text-secondary-foreground hover:bg-secondary/90" },
     unverified: { label: "Ожидает", className: "bg-accent text-accent-foreground hover:bg-accent/90" },
   };
 
-  const config = variants[role] || variants.employee;
+  const config = variants[role] ?? { label: role, className: "bg-secondary text-secondary-foreground" };
 
   return (
     <Badge className={`text-[10px] h-4 px-1.5 uppercase font-bold tracking-wider ${config.className}`}>
@@ -72,7 +72,7 @@ export function UserActionsDropdown({ user }: { user: UserRow }) {
 
         {(user.role === 'employee' || user.role === 'admin') && !user.is_blocked && (
           <DropdownMenuItem asChild>
-            <Link to={`/admin/profile/${user.id}/settings`} className="cursor-pointer gap-2 flex items-center w-full">
+            <Link to={`/admin/profile/${String(user.id)}/settings`} className="cursor-pointer gap-2 flex items-center w-full">
               <Settings className="h-4 w-4" />
               <span>Изменить</span>
             </Link>

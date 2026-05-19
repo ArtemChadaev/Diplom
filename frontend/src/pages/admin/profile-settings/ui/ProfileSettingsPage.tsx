@@ -1,9 +1,13 @@
-import React from "react";
+import { ChevronLeft, Save, AlertCircle } from "lucide-react";
+import { Link } from "react-router-dom";
+
+import { Avatar, AvatarFallback } from "@/shared/ui/avatar";
+import { Button } from "@/shared/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/shared/ui/card";
+import { Checkbox } from "@/shared/ui/checkbox";
+import { DatePicker } from "@/shared/ui/date-picker";
 import { Input } from "@/shared/ui/input";
 import { Label } from "@/shared/ui/label";
-import { Button } from "@/shared/ui/button";
-import { Checkbox } from "@/shared/ui/checkbox";
 import { 
   Select, 
   SelectContent, 
@@ -11,10 +15,8 @@ import {
   SelectTrigger, 
   SelectValue 
 } from "@/shared/ui/select";
-import { Avatar, AvatarFallback } from "@/shared/ui/avatar";
-import { DatePicker } from "@/shared/ui/date-picker";
-import { ChevronLeft, Save, AlertCircle } from "lucide-react";
-import { Link } from "react-router-dom";
+
+
 import { ReadOnlyField } from "./ReadOnlyField";
 
 const mockUser = {
@@ -105,7 +107,7 @@ export function ProfileSettingsPage() {
             <div className="space-y-2">
               <Label htmlFor="birth_date">Дата рождения</Label>
               <div className="w-full">
-                <DatePicker date={mockUser.birth_date} setDate={() => {}} />
+                <DatePicker date={mockUser.birth_date} setDate={(_date) => { /* TODO: connect to form */ }} />
               </div>
             </div>
             <div className="space-y-2 col-span-full">
@@ -152,7 +154,7 @@ export function ProfileSettingsPage() {
             <div className="space-y-2">
               <Label htmlFor="hire_date">Дата приема на работу</Label>
               <div className="w-full">
-                <DatePicker date={mockUser.hire_date} setDate={() => {}} />
+                <DatePicker date={mockUser.hire_date} setDate={(_date) => { /* TODO: connect to form */ }} />
               </div>
             </div>
             <div className="space-y-2">
@@ -161,7 +163,7 @@ export function ProfileSettingsPage() {
                 <span className="text-[10px] font-normal px-1.5 py-0.5 bg-muted rounded uppercase text-muted-foreground border border-border/50">опционально</span>
               </Label>
               <div className="w-full">
-                <DatePicker date={mockUser.dismissal_date || undefined} setDate={() => {}} />
+                <DatePicker date={undefined} setDate={(_date) => { /* TODO: connect to form */ }} />
               </div>
             </div>
           </CardContent>

@@ -1,5 +1,5 @@
 import { differenceInDays, isBefore } from "date-fns"
-import { Badge } from "@/shared/ui/badge"
+
 import { cn } from "@/shared/lib/utils"
 
 interface ExpiryStatusProps {

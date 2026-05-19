@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+
 import { Button } from "@/shared/ui/button";
 
 export function Footer() {
@@ -9,7 +10,7 @@ export function Footer() {
         {/* Project Description */}
         <div className="flex flex-col gap-4 max-w-sm">
           <span className="text-xs font-bold uppercase text-primary tracking-widest">
-            MedicamentHouse
+            pharma-hub
           </span>
           <p className="text-sm text-muted-foreground leading-relaxed">
             Премиальная система управления медицинским складом. Точность, контроль и безопасность на каждом этапе логистики.
@@ -44,7 +45,7 @@ export function Footer() {
           <h4 className="text-xs font-bold uppercase text-primary tracking-widest">Контакты службы</h4>
           <div className="flex flex-col gap-2">
             <p className="text-sm text-muted-foreground">Экстренная линия: +7 (800) 555-01-99</p>
-            <p className="text-sm text-muted-foreground">Email: logistics@medicamenthouse.ru</p>
+            <p className="text-sm text-muted-foreground">Email: logistics@pharma-hub.ru</p>
           </div>
         </div>
 
@@ -53,13 +54,13 @@ export function Footer() {
       {/* Divider and Bottom Section */}
       <div className="mt-6 pt-5 border-t border-border/40 flex flex-col md:flex-row justify-between items-center gap-6">
         <p className="text-xs text-muted-foreground">
-          © 2024 MedicamentHouse. All rights reserved.
+          © 2024 pharma-hub. All rights reserved.
         </p>
         
         <div className="flex items-center gap-8">
           {/* Server Status (One line) */}
           <div className="bg-muted/40 px-3 py-1.5 rounded-md flex items-center gap-2 border border-border/30">
-            <span className="w-1.5 h-1.5 rounded-full bg-warning animate-pulse"></span>
+            <span className="w-1.5 h-1.5 rounded-full bg-warning animate-pulse" />
             <div className="flex items-baseline gap-1.5">
               <span className="text-[10px] font-bold text-muted-foreground uppercase leading-none">
                 Status:

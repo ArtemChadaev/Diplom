@@ -1,6 +1,6 @@
-import React from "react";
-import { Link, Outlet } from "react-router-dom";
 import { UserCircle } from "lucide-react";
+import { Link, Outlet } from "react-router-dom";
+
 import { Button } from "@/shared/ui/button";
 
 export function AuthLayout() {
@@ -9,7 +9,7 @@ export function AuthLayout() {
       <header className="sticky top-0 z-50 bg-background/70 backdrop-blur-md border-b border-border/40 px-6 py-4 min-h-[72px] flex items-center justify-between">
         <div className="flex items-center gap-8">
           <Link to="/" className="font-sans text-xl font-bold text-primary tracking-tight transition-opacity hover:opacity-80">
-            MedicamentHouse
+            pharma-hub
           </Link>
         </div>
 
@@ -27,11 +27,11 @@ export function AuthLayout() {
       <footer className="border-t border-border/40 py-6 px-10 bg-card/50 backdrop-blur-sm">
         <div className="mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
           <p className="text-xs text-muted-foreground font-medium">
-            © 2024 MedicamentHouse. All rights reserved.
+            © 2024 pharma-hub. All rights reserved.
           </p>
-          
+
           <Button variant="link" className="text-xs text-muted-foreground hover:text-primary transition-colors h-auto p-0 font-medium" asChild>
-            <Link to="#">
+            <Link to="/">
               Вернуться на главный сайт
             </Link>
           </Button>

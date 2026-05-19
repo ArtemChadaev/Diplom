@@ -1,16 +1,19 @@
-import React, { useState } from "react";
-import { 
-  Card, 
-  CardContent, 
-  CardDescription, 
-  CardHeader, 
-  CardTitle 
-} from "@/shared/ui/card";
-import { Tabs, TabsList, TabsTrigger } from "@/shared/ui/tabs";
-import { Button } from "@/shared/ui/button";
-import { Separator } from "@/shared/ui/separator";
+import { useState } from "react";
+
 import { LoginForm } from "@/features/auth/login";
 import { RegisterForm } from "@/features/auth/register";
+
+import { Button } from "@/shared/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle
+} from "@/shared/ui/card";
+import { Separator } from "@/shared/ui/separator";
+import { Tabs, TabsList, TabsTrigger } from "@/shared/ui/tabs";
+
 
 export function AuthPage() {
   const [activeTab, setActiveTab] = useState("login");
@@ -23,11 +26,11 @@ export function AuthPage() {
             {activeTab === "login" ? "Авторизация" : "Регистрация"}
           </CardTitle>
           <CardDescription>
-            {activeTab === "login" 
-              ? "Введите данные для входа в систему" 
+            {activeTab === "login"
+              ? "Введите данные для входа в систему"
               : "Создайте новый аккаунт для работы"}
           </CardDescription>
-          
+
           <Tabs defaultValue="login" onValueChange={setActiveTab} className="w-full mt-4">
             <TabsList className="grid w-full grid-cols-2">
               <TabsTrigger value="login">Вход</TabsTrigger>
@@ -35,7 +38,7 @@ export function AuthPage() {
             </TabsList>
           </Tabs>
         </CardHeader>
-        
+
         <CardContent className="flex-1 space-y-6 flex flex-col justify-between">
           <div className="min-h-[160px]">
             {activeTab === "login" ? <LoginForm /> : <RegisterForm />}
