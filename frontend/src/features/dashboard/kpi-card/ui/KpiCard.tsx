@@ -1,0 +1,83 @@
+import { cn } from "@/shared/lib/utils";
+
+import type { ReactNode } from "react";
+
+export type KpiCardState = "normal" | "warning" | "error" | "success";
+
+interface KpiCardProps {
+    title: string;
+    value: string;
+    description: string;
+    icon: ReactNode;
+    state?: KpiCardState;
+    trendIcon?: ReactNode;
+}
+
+export function KpiCard({
+    title,
+    value,
+    description,
+    icon,
+    state = "normal",
+    trendIcon
+}: KpiCardProps) {
+
+    const styles = {
+        normal: {
+            wrapper: "bg-card border border-l-4 border-l-muted-foreground/30",
+            iconBg: "bg-muted",
+            iconColor: "text-primary",
+            title: "text-muted-foreground/60",
+            value: "text-primary",
+            desc: "text-muted-foreground",
+        },
+        warning: {
+            wrapper: "bg-card border border-l-4 border-l-warning shadow-sm",
+            iconBg: "bg-warning-subtle",
+            iconColor: "text-warning",
+            title: "text-warning/70",
+            value: "text-warning",
+            desc: "text-warning/80",
+        },
+        error: {
+            wrapper: "bg-card border border-l-4 border-l-destructive shadow-sm",
+            iconBg: "bg-destructive/10",
+            iconColor: "text-destructive",
+            title: "text-destructive/60",
+            value: "text-destructive",
+            desc: "text-destructive/80",
+        },
+        success: {
+            wrapper: "bg-card border border-l-4 border-l-success shadow-sm",
+            iconBg: "bg-success-subtle",
+            iconColor: "text-success",
+            title: "text-success/60",
+            value: "text-success",
+            desc: "text-success/80",
+        }
+    };
+
+    const currentStyle = styles[state];
+
+    return (
+        <div className={cn("md:col-span-4 p-6 rounded-xl flex flex-col justify-between group transition-all duration-300 cursor-default", currentStyle.wrapper)}>
+            <div className="flex justify-between items-start mb-4">
+                <div className={cn("p-2 rounded-lg", currentStyle.iconBg, currentStyle.iconColor)}>
+                    {icon}
+                </div>
+                <span className={cn("text-xs font-bold uppercase tracking-widest", currentStyle.title)}>
+                    {title}
+                </span>
+            </div>
+            <div>
+                <div className={cn("font-sans text-5xl font-bold mb-1 tracking-tight", currentStyle.value)}>
+                    {value}
+                </div>
+                <div className={cn("text-sm font-medium flex items-center gap-1", currentStyle.desc)}>
+                    {trendIcon}
+                    {description}
+                </div>
+            </div>
+        </div>
+    );
+}

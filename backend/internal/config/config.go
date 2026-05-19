@@ -23,7 +23,7 @@ type Config struct {
 
 	JWTSecret      string `env:"JWT_SECRET" env-required:"true"`
 	AdminEmail     string `env:"ADMIN_EMAIL" env-required:"true"`
-	GoogleClientID string `env:"GOOGLE_CLIENT_ID"` //Не уверен что надо TODO: если не надо то удалить
+	GoogleClientID string `env:"GOOGLE_CLIENT_ID" env-default:"691345228451-172nt62vjc3pirkbumpjqcr6pd280pbp.apps.googleusercontent.com"`
 
 	// Valkey
 	ValkeyHost     string `env:"VALKEY_HOST" env-default:"valkey"`
@@ -38,6 +38,7 @@ type Config struct {
 
 	OTPHMACSecret string `env:"OTP_HMAC_SECRET" env-required:"true"`
 	UploadDir     string `env:"UPLOAD_DIR" env-default:"./uploads"`
+	AllowedOrigins []string `env:"ALLOWED_ORIGINS" env-separator:"," env-default:"http://localhost:3000,http://localhost:5173,http://127.0.0.1:3000,http://127.0.0.1:5173,https://pharma-hub.ru,https://phasma-hub.ru"`
 }
 
 func Load() (*Config, error) {

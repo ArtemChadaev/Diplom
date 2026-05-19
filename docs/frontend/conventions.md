@@ -1,262 +1,126 @@
-# Frontend — Stack & Conventions (Full Reference)
+# Frontend — Стек и Конвенции
 
-← [Back to Main README](../../README.md) | [Frontend Overview →](./README.md) | [Forms →](./forms/)
-
----
-
-## Framework
-
-**Next.js 16 — App Router**
-
-- Application directory: `frontend/src/app/`
-- Uses App Router (not Pages Router)
-- Route groups for layout isolation:
-  - `(app)/` — main interface (Header + Footer)
-  - `(auth)/` — login pages (simplified layout)
-  - `(admin)/` — admin section
-- Server Components by default; `"use client"` only where state/interactivity is needed
-- Language: **TypeScript** (strict mode)
-- React version: **19**
+← [Назад к главному README](../../README.md) | [Обзор Frontend →](./README.md) | [Формы →](./forms/) | [Архитектура FSD →](./fsd.md)
 
 ---
 
-## Styling
+## ⚡ Фреймворк и Сборка
 
-### Tailwind CSS v4
+**React 19 + Vite + TypeScript (Strict Mode)**
 
-Uses **Tailwind CSS v4** with `@import "tailwindcss"` (not the legacy `@tailwind base` syntax).
+- Маршрутизация: **React Router v7** (`react-router-dom`).
+- Архитектура: **Feature-Sliced Design (FSD)** (папка `src/`).
 
-Theme configuration is overridden via `@theme inline` in `globals.css`.
+---
 
-### Color Rule — CRITICAL
+## 🎨 Стилизация (Tailwind CSS v4)
 
-**Only use semantic variables from `globals.css`. No raw Tailwind color utilities.**
+Используется **Tailwind CSS v4** с подключением через `@import "tailwindcss"` в `src/index.css`.
+Файл `index.css` сгенерирован через shadcn CLI (пресет `b2p9XgkXg`, тема `radix-lyra`). Строго запрещено менять существующие токены или добавлять новые без согласования.
 
-| ❌ Forbidden | ✅ Correct |
-|-------------|-----------|
-| `bg-gray-800` | `bg-primary` |
-| `text-white` | `text-primary-foreground` |
-| `bg-green-500` | `bg-secondary` |
-| `text-red-500` | `text-destructive` |
-| `bg-gray-100` | `bg-muted` |
-| `border-gray-200` | `border-border` |
-| `text-gray-500` | `text-muted-foreground` |
+### Правило цветов — КРИТИЧЕСКИ ВАЖНО
 
-### Theme Variables (`globals.css`)
+**Используйте только семантические CSS-переменные из `index.css`. Использование сырых утилит Tailwind запрещено.**
 
-```
---background          Main page background
---foreground          Main text color
---card                Card background
---card-foreground     Text on cards
---primary             Buttons, active elements (#181619)
---primary-foreground  Text on primary (#ffffff)
---secondary           Accent / brand color (#006b58)
---secondary-foreground Text on secondary (#ffffff)
---muted               Muted background (#f3f3f3)
---muted-foreground    Muted text (#7a767a)
---accent              Hover background (#e2e2e2)
---accent-foreground   Text on accent (#49454a)
---destructive         Errors, delete actions (#ba1a1a)
---destructive-foreground Text on destructive (#ffffff)
---border              Border color (#e2e2e2)
---input               Input border color (#e2e2e2)
---ring                Focus ring color (#006b58)
---blue                Informational (#0077ff)
---blue-foreground     Text on blue (#ffffff)
-```
+| ❌ Запрещено | ✅ Правильно (Семантика) | Описание |
+|-------------|-----------|----------|
+| `bg-gray-800` | `bg-primary` | Основные интерактивные элементы |
+| `text-white` | `text-primary-foreground` | Текст на primary |
+| `bg-green-500` | `bg-secondary` | Вторичные акценты |
+| `text-red-500` | `text-destructive` | Ошибки, удаление, блокировки |
+| `bg-blue-500` | `bg-info` | Информационные сообщения |
+| `bg-amber-500` | `bg-warning` | Предупреждения |
+| `bg-purple-500` | `bg-notification` | Уведомления |
+| `bg-gray-100` | `bg-muted` | Приглушенный фон |
+| `border-gray-200` | `border-border` | Границы и разделители |
+| `text-gray-500` | `text-muted-foreground` | Второстепенный текст |
 
-Corner radius via `--radius` (0.625rem); use `rounded-sm`, `rounded-md`, `rounded-lg`, `rounded-xl` — they are bound to `--radius` via `@theme`.
+### Утилита `cn()`
 
-### `cn()` — required for conditional classes
-
+Для объединения и условного применения классов всегда используйте `cn()`:
 ```ts
-import { cn } from "@/lib/utils"
-// Internally: clsx + tailwind-merge
+import { cn } from "@/shared/lib/utils"
+
 cn("base-class", condition && "conditional-class", className)
 ```
 
 ---
 
-## UI Components — shadcn/ui
+## 🧩 UI-компоненты (shadcn/ui)
 
-Components live in `src/components/ui/`. Import via `@/components/ui/...`.
+Компоненты располагаются в `src/shared/ui/`.
 
-### Installed Components
-
-| File | Components |
-|------|-----------|
-| `avatar.tsx` | `Avatar`, `AvatarImage`, `AvatarFallback` |
-| `badge.tsx` | `Badge` |
-| `button.tsx` | `Button` |
-| `button-group.tsx` | `ButtonGroup` (custom) |
-| `calendar.tsx` | `Calendar` |
-| `card.tsx` | `Card`, `CardHeader`, `CardTitle`, `CardContent`, `CardFooter` |
-| `checkbox.tsx` | `Checkbox` |
-| `command.tsx` | `Command`, `CommandInput`, `CommandList`, `CommandItem`, `CommandGroup`, `CommandEmpty` |
-| `date-picker.tsx` | `DatePicker` (wrapper over Calendar + Popover) |
-| `dialog.tsx` | `Dialog`, `DialogContent`, `DialogHeader`, `DialogTitle`, `DialogFooter` |
-| `dropdown-menu.tsx` | `DropdownMenu`, `DropdownMenuTrigger`, `DropdownMenuContent`, `DropdownMenuItem` |
-| `input.tsx` | `Input` |
-| `input-group.tsx` | `InputGroup` (custom) |
-| `label.tsx` | `Label` |
-| `multi-select.tsx` | `MultiSelect` (custom, via Command + Popover + Badge) |
-| `pagination.tsx` | `Pagination` |
-| `popover.tsx` | `Popover`, `PopoverTrigger`, `PopoverContent` |
-| `select.tsx` | `Select`, `SelectContent`, `SelectItem`, `SelectTrigger`, `SelectValue` |
-| `separator.tsx` | `Separator` |
-| `table.tsx` | `Table`, `TableHeader`, `TableBody`, `TableRow`, `TableHead`, `TableCell` |
-| `tabs.tsx` | `Tabs`, `TabsList`, `TabsTrigger`, `TabsContent` |
-| `textarea.tsx` | `Textarea` |
-| `toggle.tsx` | `Toggle` |
-| `toggle-group.tsx` | `ToggleGroup`, `ToggleGroupItem` |
-
-### Installing New Components
-
+Установка новых компонентов:
 ```bash
 npx shadcn@latest add <component-name>
 ```
 
-> Components are placed in `src/components/ui/` and automatically use variables from `globals.css`.
-
 ---
 
-## Icons
+## 🖼️ Иконки
 
-**lucide-react** — the only icon library used.
+Используется библиотека **lucide-react** (и `@phosphor-icons/react` при необходимости).
 
 ```tsx
 import { Bell, Search, Package } from "lucide-react"
+
 <Bell className="h-5 w-5 text-muted-foreground" />
 ```
 
-Sizes: `h-4 w-4` (small), `h-5 w-5` (standard), `h-6 w-6` (large).
+---
+
+## 🌐 HTTP-запросы и API
+
+Для взаимодействия с бэкендом настроен глобальный API-клиент на базе **Axios** в **`src/shared/api`**:
+- **`apiClient`** — для защищенных запросов (автоматически подставляет заголовок `Authorization: Bearer <accessToken>` и выполняет автоматический фоновый silent-refresh сессии при получении ошибки `401` через HttpOnly-куку с рефреш-токеном).
+- **`authClient`** — чистый экземпляр без интерцепторов (для логина, регистрации и обновления токенов).
+
+Глобальное состояние сессии и профиля пользователя управляется через стор **Zustand** в **`src/entities/user`** (с персистентностью безопасных данных в `localStorage`).
+
+```ts
+import { apiClient } from "@/shared/api";
+
+// Пример выполнения запроса с авто-авторизацией
+const res = await apiClient.get("/api/v1/products");
+const data = res.data;
+```
 
 ---
 
-## Typography
+## 📋 Валидация форм
 
-**Inter** (Google Fonts) — connected via `next/font/google` in `layout.tsx`, applied via the `--font-sans` CSS variable.
+Используется связка **Zod v4** + `react-hook-form` + компоненты формы shadcn/ui.
 
 ```tsx
-// layout.tsx
-const inter = Inter({ subsets: ['latin'], variable: '--font-sans' })
-<html className={cn("font-sans", inter.variable)}>
-```
-
-No other fonts allowed.
-
----
-
-## HTTP Requests
-
-Use the native **`fetch`** API (Next.js extends it with caching).
-
-**Server Component (RSC):**
-```ts
-export default async function Page() {
-  const data = await fetch("/api/v1/products", {
-    headers: { Authorization: `Bearer ${token}` },
-    next: { revalidate: 60 }, // ISR optional
-  }).then(r => r.json())
-}
-```
-
-**Client Component (`"use client"`):**
-```ts
-const res = await fetch("/api/v1/auth/send-code", {
-  method: "POST",
-  headers: { "Content-Type": "application/json" },
-  body: JSON.stringify({ email }),
-})
-if (!res.ok) {
-  const err = await res.json()
-  throw new Error(err.error)
-}
-const data = await res.json()
-```
-
-- No axios, no react-query — native `fetch` only
-- Tokens: `httpOnly` cookies (set by server) or `Authorization: Bearer` header
-- Errors: always check `res.ok`, parse `{ error: string }` from JSON
-
----
-
-## Form Validation
-
-**Zod v4** + shadcn/ui Form components.
-
-```ts
 import { z } from "zod"
+import { useForm } from "react-hook-form"
+import { zodResolver } from "@hookform/resolvers/zod"
 
-const schema = z.object({
-  email: z.string().email("Invalid email"),
-})
-type FormData = z.infer<typeof schema>
+const schema = z.object({ email: z.string().email() })
 ```
-
-Form built with shadcn/ui Form components:
-```tsx
-<Form {...form}>
-  <FormField
-    control={form.control}
-    name="email"
-    render={({ field }) => (
-      <FormItem>
-        <FormLabel>Email</FormLabel>
-        <FormControl><Input {...field} /></FormControl>
-        <FormMessage />  {/* auto-shows validation error */}
-      </FormItem>
-    )}
-  />
-</Form>
-```
-
-> `react-hook-form` and `@hookform/resolvers` are required for the `Form` component: `npx shadcn@latest add form`
 
 ---
 
-## URL State Management
+## 🗺️ Управление состоянием URL
 
-**nuqs** — URL search param state management (`useQueryState`, `useQueryStates`).
+Для работы с параметрами URL используется хук `useSearchParams` из **React Router**:
 
 ```ts
-import { parseAsString, parseAsArrayOf, parseAsInteger } from "nuqs"
-import { useQueryStates } from "nuqs"
+import { useSearchParams } from "react-router-dom"
 
-const [params, setParams] = useQueryStates({
-  q: parseAsString.withDefault(""),
-  page: parseAsInteger.withDefault(1),
-})
+const [searchParams, setSearchParams] = useSearchParams()
+const query = searchParams.get("q") || ""
 ```
-
-`NuqsAdapter` is wrapped around `<body>` in the root `layout.tsx`.
-Use for: search, filters, pagination — anything that must persist in the URL.
 
 ---
 
-## Working with Dates
+## 📅 Работа с датами
 
-**date-fns v4** for formatting and calculations.
+Используется **date-fns v4** для форматирования и расчетов дат.
 
 ```ts
 import { format, differenceInDays } from "date-fns"
 import { ru } from "date-fns/locale"
 
-format(new Date(expiryDate), "dd.MM.yyyy", { locale: ru })
-differenceInDays(new Date(expiryDate), new Date())
+format(new Date(date), "dd.MM.yyyy", { locale: ru })
 ```
-
-**react-day-picker v9** is used internally by the `DatePicker` component (already in the project).
-
----
-
-## Key Conventions Summary
-
-1. **`"use client"`** — only when `useState`, `useEffect`, or event handlers are needed
-2. **Colors** — only from `globals.css` (semantic variables, see table above)
-3. **Imports** — use `@/` alias (`@/` = `src/`)
-4. **Components** — named export (`export function Foo`), not default
-5. **Types** — declare explicitly, no `any`
-6. **Icons** — `lucide-react` only
-7. **Dates** — `date-fns` only for formatting and calculations
