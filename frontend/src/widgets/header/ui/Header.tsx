@@ -1,15 +1,18 @@
-import { Link } from "react-router-dom";
 import { Bell, CircleUserRound } from "lucide-react";
-import { Button } from "@/shared/ui/button";
+import { Link } from "react-router-dom";
+
+
 import { SearchBar } from "@/widgets/search-bar";
+
 import { Avatar, AvatarFallback } from "@/shared/ui/avatar";
+import { Button } from "@/shared/ui/button";
 
 export function Header() {
   return (
     <header className="sticky top-0 z-50 bg-background/70 backdrop-blur-md border-b border-border/40 px-6 py-4 min-h-[72px] flex items-center justify-between">
       <div className="flex items-center gap-8">
         <Link to="/" className="font-sans text-xl font-bold text-primary tracking-tight">
-          MedicamentHouse
+          pharma-hub
         </Link>
         <nav className="hidden md:flex items-center gap-3 pt-1">
           <Button variant="link" className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors" asChild>

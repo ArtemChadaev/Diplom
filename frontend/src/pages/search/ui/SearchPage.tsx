@@ -1,4 +1,5 @@
 import { Suspense } from "react";
+
 import { SearchInterface } from "./SearchInterface";
 
 export function SearchPage() {

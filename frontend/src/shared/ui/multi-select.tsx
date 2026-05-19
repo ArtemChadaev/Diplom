@@ -1,8 +1,9 @@
 "use client"
-import * as React from "react"
 import { Check, ChevronsUpDown, X } from "lucide-react"
+import * as React from "react"
 
 import { cn } from "@/shared/lib/utils"
+import { Badge } from "@/shared/ui/badge"
 import {
   Command,
   CommandEmpty,
@@ -16,9 +17,8 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/shared/ui/popover"
-import { Badge } from "@/shared/ui/badge"
 
-export type Option = {
+export interface Option {
   label: string
   value: string
 }

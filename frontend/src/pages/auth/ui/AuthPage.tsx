@@ -13,6 +13,18 @@ import { OtpVerifyForm } from "@/features/auth/otp-verify"
 
 type AuthStep = "email" | "register-request" | "otp"
 
+import { Button } from "@/shared/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle
+} from "@/shared/ui/card";
+import { Separator } from "@/shared/ui/separator";
+import { Tabs, TabsList, TabsTrigger } from "@/shared/ui/tabs";
+
+
 export function AuthPage() {
   const [searchParams] = useSearchParams()
   const [step, setStep] = useState<AuthStep>("email")

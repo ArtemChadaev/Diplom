@@ -1,12 +1,15 @@
 import { useState, useMemo, useCallback } from "react"
-import { SearchHeader } from "./SearchHeader"
+
 import { FilterSection } from "./FilterSection"
 import { ResultsTable } from "./ResultsTable"
-import type { Medicament, SortOrder } from "../types"
+import { SearchHeader } from "./SearchHeader"
 import { MOCK_DATA } from "../data"
 
+import type { Medicament, SortOrder, SearchParams } from "../types"
+
+
 export function SearchInterface() {
-  const [params, setParams] = useState({
+  const [params, setParams] = useState<SearchParams>({
     q: "",
     categories: [] as string[],
     warehouses: [] as string[],
@@ -35,8 +38,9 @@ export function SearchInterface() {
     }
 
     if (params.aDate) {
+      const filterDate = params.aDate
       result = result.filter(item =>
-        new Date(item.arrivalDate).toDateString() === params.aDate!.toDateString()
+        new Date(item.arrivalDate).toDateString() === filterDate.toDateString()
       )
     }
 
@@ -100,10 +104,10 @@ export function SearchInterface() {
         <ResultsTable
           data={processedData}
           sortBy={params.sortBy as keyof Medicament}
-          sortOrder={params.sortOrder as SortOrder}
+          sortOrder={params.sortOrder}
           onSort={handleSort}
           pageSize={params.limit.toString()}
-          onPageSizeChange={(val) => setParams(prev => ({ ...prev, limit: parseInt(val) }))}
+          onPageSizeChange={(val) => { setParams(prev => ({ ...prev, limit: parseInt(val) })); }}
         />
       </div>
     </div>

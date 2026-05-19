@@ -1,26 +1,25 @@
-import { useState, Suspense } from "react"
+import { Search } from "lucide-react"
+import { Suspense, useState } from "react"
 import { useNavigate, useSearchParams } from "react-router-dom"
-import { Input } from "@/shared/ui/input"
+
 import { Button } from "@/shared/ui/button"
 import { ButtonGroup } from "@/shared/ui/button-group"
-import { Search } from "lucide-react"
+import { Input } from "@/shared/ui/input"
 
 function SearchBarInner() {
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
-  const [query, setQuery] = useState(searchParams.get("q") || "")
+  const [query, setQuery] = useState(searchParams.get("q") ?? "")
 
-  const handleSearch = (e?: React.FormEvent) => {
+  const handleSearch = (e?: React.SyntheticEvent) => {
     e?.preventDefault()
+    const params = new URLSearchParams(searchParams.toString())
     if (query.trim()) {
-      const params = new URLSearchParams(searchParams.toString())
       params.set("q", query.trim())
-      navigate(`/search?${params.toString()}`)
     } else {
-      const params = new URLSearchParams(searchParams.toString())
       params.delete("q")
-      navigate(`/search?${params.toString()}`)
     }
+    void navigate(`/search?${params.toString()}`)
   }
 
   return (
@@ -29,7 +28,7 @@ function SearchBarInner() {
         <Input
           placeholder="Search..."
           value={query}
-          onChange={(e) => setQuery(e.target.value)}
+          onChange={(e) => { setQuery(e.target.value); }}
         />
         <Button variant="outline" type="submit">
           <Search className="h-4 w-4" />

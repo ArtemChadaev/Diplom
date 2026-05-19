@@ -1,13 +1,16 @@
 import { ChevronUp, ChevronDown, ChevronsUpDown } from "lucide-react"
-import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/shared/ui/card"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/shared/ui/table"
-import { Badge } from "@/shared/ui/badge"
-import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from "@/shared/ui/pagination"
-import { ToggleGroup, ToggleGroupItem } from "@/shared/ui/toggle-group"
+
 import { cn } from "@/shared/lib/utils"
-import type { Medicament, SortOrder } from "../types"
+import { Badge } from "@/shared/ui/badge"
+import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/shared/ui/card"
+import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from "@/shared/ui/pagination"
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/shared/ui/table"
+import { ToggleGroup, ToggleGroupItem } from "@/shared/ui/toggle-group"
+
 import { TAGS } from "../constants"
 import { ExpiryStatus } from "./ExpiryStatus"
+
+import type { Medicament, SortOrder } from "../types"
 
 interface ResultsTableProps {
   data: Medicament[]
@@ -37,7 +40,7 @@ export function ResultsTable({
       <CardHeader className="flex flex-row items-center justify-between border-b border-border/50 pb-4">
         <div className="flex items-center gap-4">
           <CardTitle className="text-xl font-semibold">Список препаратов</CardTitle>
-          <ToggleGroup type="single" value={pageSize} onValueChange={(v) => v && onPageSizeChange(v)} className="bg-muted p-1 rounded-full h-10">
+          <ToggleGroup type="single" value={pageSize} onValueChange={(v) => { if (v) onPageSizeChange(v); }} className="bg-muted p-1 rounded-full h-10">
             {["5", "10", "15", "20"].map(v => (
               <ToggleGroupItem key={v} value={v} className="px-4 text-xs h-8 rounded-full data-[state=on]:bg-background data-[state=on]:shadow-sm">{v}</ToggleGroupItem>
             ))}
@@ -50,23 +53,23 @@ export function ResultsTable({
         <Table>
           <TableHeader className="bg-muted/30">
             <TableRow className="hover:bg-transparent">
-              <TableHead className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-muted-foreground h-auto cursor-pointer select-none" onClick={() => onSort("name")}>
+              <TableHead className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-muted-foreground h-auto cursor-pointer select-none" onClick={() => { onSort("name"); }}>
                 <div className="flex items-center">Название {renderSortIcon("name")}</div>
               </TableHead>
-              <TableHead className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-muted-foreground h-auto cursor-pointer select-none" onClick={() => onSort("category")}>
+              <TableHead className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-muted-foreground h-auto cursor-pointer select-none" onClick={() => { onSort("category"); }}>
                 <div className="flex items-center">Категория {renderSortIcon("category")}</div>
               </TableHead>
               <TableHead className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-muted-foreground h-auto">Теги</TableHead>
-              <TableHead className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-muted-foreground h-auto cursor-pointer select-none" onClick={() => onSort("warehouse")}>
+              <TableHead className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-muted-foreground h-auto cursor-pointer select-none" onClick={() => { onSort("warehouse"); }}>
                 <div className="flex items-center">Склад {renderSortIcon("warehouse")}</div>
               </TableHead>
-              <TableHead className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-muted-foreground h-auto cursor-pointer select-none" onClick={() => onSort("quantity")}>
+              <TableHead className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-muted-foreground h-auto cursor-pointer select-none" onClick={() => { onSort("quantity"); }}>
                 <div className="flex items-center">Количество {renderSortIcon("quantity")}</div>
               </TableHead>
-              <TableHead className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-muted-foreground h-auto cursor-pointer select-none" onClick={() => onSort("arrivalDate")}>
+              <TableHead className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-muted-foreground h-auto cursor-pointer select-none" onClick={() => { onSort("arrivalDate"); }}>
                 <div className="flex items-center">Дата привоза {renderSortIcon("arrivalDate")}</div>
               </TableHead>
-              <TableHead className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-muted-foreground h-auto cursor-pointer select-none" onClick={() => onSort("expiryDate")}>
+              <TableHead className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-muted-foreground h-auto cursor-pointer select-none" onClick={() => { onSort("expiryDate"); }}>
                 <div className="flex items-center">Срок годности {renderSortIcon("expiryDate")}</div>
               </TableHead>
             </TableRow>
@@ -76,7 +79,7 @@ export function ResultsTable({
               <TableRow key={item.id} className="group">
                 <TableCell className="px-6 py-5">
                   <div className="flex items-center gap-3">
-                    <div className={cn("w-1.5 h-8 rounded-full shrink-0", item.tags.includes("critical") ? "bg-destructive" : item.tags.includes("warning") ? "bg-orange-400" : "bg-secondary")}></div>
+                    <div className={cn("w-1.5 h-8 rounded-full shrink-0", item.tags.includes("critical") ? "bg-destructive" : item.tags.includes("warning") ? "bg-orange-400" : "bg-secondary")} />
                     <div>
                       <p className="text-sm font-semibold text-primary">{item.name}</p>
                       <p className="text-xs text-muted-foreground">Batch: {item.batch}</p>
@@ -90,7 +93,7 @@ export function ResultsTable({
                   <div className="flex flex-wrap gap-1">
                     {item.tags.map(tagValue => {
                       const tag = TAGS.find(t => t.value === tagValue)
-                      return <Badge key={tagValue} variant="secondary" className="bg-blue/10 text-blue hover:bg-blue/20 border-transparent text-[10px] uppercase tracking-wider">{tag?.label || tagValue}</Badge>
+                      return <Badge key={tagValue} variant="secondary" className="bg-blue/10 text-blue hover:bg-blue/20 border-transparent text-[10px] uppercase tracking-wider">{tag?.label ?? tagValue}</Badge>
                     })}
                   </div>
                 </TableCell>
@@ -117,11 +120,11 @@ export function ResultsTable({
         <p className="text-sm text-muted-foreground">Показано 1-{data.length} из 1,284 результатов</p>
         <Pagination className="w-auto mx-0">
           <PaginationContent>
-            <PaginationItem><PaginationPrevious href="#" onClick={(e) => e.preventDefault()} /></PaginationItem>
-            <PaginationItem><PaginationLink href="#" isActive onClick={(e) => e.preventDefault()}>1</PaginationLink></PaginationItem>
-            <PaginationItem><PaginationLink href="#" onClick={(e) => e.preventDefault()}>2</PaginationLink></PaginationItem>
-            <PaginationItem><PaginationLink href="#" onClick={(e) => e.preventDefault()}>3</PaginationLink></PaginationItem>
-            <PaginationItem><PaginationNext href="#" onClick={(e) => e.preventDefault()} /></PaginationItem>
+            <PaginationItem><PaginationPrevious href="#" onClick={(e) => { e.preventDefault(); }} /></PaginationItem>
+            <PaginationItem><PaginationLink href="#" isActive onClick={(e) => { e.preventDefault(); }}>1</PaginationLink></PaginationItem>
+            <PaginationItem><PaginationLink href="#" onClick={(e) => { e.preventDefault(); }}>2</PaginationLink></PaginationItem>
+            <PaginationItem><PaginationLink href="#" onClick={(e) => { e.preventDefault(); }}>3</PaginationLink></PaginationItem>
+            <PaginationItem><PaginationNext href="#" onClick={(e) => { e.preventDefault(); }} /></PaginationItem>
           </PaginationContent>
         </Pagination>
       </CardFooter>

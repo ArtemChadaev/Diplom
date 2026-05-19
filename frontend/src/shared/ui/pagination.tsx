@@ -1,8 +1,8 @@
+import { CaretLeftIcon, CaretRightIcon, DotsThreeIcon } from "@phosphor-icons/react"
 import * as React from "react"
 
 import { cn } from "@/shared/lib/utils"
 import { Button } from "@/shared/ui/button"
-import { CaretLeftIcon, CaretRightIcon, DotsThreeIcon } from "@phosphor-icons/react"
 
 function Pagination({ className, ...props }: React.ComponentProps<"nav">) {
   return (

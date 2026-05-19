@@ -1,6 +1,7 @@
-import React from "react";
 import { TrendingUp, AlertTriangle, AlertCircle, PlusSquare, MinusSquare, AlertOctagon, CheckCircle2, ChevronRight, Package, ArrowUpRight, ArrowDownRight } from "lucide-react";
+
 import { KpiCard } from "@/features/dashboard/kpi-card";
+
 import { Card, CardHeader, CardTitle, CardContent } from "@/shared/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/shared/ui/table";
 
@@ -72,7 +73,7 @@ export function DashboardPage() {
 
                 {/* Reorder Tasks (Center Right) */}
                 <Card className="md:col-span-7 relative overflow-hidden">
-                    <div className="absolute top-0 right-0 w-32 h-32 bg-secondary/5 rounded-full -mr-16 -mt-16"></div>
+                    <div className="absolute top-0 right-0 w-32 h-32 bg-secondary/5 rounded-full -mr-16 -mt-16" />
                     <CardHeader className="flex flex-row justify-between items-center mb-2 z-10 relative">
                         <CardTitle className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Уведомления и задачи</CardTitle>
                         <span className="bg-secondary/10 text-secondary px-2 py-0.5 rounded text-[10px] font-bold">1 ACTIVE</span>

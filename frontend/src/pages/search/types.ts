@@ -13,3 +13,15 @@ export interface Medicament {
   expiryDate: Date
   tags: string[]
 }
+
+export interface SearchParams {
+  q: string
+  categories: string[]
+  warehouses: string[]
+  tags: string[]
+  aDate: Date | null
+  days: string
+  sortBy: string
+  sortOrder: SortOrder
+  limit: number
+}

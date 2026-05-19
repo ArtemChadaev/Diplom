@@ -1,26 +1,29 @@
-import * as React from "react"
-import { Input } from "@/shared/ui/input"
 import { Button } from "@/shared/ui/button"
 import { Card, CardContent } from "@/shared/ui/card"
-import { MultiSelect } from "@/shared/ui/multi-select"
 import { DatePicker } from "@/shared/ui/date-picker"
+import { Input } from "@/shared/ui/input"
+import { MultiSelect } from "@/shared/ui/multi-select"
 import { ToggleGroup, ToggleGroupItem } from "@/shared/ui/toggle-group"
+
 import { CATEGORIES, WAREHOUSES, TAGS } from "../constants"
 
+import type { SearchParams } from "../types"
+import type { Dispatch, SetStateAction } from "react"
+
 interface FilterSectionProps {
-  params: any
-  setParams: (state: any) => void
+  params: SearchParams
+  setParams: Dispatch<SetStateAction<SearchParams>>
   resetFilters: () => void
 }
 
 export function FilterSection({
-                                params,
-                                setParams,
-                                resetFilters
-                              }: FilterSectionProps) {
+  params,
+  setParams,
+  resetFilters
+}: FilterSectionProps) {
 
-  const updateField = (field: string, value: any) => {
-    setParams((prev: any) => ({ ...prev, [field]: value }))
+  const updateField = <K extends keyof SearchParams>(field: K, value: SearchParams[K]) => {
+    setParams((prev) => ({ ...prev, [field]: value }))
   }
 
   return (
@@ -34,8 +37,8 @@ export function FilterSection({
             <Input
               className="w-full bg-background min-h-12 border-muted-foreground/20 focus-visible:ring-secondary"
               placeholder="Введите название препарата..."
-              value={params.q ?? ""}
-              onChange={(e) => updateField("q", e.target.value)}
+              value={params.q}
+              onChange={(e) => { updateField("q", e.target.value); }}
             />
           </div>
 
@@ -44,8 +47,8 @@ export function FilterSection({
             <label className="block text-xs font-bold uppercase text-muted-foreground mb-2">Категория</label>
             <MultiSelect
               options={CATEGORIES}
-              selected={params.categories ?? []}
-              onChange={(vals) => updateField("categories", vals)}
+              selected={params.categories}
+              onChange={(vals) => { updateField("categories", vals); }}
               placeholder="Все категории"
             />
           </div>
@@ -55,8 +58,8 @@ export function FilterSection({
             <label className="block text-xs font-bold uppercase text-muted-foreground mb-2">Склад</label>
             <MultiSelect
               options={WAREHOUSES}
-              selected={params.warehouses ?? []}
-              onChange={(vals) => updateField("warehouses", vals)}
+              selected={params.warehouses}
+              onChange={(vals) => { updateField("warehouses", vals); }}
               placeholder="Все склады"
             />
           </div>
@@ -66,8 +69,8 @@ export function FilterSection({
             <label className="block text-xs font-bold uppercase text-muted-foreground mb-2">Теги</label>
             <MultiSelect
               options={TAGS}
-              selected={params.tags ?? []}
-              onChange={(vals) => updateField("tags", vals)}
+              selected={params.tags}
+              onChange={(vals) => { updateField("tags", vals); }}
               placeholder="Выберите теги"
               badgeClassName="bg-blue-500/10 text-blue-600 hover:bg-blue-500/20 border-blue-200"
             />
@@ -78,7 +81,7 @@ export function FilterSection({
             <label className="block text-xs font-bold uppercase text-muted-foreground mb-2">Дата привоза</label>
             <DatePicker
               date={params.aDate ?? undefined}
-              setDate={(date) => updateField("aDate", date)}
+              setDate={(date) => { updateField("aDate", date ?? null); }}
               placeholder="Выберите дату"
             />
           </div>
@@ -90,8 +93,8 @@ export function FilterSection({
               type="number"
               className="w-full bg-background min-h-12 border-muted-foreground/20 focus-visible:ring-secondary"
               placeholder="Количество дней..."
-              value={params.days ?? ""}
-              onChange={(e) => updateField("days", e.target.value)}
+              value={params.days}
+              onChange={(e) => { updateField("days", e.target.value); }}
             />
           </div>
         </div>
@@ -101,7 +104,7 @@ export function FilterSection({
             <ToggleGroup
               type="single"
               value={params.sortBy}
-              onValueChange={(val) => val && updateField("sortBy", val)}
+              onValueChange={(val) => { if (val) updateField("sortBy", val); }}
               variant="outline"
               className="justify-start h-10 bg-background border border-muted-foreground/20 p-1 rounded-full w-fit"
             >
@@ -118,7 +121,7 @@ export function FilterSection({
             </Button>
             <Button
               className="bg-secondary text-secondary-foreground hover:bg-secondary/90 px-8"
-              onClick={() => {/* Применить */}}
+              onClick={() => { /* Применить — TODO */ }}
             >
               Применить фильтры
             </Button>
