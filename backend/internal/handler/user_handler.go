@@ -91,6 +91,13 @@ func (h *Handler) patchMe(w http.ResponseWriter, r *http.Request) {
 		avatarURL = req.AvatarURL
 	}
 
+	var gdpRaw json.RawMessage
+	if req.GDPTrainingHistory != nil {
+		if b, err := json.Marshal(req.GDPTrainingHistory); err == nil {
+			gdpRaw = b
+		}
+	}
+
 	input := domain.UpdateEmployeeProfileInput{
 		FullName:           req.FullName,
 		Phone:              req.Phone,
@@ -98,7 +105,7 @@ func (h *Handler) patchMe(w http.ResponseWriter, r *http.Request) {
 		BirthDate:          birthDate,
 		AvatarURL:          avatarURL,
 		MedicalBookScanURL: req.MedicalBookScanURL,
-		GDPTrainingHistory: req.GDPTrainingHistory,
+		GDPTrainingHistory: gdpRaw,
 	}
 
 	_, err := h.service.EmployeeProfile.PatchSelfProfile(r.Context(), userID, input)

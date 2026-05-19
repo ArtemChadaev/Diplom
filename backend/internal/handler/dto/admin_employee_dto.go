@@ -1,7 +1,6 @@
 package dto
 
 import (
-	"encoding/json"
 	"time"
 )
 
@@ -21,7 +20,7 @@ type PatchEmployeeProfileRequest struct {
 	DismissalDate       *time.Time      `json:"dismissal_date"`
 	MedicalBookScanURL  *string         `json:"medical_book_scan_url"`
 	SpecialZoneAccess   *bool           `json:"special_zone_access"`
-	GDPTrainingHistory  json.RawMessage `json:"gdp_training_history"`
+	GDPTrainingHistory  interface{} `json:"gdp_training_history"`
 }
 
 // EmployeeProfileResponse is what the API returns (read-only, no pointers for non-nullable fields).
@@ -40,5 +39,5 @@ type EmployeeProfileResponse struct {
 	DismissalDate      *time.Time      `json:"dismissal_date,omitempty"`
 	MedicalBookScanURL string          `json:"medical_book_scan_url"`
 	SpecialZoneAccess  bool            `json:"special_zone_access"`
-	GDPTrainingHistory json.RawMessage `json:"gdp_training_history"`
+	GDPTrainingHistory interface{} `json:"gdp_training_history"`
 }

@@ -1,7 +1,6 @@
 package dto
 
 import (
-	"encoding/json"
 	"time"
 )
 
@@ -61,5 +60,5 @@ type PatchMeRequest struct {
 	AvatarURL           *string         `json:"avatar_url"`
 	AvatarURL2          *string         `json:"avatarurl"`
 	MedicalBookScanURL  *string         `json:"medical_book_scan_url"`
-	GDPTrainingHistory  json.RawMessage `json:"gdp_training_history"`
+	GDPTrainingHistory  interface{} `json:"gdp_training_history"`
 }

@@ -1,5 +1,5 @@
 definitions:
-  github_com_ima_diplom-backend_internal_domain.BatchStatus:
+  domain.BatchStatus:
     enum:
     - quarantine
     - available
@@ -11,7 +11,7 @@ definitions:
     - BatchStatusAvailable
     - BatchStatusRejected
     - BatchStatusBlocked
-  github_com_ima_diplom-backend_internal_domain.ClaimStatus:
+  domain.ClaimStatus:
     enum:
     - new
     - review
@@ -23,7 +23,7 @@ definitions:
     - ClaimStatusUnderReview
     - ClaimStatusResolved
     - ClaimStatusRejected
-  github_com_ima_diplom-backend_internal_domain.InboundStatus:
+  domain.InboundStatus:
     enum:
     - draft
     - received
@@ -44,7 +44,7 @@ definitions:
     - InboundStatusReceived
     - InboundStatusCompleted
     - InboundStatusCancelled
-  github_com_ima_diplom-backend_internal_domain.InventoryStatus:
+  domain.InventoryStatus:
     enum:
     - draft
     - active
@@ -54,7 +54,7 @@ definitions:
     - InventoryStatusDraft
     - InventoryStatusActive
     - InventoryStatusCompleted
-  github_com_ima_diplom-backend_internal_domain.OrderStatus:
+  domain.OrderStatus:
     enum:
     - new
     - assembling
@@ -79,7 +79,7 @@ definitions:
     - OrderStatusAssembled
     - OrderStatusShipped
     - OrderStatusCancelled
-  github_com_ima_diplom-backend_internal_domain.ZoneType:
+  domain.ZoneType:
     enum:
     - ambient
     - cool
@@ -105,7 +105,7 @@ definitions:
     - ZoneTypeColdStorage
     - ZoneTypeNarcotic
     - ZoneTypeQuarantine
-  github_com_ima_diplom-backend_internal_handler_dto.ATCCodeResponse:
+  dto.ATCCodeResponse:
     properties:
       code:
         example: J01CA04
@@ -114,21 +114,21 @@ definitions:
         example: Амоксициллин
         type: string
     type: object
-  github_com_ima_diplom-backend_internal_handler_dto.AssignRoleRequest:
+  dto.AssignRoleRequest:
     properties:
       role:
         type: string
     type: object
-  github_com_ima_diplom-backend_internal_handler_dto.BatchListResponse:
+  dto.BatchListResponse:
     properties:
       batches:
         items:
-          $ref: '#/definitions/github_com_ima_diplom-backend_internal_handler_dto.BatchResponse'
+          $ref: '#/definitions/dto.BatchResponse'
         type: array
       total:
         type: integer
     type: object
-  github_com_ima_diplom-backend_internal_handler_dto.BatchResponse:
+  dto.BatchResponse:
     properties:
       expiry_date:
         type: string
@@ -143,22 +143,22 @@ definitions:
       serial_number:
         type: string
       status:
-        $ref: '#/definitions/github_com_ima_diplom-backend_internal_domain.BatchStatus'
+        $ref: '#/definitions/domain.BatchStatus'
       updated_at:
         type: string
       zone_id:
         type: string
     type: object
-  github_com_ima_diplom-backend_internal_handler_dto.ClaimListResponse:
+  dto.ClaimListResponse:
     properties:
       claims:
         items:
-          $ref: '#/definitions/github_com_ima_diplom-backend_internal_handler_dto.ClaimResponse'
+          $ref: '#/definitions/dto.ClaimResponse'
         type: array
       total:
         type: integer
     type: object
-  github_com_ima_diplom-backend_internal_handler_dto.ClaimResponse:
+  dto.ClaimResponse:
     properties:
       created_at:
         type: string
@@ -173,13 +173,13 @@ definitions:
       order_id:
         type: string
       status:
-        $ref: '#/definitions/github_com_ima_diplom-backend_internal_domain.ClaimStatus'
+        $ref: '#/definitions/domain.ClaimStatus'
       title:
         type: string
       updated_at:
         type: string
     type: object
-  github_com_ima_diplom-backend_internal_handler_dto.CountItem:
+  dto.CountItem:
     properties:
       batch_number:
         type: string
@@ -195,7 +195,7 @@ definitions:
     - batch_number
     - product_id
     type: object
-  github_com_ima_diplom-backend_internal_handler_dto.CountryResponse:
+  dto.CountryResponse:
     properties:
       code:
         example: RUS
@@ -204,7 +204,7 @@ definitions:
         example: РФ
         type: string
     type: object
-  github_com_ima_diplom-backend_internal_handler_dto.CreateClaimRequest:
+  dto.CreateClaimRequest:
     properties:
       description:
         type: string
@@ -218,7 +218,7 @@ definitions:
     - description
     - title
     type: object
-  github_com_ima_diplom-backend_internal_handler_dto.CreateInboundItem:
+  dto.CreateInboundItem:
     properties:
       batch_number:
         type: string
@@ -247,7 +247,7 @@ definitions:
     - quantity
     - zone_id
     type: object
-  github_com_ima_diplom-backend_internal_handler_dto.CreateInboundRequest:
+  dto.CreateInboundRequest:
     properties:
       invoice_date:
         type: string
@@ -255,7 +255,7 @@ definitions:
         type: string
       items:
         items:
-          $ref: '#/definitions/github_com_ima_diplom-backend_internal_handler_dto.CreateInboundItem'
+          $ref: '#/definitions/dto.CreateInboundItem'
         type: array
       notes:
         type: string
@@ -267,7 +267,7 @@ definitions:
     - items
     - supplier_id
     type: object
-  github_com_ima_diplom-backend_internal_handler_dto.CreateOrderItem:
+  dto.CreateOrderItem:
     properties:
       product_id:
         type: string
@@ -278,13 +278,13 @@ definitions:
     - product_id
     - quantity
     type: object
-  github_com_ima_diplom-backend_internal_handler_dto.CreateOrderRequest:
+  dto.CreateOrderRequest:
     properties:
       customer_name:
         type: string
       items:
         items:
-          $ref: '#/definitions/github_com_ima_diplom-backend_internal_handler_dto.CreateOrderItem'
+          $ref: '#/definitions/dto.CreateOrderItem'
         type: array
       priority:
         maximum: 3
@@ -294,7 +294,7 @@ definitions:
     - customer_name
     - items
     type: object
-  github_com_ima_diplom-backend_internal_handler_dto.CreateProductRequest:
+  dto.CreateProductRequest:
     properties:
       atc_code:
         type: string
@@ -328,7 +328,7 @@ definitions:
     - sku
     - strength
     type: object
-  github_com_ima_diplom-backend_internal_handler_dto.CreateSupplierRequest:
+  dto.CreateSupplierRequest:
     properties:
       address:
         type: string
@@ -349,7 +349,7 @@ definitions:
     - kpp
     - name
     type: object
-  github_com_ima_diplom-backend_internal_handler_dto.CreateZoneRequest:
+  dto.CreateZoneRequest:
     properties:
       capacity:
         type: integer
@@ -363,7 +363,7 @@ definitions:
         type: number
       type:
         allOf:
-        - $ref: '#/definitions/github_com_ima_diplom-backend_internal_domain.ZoneType'
+        - $ref: '#/definitions/domain.ZoneType'
         enum:
         - ambient
         - cool
@@ -374,7 +374,7 @@ definitions:
     - name
     - type
     type: object
-  github_com_ima_diplom-backend_internal_handler_dto.EmployeeProfileResponse:
+  dto.EmployeeProfileResponse:
     properties:
       avatar_url:
         type: string
@@ -390,10 +390,7 @@ definitions:
         type: string
       full_name:
         type: string
-      gdp_training_history:
-        items:
-          type: integer
-        type: array
+      gdp_training_history: {}
       hire_date:
         type: string
       id:
@@ -409,16 +406,16 @@ definitions:
       user_id:
         type: integer
     type: object
-  github_com_ima_diplom-backend_internal_handler_dto.EnvLogListResponse:
+  dto.EnvLogListResponse:
     properties:
       logs:
         items:
-          $ref: '#/definitions/github_com_ima_diplom-backend_internal_handler_dto.EnvLogResponse'
+          $ref: '#/definitions/dto.EnvLogResponse'
         type: array
       total:
         type: integer
     type: object
-  github_com_ima_diplom-backend_internal_handler_dto.EnvLogResponse:
+  dto.EnvLogResponse:
     properties:
       humidity:
         type: number
@@ -435,17 +432,17 @@ definitions:
       zone_id:
         type: string
     type: object
-  github_com_ima_diplom-backend_internal_handler_dto.ErrorResponse:
+  dto.ErrorResponse:
     properties:
       error:
         type: string
     type: object
-  github_com_ima_diplom-backend_internal_handler_dto.GoogleAuthRequest:
+  dto.GoogleAuthRequest:
     properties:
       id_token:
         type: string
     type: object
-  github_com_ima_diplom-backend_internal_handler_dto.InboundItemResponse:
+  dto.InboundItemResponse:
     properties:
       batch_number:
         type: string
@@ -468,16 +465,16 @@ definitions:
       zone_id:
         type: string
     type: object
-  github_com_ima_diplom-backend_internal_handler_dto.InboundListResponse:
+  dto.InboundListResponse:
     properties:
       inbounds:
         items:
-          $ref: '#/definitions/github_com_ima_diplom-backend_internal_handler_dto.InboundResponse'
+          $ref: '#/definitions/dto.InboundResponse'
         type: array
       total:
         type: integer
     type: object
-  github_com_ima_diplom-backend_internal_handler_dto.InboundResponse:
+  dto.InboundResponse:
     properties:
       created_at:
         type: string
@@ -489,14 +486,14 @@ definitions:
         type: string
       items:
         items:
-          $ref: '#/definitions/github_com_ima_diplom-backend_internal_handler_dto.InboundItemResponse'
+          $ref: '#/definitions/dto.InboundItemResponse'
         type: array
       notes:
         type: string
       received_by:
         type: integer
       status:
-        $ref: '#/definitions/github_com_ima_diplom-backend_internal_domain.InboundStatus'
+        $ref: '#/definitions/domain.InboundStatus'
       supplier_id:
         type: string
       total_amount:
@@ -506,7 +503,7 @@ definitions:
       vat_amount:
         type: number
     type: object
-  github_com_ima_diplom-backend_internal_handler_dto.InventoryItemResponse:
+  dto.InventoryItemResponse:
     properties:
       batch_number:
         type: string
@@ -521,7 +518,7 @@ definitions:
       system_qty:
         type: integer
     type: object
-  github_com_ima_diplom-backend_internal_handler_dto.InventorySessionResponse:
+  dto.InventorySessionResponse:
     properties:
       completed_at:
         type: string
@@ -529,18 +526,18 @@ definitions:
         type: string
       items:
         items:
-          $ref: '#/definitions/github_com_ima_diplom-backend_internal_handler_dto.InventoryItemResponse'
+          $ref: '#/definitions/dto.InventoryItemResponse'
         type: array
       started_at:
         type: string
       started_by:
         type: integer
       status:
-        $ref: '#/definitions/github_com_ima_diplom-backend_internal_domain.InventoryStatus'
+        $ref: '#/definitions/domain.InventoryStatus'
       zone_id:
         type: string
     type: object
-  github_com_ima_diplom-backend_internal_handler_dto.OrderItemResponse:
+  dto.OrderItemResponse:
     properties:
       id:
         type: string
@@ -551,16 +548,16 @@ definitions:
       quantity:
         type: integer
     type: object
-  github_com_ima_diplom-backend_internal_handler_dto.OrderListResponse:
+  dto.OrderListResponse:
     properties:
       orders:
         items:
-          $ref: '#/definitions/github_com_ima_diplom-backend_internal_handler_dto.OrderResponse'
+          $ref: '#/definitions/dto.OrderResponse'
         type: array
       total:
         type: integer
     type: object
-  github_com_ima_diplom-backend_internal_handler_dto.OrderResponse:
+  dto.OrderResponse:
     properties:
       created_at:
         type: string
@@ -572,18 +569,18 @@ definitions:
         type: string
       items:
         items:
-          $ref: '#/definitions/github_com_ima_diplom-backend_internal_handler_dto.OrderItemResponse'
+          $ref: '#/definitions/dto.OrderItemResponse'
         type: array
       order_number:
         type: string
       priority:
         type: integer
       status:
-        $ref: '#/definitions/github_com_ima_diplom-backend_internal_domain.OrderStatus'
+        $ref: '#/definitions/domain.OrderStatus'
       updated_at:
         type: string
     type: object
-  github_com_ima_diplom-backend_internal_handler_dto.PatchEmployeeProfileRequest:
+  dto.PatchEmployeeProfileRequest:
     properties:
       avatar_url:
         type: string
@@ -599,10 +596,7 @@ definitions:
         type: string
       full_name:
         type: string
-      gdp_training_history:
-        items:
-          type: integer
-        type: array
+      gdp_training_history: {}
       hire_date:
         type: string
       medical_book_scan_url:
@@ -614,7 +608,7 @@ definitions:
       special_zone_access:
         type: boolean
     type: object
-  github_com_ima_diplom-backend_internal_handler_dto.PatchMeRequest:
+  dto.PatchMeRequest:
     properties:
       avatar_url:
         type: string
@@ -630,16 +624,13 @@ definitions:
         type: string
       full_name:
         type: string
-      gdp_training_history:
-        items:
-          type: integer
-        type: array
+      gdp_training_history: {}
       medical_book_scan_url:
         type: string
       phone:
         type: string
     type: object
-  github_com_ima_diplom-backend_internal_handler_dto.PatchUserRequest:
+  dto.PatchUserRequest:
     properties:
       ns_pv_access:
         type: boolean
@@ -648,16 +639,16 @@ definitions:
       special_zone_access:
         type: boolean
     type: object
-  github_com_ima_diplom-backend_internal_handler_dto.ProductListResponse:
+  dto.ProductListResponse:
     properties:
       products:
         items:
-          $ref: '#/definitions/github_com_ima_diplom-backend_internal_handler_dto.ProductResponse'
+          $ref: '#/definitions/dto.ProductResponse'
         type: array
       total:
         type: integer
     type: object
-  github_com_ima_diplom-backend_internal_handler_dto.ProductResponse:
+  dto.ProductResponse:
     properties:
       atc_code:
         type: string
@@ -690,7 +681,7 @@ definitions:
       updated_at:
         type: string
     type: object
-  github_com_ima_diplom-backend_internal_handler_dto.RecalledBatchResponse:
+  dto.RecalledBatchResponse:
     properties:
       id:
         type: string
@@ -707,14 +698,14 @@ definitions:
       synced_at:
         type: string
     type: object
-  github_com_ima_diplom-backend_internal_handler_dto.RecalledCheckResponse:
+  dto.RecalledCheckResponse:
     properties:
       details:
-        $ref: '#/definitions/github_com_ima_diplom-backend_internal_handler_dto.RecalledBatchResponse'
+        $ref: '#/definitions/dto.RecalledBatchResponse'
       is_recalled:
         type: boolean
     type: object
-  github_com_ima_diplom-backend_internal_handler_dto.RecordEnvLogRequest:
+  dto.RecordEnvLogRequest:
     properties:
       humidity:
         type: number
@@ -727,61 +718,61 @@ definitions:
     required:
     - zone_id
     type: object
-  github_com_ima_diplom-backend_internal_handler_dto.RegisterRequest:
+  dto.RegisterRequest:
     properties:
       email:
         type: string
     type: object
-  github_com_ima_diplom-backend_internal_handler_dto.RegisterResponse:
+  dto.RegisterResponse:
     properties:
       expires_in:
         type: integer
       message:
         type: string
     type: object
-  github_com_ima_diplom-backend_internal_handler_dto.SendCodeRequest:
+  dto.SendCodeRequest:
     properties:
       email:
         type: string
     type: object
-  github_com_ima_diplom-backend_internal_handler_dto.SendCodeResponse:
+  dto.SendCodeResponse:
     properties:
       expires_in:
         type: integer
       message:
         type: string
     type: object
-  github_com_ima_diplom-backend_internal_handler_dto.SetBlockedRequest:
+  dto.SetBlockedRequest:
     properties:
       blocked:
         type: boolean
     type: object
-  github_com_ima_diplom-backend_internal_handler_dto.StartInventoryRequest:
+  dto.StartInventoryRequest:
     properties:
       zone_id:
         type: string
     required:
     - zone_id
     type: object
-  github_com_ima_diplom-backend_internal_handler_dto.SubmitCountRequest:
+  dto.SubmitCountRequest:
     properties:
       items:
         items:
-          $ref: '#/definitions/github_com_ima_diplom-backend_internal_handler_dto.CountItem'
+          $ref: '#/definitions/dto.CountItem'
         type: array
     required:
     - items
     type: object
-  github_com_ima_diplom-backend_internal_handler_dto.SupplierListResponse:
+  dto.SupplierListResponse:
     properties:
       suppliers:
         items:
-          $ref: '#/definitions/github_com_ima_diplom-backend_internal_handler_dto.SupplierResponse'
+          $ref: '#/definitions/dto.SupplierResponse'
         type: array
       total:
         type: integer
     type: object
-  github_com_ima_diplom-backend_internal_handler_dto.SupplierResponse:
+  dto.SupplierResponse:
     properties:
       address:
         type: string
@@ -806,46 +797,46 @@ definitions:
       updated_at:
         type: string
     type: object
-  github_com_ima_diplom-backend_internal_handler_dto.SystemSettingResponse:
+  dto.SystemSettingResponse:
     properties:
       key:
         type: string
       value:
         type: string
     type: object
-  github_com_ima_diplom-backend_internal_handler_dto.TokenResponse:
+  dto.TokenResponse:
     properties:
       access_token:
         type: string
       expires_in:
         type: integer
     type: object
-  github_com_ima_diplom-backend_internal_handler_dto.TransferBatchRequest:
+  dto.TransferBatchRequest:
     properties:
       target_zone_id:
         type: string
     required:
     - target_zone_id
     type: object
-  github_com_ima_diplom-backend_internal_handler_dto.UpdateBatchStatusRequest:
+  dto.UpdateBatchStatusRequest:
     properties:
       status:
-        $ref: '#/definitions/github_com_ima_diplom-backend_internal_domain.BatchStatus'
+        $ref: '#/definitions/domain.BatchStatus'
     required:
     - status
     type: object
-  github_com_ima_diplom-backend_internal_handler_dto.UpdateClaimStatusRequest:
+  dto.UpdateClaimStatusRequest:
     properties:
       status:
-        $ref: '#/definitions/github_com_ima_diplom-backend_internal_domain.ClaimStatus'
+        $ref: '#/definitions/domain.ClaimStatus'
     required:
     - status
     type: object
-  github_com_ima_diplom-backend_internal_handler_dto.UpdateInboundStatusRequest:
+  dto.UpdateInboundStatusRequest:
     properties:
       status:
         allOf:
-        - $ref: '#/definitions/github_com_ima_diplom-backend_internal_domain.InboundStatus'
+        - $ref: '#/definitions/domain.InboundStatus'
         enum:
         - draft
         - received
@@ -854,14 +845,14 @@ definitions:
     required:
     - status
     type: object
-  github_com_ima_diplom-backend_internal_handler_dto.UpdateOrderStatusRequest:
+  dto.UpdateOrderStatusRequest:
     properties:
       status:
-        $ref: '#/definitions/github_com_ima_diplom-backend_internal_domain.OrderStatus'
+        $ref: '#/definitions/domain.OrderStatus'
     required:
     - status
     type: object
-  github_com_ima_diplom-backend_internal_handler_dto.UpdateProductRequest:
+  dto.UpdateProductRequest:
     properties:
       atc_code:
         type: string
@@ -884,14 +875,14 @@ definitions:
       strength:
         type: string
     type: object
-  github_com_ima_diplom-backend_internal_handler_dto.UpdateSettingRequest:
+  dto.UpdateSettingRequest:
     properties:
       value:
         type: string
     required:
     - value
     type: object
-  github_com_ima_diplom-backend_internal_handler_dto.UpdateSupplierRequest:
+  dto.UpdateSupplierRequest:
     properties:
       address:
         type: string
@@ -908,7 +899,7 @@ definitions:
       phone:
         type: string
     type: object
-  github_com_ima_diplom-backend_internal_handler_dto.UpdateZoneRequest:
+  dto.UpdateZoneRequest:
     properties:
       capacity:
         type: integer
@@ -923,9 +914,9 @@ definitions:
       temp_min:
         type: number
       type:
-        $ref: '#/definitions/github_com_ima_diplom-backend_internal_domain.ZoneType'
+        $ref: '#/definitions/domain.ZoneType'
     type: object
-  github_com_ima_diplom-backend_internal_handler_dto.UserProfileResponse:
+  dto.UserProfileResponse:
     properties:
       department:
         type: string
@@ -948,14 +939,14 @@ definitions:
       ukep_bound:
         type: boolean
     type: object
-  github_com_ima_diplom-backend_internal_handler_dto.VerifyCodeRequest:
+  dto.VerifyCodeRequest:
     properties:
       code:
         type: string
       email:
         type: string
     type: object
-  github_com_ima_diplom-backend_internal_handler_dto.ZoneResponse:
+  dto.ZoneResponse:
     properties:
       capacity:
         type: integer
@@ -974,7 +965,7 @@ definitions:
       temp_min:
         type: number
       type:
-        $ref: '#/definitions/github_com_ima_diplom-backend_internal_domain.ZoneType'
+        $ref: '#/definitions/domain.ZoneType'
       updated_at:
         type: string
     type: object
@@ -1023,12 +1014,12 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/github_com_ima_diplom-backend_internal_handler_dto.EmployeeProfileResponse'
+              $ref: '#/definitions/dto.EmployeeProfileResponse'
             type: array
         "403":
           description: insufficient permissions
           schema:
-            $ref: '#/definitions/github_com_ima_diplom-backend_internal_handler_dto.ErrorResponse'
+            $ref: '#/definitions/dto.ErrorResponse'
       security:
       - BearerAuth: []
       summary: List employee profiles (Admin)
@@ -1050,19 +1041,19 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/github_com_ima_diplom-backend_internal_handler_dto.EmployeeProfileResponse'
+            $ref: '#/definitions/dto.EmployeeProfileResponse'
         "400":
           description: invalid user ID
           schema:
-            $ref: '#/definitions/github_com_ima_diplom-backend_internal_handler_dto.ErrorResponse'
+            $ref: '#/definitions/dto.ErrorResponse'
         "403":
           description: insufficient permissions
           schema:
-            $ref: '#/definitions/github_com_ima_diplom-backend_internal_handler_dto.ErrorResponse'
+            $ref: '#/definitions/dto.ErrorResponse'
         "404":
           description: profile not found
           schema:
-            $ref: '#/definitions/github_com_ima_diplom-backend_internal_handler_dto.ErrorResponse'
+            $ref: '#/definitions/dto.ErrorResponse'
       security:
       - BearerAuth: []
       summary: Get employee profile (Admin)
@@ -1083,26 +1074,26 @@ paths:
         name: body
         required: true
         schema:
-          $ref: '#/definitions/github_com_ima_diplom-backend_internal_handler_dto.PatchEmployeeProfileRequest'
+          $ref: '#/definitions/dto.PatchEmployeeProfileRequest'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/github_com_ima_diplom-backend_internal_handler_dto.EmployeeProfileResponse'
+            $ref: '#/definitions/dto.EmployeeProfileResponse'
         "400":
           description: invalid user ID, invalid JSON or invalid fields
           schema:
-            $ref: '#/definitions/github_com_ima_diplom-backend_internal_handler_dto.ErrorResponse'
+            $ref: '#/definitions/dto.ErrorResponse'
         "403":
           description: insufficient permissions
           schema:
-            $ref: '#/definitions/github_com_ima_diplom-backend_internal_handler_dto.ErrorResponse'
+            $ref: '#/definitions/dto.ErrorResponse'
         "404":
           description: profile not found
           schema:
-            $ref: '#/definitions/github_com_ima_diplom-backend_internal_handler_dto.ErrorResponse'
+            $ref: '#/definitions/dto.ErrorResponse'
       security:
       - BearerAuth: []
       summary: Update employee profile (Admin)
@@ -1123,15 +1114,15 @@ paths:
         "400":
           description: invalid session ID
           schema:
-            $ref: '#/definitions/github_com_ima_diplom-backend_internal_handler_dto.ErrorResponse'
+            $ref: '#/definitions/dto.ErrorResponse'
         "403":
           description: insufficient permissions
           schema:
-            $ref: '#/definitions/github_com_ima_diplom-backend_internal_handler_dto.ErrorResponse'
+            $ref: '#/definitions/dto.ErrorResponse'
         "404":
           description: session not found
           schema:
-            $ref: '#/definitions/github_com_ima_diplom-backend_internal_handler_dto.ErrorResponse'
+            $ref: '#/definitions/dto.ErrorResponse'
       security:
       - BearerAuth: []
       summary: Revoke user session (Admin)
@@ -1165,12 +1156,12 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/github_com_ima_diplom-backend_internal_handler_dto.UserProfileResponse'
+              $ref: '#/definitions/dto.UserProfileResponse'
             type: array
         "403":
           description: insufficient permissions
           schema:
-            $ref: '#/definitions/github_com_ima_diplom-backend_internal_handler_dto.ErrorResponse'
+            $ref: '#/definitions/dto.ErrorResponse'
       security:
       - BearerAuth: []
       summary: List users (Admin)
@@ -1191,19 +1182,19 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/github_com_ima_diplom-backend_internal_handler_dto.UserProfileResponse'
+            $ref: '#/definitions/dto.UserProfileResponse'
         "400":
           description: invalid user ID
           schema:
-            $ref: '#/definitions/github_com_ima_diplom-backend_internal_handler_dto.ErrorResponse'
+            $ref: '#/definitions/dto.ErrorResponse'
         "403":
           description: insufficient permissions
           schema:
-            $ref: '#/definitions/github_com_ima_diplom-backend_internal_handler_dto.ErrorResponse'
+            $ref: '#/definitions/dto.ErrorResponse'
         "404":
           description: user not found
           schema:
-            $ref: '#/definitions/github_com_ima_diplom-backend_internal_handler_dto.ErrorResponse'
+            $ref: '#/definitions/dto.ErrorResponse'
       security:
       - BearerAuth: []
       summary: Get user by ID (Admin)
@@ -1225,26 +1216,26 @@ paths:
         name: body
         required: true
         schema:
-          $ref: '#/definitions/github_com_ima_diplom-backend_internal_handler_dto.PatchUserRequest'
+          $ref: '#/definitions/dto.PatchUserRequest'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/github_com_ima_diplom-backend_internal_handler_dto.UserProfileResponse'
+            $ref: '#/definitions/dto.UserProfileResponse'
         "400":
           description: invalid user ID or request body
           schema:
-            $ref: '#/definitions/github_com_ima_diplom-backend_internal_handler_dto.ErrorResponse'
+            $ref: '#/definitions/dto.ErrorResponse'
         "403":
           description: insufficient permissions
           schema:
-            $ref: '#/definitions/github_com_ima_diplom-backend_internal_handler_dto.ErrorResponse'
+            $ref: '#/definitions/dto.ErrorResponse'
         "404":
           description: user not found
           schema:
-            $ref: '#/definitions/github_com_ima_diplom-backend_internal_handler_dto.ErrorResponse'
+            $ref: '#/definitions/dto.ErrorResponse'
       security:
       - BearerAuth: []
       summary: Update user and permissions (Admin)
@@ -1266,7 +1257,7 @@ paths:
         name: body
         required: true
         schema:
-          $ref: '#/definitions/github_com_ima_diplom-backend_internal_handler_dto.SetBlockedRequest'
+          $ref: '#/definitions/dto.SetBlockedRequest'
       produces:
       - application/json
       responses:
@@ -1279,15 +1270,15 @@ paths:
         "400":
           description: invalid user ID or invalid JSON
           schema:
-            $ref: '#/definitions/github_com_ima_diplom-backend_internal_handler_dto.ErrorResponse'
+            $ref: '#/definitions/dto.ErrorResponse'
         "403":
           description: insufficient permissions
           schema:
-            $ref: '#/definitions/github_com_ima_diplom-backend_internal_handler_dto.ErrorResponse'
+            $ref: '#/definitions/dto.ErrorResponse'
         "404":
           description: user not found
           schema:
-            $ref: '#/definitions/github_com_ima_diplom-backend_internal_handler_dto.ErrorResponse'
+            $ref: '#/definitions/dto.ErrorResponse'
       security:
       - BearerAuth: []
       summary: Block/Unblock user (Admin)
@@ -1309,7 +1300,7 @@ paths:
         name: body
         required: true
         schema:
-          $ref: '#/definitions/github_com_ima_diplom-backend_internal_handler_dto.AssignRoleRequest'
+          $ref: '#/definitions/dto.AssignRoleRequest'
       produces:
       - application/json
       responses:
@@ -1322,15 +1313,15 @@ paths:
         "400":
           description: invalid user ID or invalid JSON
           schema:
-            $ref: '#/definitions/github_com_ima_diplom-backend_internal_handler_dto.ErrorResponse'
+            $ref: '#/definitions/dto.ErrorResponse'
         "403":
           description: insufficient permissions
           schema:
-            $ref: '#/definitions/github_com_ima_diplom-backend_internal_handler_dto.ErrorResponse'
+            $ref: '#/definitions/dto.ErrorResponse'
         "404":
           description: user not found
           schema:
-            $ref: '#/definitions/github_com_ima_diplom-backend_internal_handler_dto.ErrorResponse'
+            $ref: '#/definitions/dto.ErrorResponse'
       security:
       - BearerAuth: []
       summary: Assign user role (Admin)
@@ -1366,7 +1357,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/github_com_ima_diplom-backend_internal_handler_dto.BatchListResponse'
+            $ref: '#/definitions/dto.BatchListResponse'
       summary: List product batches (Inventory)
       tags:
       - Batches
@@ -1386,7 +1377,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/github_com_ima_diplom-backend_internal_handler_dto.BatchResponse'
+            $ref: '#/definitions/dto.BatchResponse'
       summary: Get batch by ID
       tags:
       - Batches
@@ -1406,7 +1397,7 @@ paths:
         name: request
         required: true
         schema:
-          $ref: '#/definitions/github_com_ima_diplom-backend_internal_handler_dto.UpdateBatchStatusRequest'
+          $ref: '#/definitions/dto.UpdateBatchStatusRequest'
       produces:
       - application/json
       responses:
@@ -1431,7 +1422,7 @@ paths:
         name: request
         required: true
         schema:
-          $ref: '#/definitions/github_com_ima_diplom-backend_internal_handler_dto.TransferBatchRequest'
+          $ref: '#/definitions/dto.TransferBatchRequest'
       produces:
       - application/json
       responses:
@@ -1458,7 +1449,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/github_com_ima_diplom-backend_internal_handler_dto.ClaimListResponse'
+            $ref: '#/definitions/dto.ClaimListResponse'
       summary: List claims and defects
       tags:
       - Claims
@@ -1472,14 +1463,14 @@ paths:
         name: request
         required: true
         schema:
-          $ref: '#/definitions/github_com_ima_diplom-backend_internal_handler_dto.CreateClaimRequest'
+          $ref: '#/definitions/dto.CreateClaimRequest'
       produces:
       - application/json
       responses:
         "201":
           description: Created
           schema:
-            $ref: '#/definitions/github_com_ima_diplom-backend_internal_handler_dto.ClaimResponse'
+            $ref: '#/definitions/dto.ClaimResponse'
       summary: Create claim or defect
       tags:
       - Claims
@@ -1498,7 +1489,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/github_com_ima_diplom-backend_internal_handler_dto.ClaimResponse'
+            $ref: '#/definitions/dto.ClaimResponse'
       summary: Get claim by ID
       tags:
       - Claims
@@ -1518,7 +1509,7 @@ paths:
         name: request
         required: true
         schema:
-          $ref: '#/definitions/github_com_ima_diplom-backend_internal_handler_dto.UpdateClaimStatusRequest'
+          $ref: '#/definitions/dto.UpdateClaimStatusRequest'
       produces:
       - application/json
       responses:
@@ -1549,7 +1540,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/github_com_ima_diplom-backend_internal_handler_dto.EnvLogListResponse'
+            $ref: '#/definitions/dto.EnvLogListResponse'
       summary: List environment logs
       tags:
       - Environment
@@ -1564,7 +1555,7 @@ paths:
         required: true
         schema:
           items:
-            $ref: '#/definitions/github_com_ima_diplom-backend_internal_handler_dto.RecordEnvLogRequest'
+            $ref: '#/definitions/dto.RecordEnvLogRequest'
           type: array
       produces:
       - application/json
@@ -1592,7 +1583,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/github_com_ima_diplom-backend_internal_handler_dto.InboundListResponse'
+            $ref: '#/definitions/dto.InboundListResponse'
       summary: List inbound receivings
       tags:
       - Inbound
@@ -1606,14 +1597,14 @@ paths:
         name: request
         required: true
         schema:
-          $ref: '#/definitions/github_com_ima_diplom-backend_internal_handler_dto.CreateInboundRequest'
+          $ref: '#/definitions/dto.CreateInboundRequest'
       produces:
       - application/json
       responses:
         "201":
           description: Created
           schema:
-            $ref: '#/definitions/github_com_ima_diplom-backend_internal_handler_dto.InboundResponse'
+            $ref: '#/definitions/dto.InboundResponse'
       summary: Create inbound receiving
       tags:
       - Inbound
@@ -1649,7 +1640,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/github_com_ima_diplom-backend_internal_handler_dto.InboundResponse'
+            $ref: '#/definitions/dto.InboundResponse'
       summary: Get inbound receiving by ID
       tags:
       - Inbound
@@ -1669,7 +1660,7 @@ paths:
         name: request
         required: true
         schema:
-          $ref: '#/definitions/github_com_ima_diplom-backend_internal_handler_dto.UpdateInboundStatusRequest'
+          $ref: '#/definitions/dto.UpdateInboundStatusRequest'
       produces:
       - application/json
       responses:
@@ -1697,7 +1688,7 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/github_com_ima_diplom-backend_internal_handler_dto.InventorySessionResponse'
+              $ref: '#/definitions/dto.InventorySessionResponse'
             type: array
       summary: List inventory sessions
       tags:
@@ -1712,14 +1703,14 @@ paths:
         name: request
         required: true
         schema:
-          $ref: '#/definitions/github_com_ima_diplom-backend_internal_handler_dto.StartInventoryRequest'
+          $ref: '#/definitions/dto.StartInventoryRequest'
       produces:
       - application/json
       responses:
         "201":
           description: Created
           schema:
-            $ref: '#/definitions/github_com_ima_diplom-backend_internal_handler_dto.InventorySessionResponse'
+            $ref: '#/definitions/dto.InventorySessionResponse'
       summary: Start inventory session
       tags:
       - Inventory
@@ -1738,7 +1729,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/github_com_ima_diplom-backend_internal_handler_dto.InventorySessionResponse'
+            $ref: '#/definitions/dto.InventorySessionResponse'
       summary: Get inventory session by ID
       tags:
       - Inventory
@@ -1758,7 +1749,7 @@ paths:
         name: request
         required: true
         schema:
-          $ref: '#/definitions/github_com_ima_diplom-backend_internal_handler_dto.SubmitCountRequest'
+          $ref: '#/definitions/dto.SubmitCountRequest'
       produces:
       - application/json
       responses:
@@ -1802,7 +1793,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/github_com_ima_diplom-backend_internal_handler_dto.OrderListResponse'
+            $ref: '#/definitions/dto.OrderListResponse'
       summary: List shipping orders
       tags:
       - Orders
@@ -1816,14 +1807,14 @@ paths:
         name: request
         required: true
         schema:
-          $ref: '#/definitions/github_com_ima_diplom-backend_internal_handler_dto.CreateOrderRequest'
+          $ref: '#/definitions/dto.CreateOrderRequest'
       produces:
       - application/json
       responses:
         "201":
           description: Created
           schema:
-            $ref: '#/definitions/github_com_ima_diplom-backend_internal_handler_dto.OrderResponse'
+            $ref: '#/definitions/dto.OrderResponse'
       summary: Create shipping order
       tags:
       - Orders
@@ -1842,7 +1833,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/github_com_ima_diplom-backend_internal_handler_dto.OrderResponse'
+            $ref: '#/definitions/dto.OrderResponse'
       summary: Get order by ID
       tags:
       - Orders
@@ -1862,7 +1853,7 @@ paths:
         name: request
         required: true
         schema:
-          $ref: '#/definitions/github_com_ima_diplom-backend_internal_handler_dto.UpdateOrderStatusRequest'
+          $ref: '#/definitions/dto.UpdateOrderStatusRequest'
       produces:
       - application/json
       responses:
@@ -1901,7 +1892,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/github_com_ima_diplom-backend_internal_handler_dto.ProductListResponse'
+            $ref: '#/definitions/dto.ProductListResponse'
       summary: List products
       tags:
       - Products
@@ -1915,14 +1906,14 @@ paths:
         name: request
         required: true
         schema:
-          $ref: '#/definitions/github_com_ima_diplom-backend_internal_handler_dto.CreateProductRequest'
+          $ref: '#/definitions/dto.CreateProductRequest'
       produces:
       - application/json
       responses:
         "201":
           description: Created
           schema:
-            $ref: '#/definitions/github_com_ima_diplom-backend_internal_handler_dto.ProductResponse'
+            $ref: '#/definitions/dto.ProductResponse'
       summary: Create product
       tags:
       - Products
@@ -1957,7 +1948,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/github_com_ima_diplom-backend_internal_handler_dto.ProductResponse'
+            $ref: '#/definitions/dto.ProductResponse'
       summary: Get product by ID
       tags:
       - Products
@@ -1977,14 +1968,14 @@ paths:
         name: request
         required: true
         schema:
-          $ref: '#/definitions/github_com_ima_diplom-backend_internal_handler_dto.UpdateProductRequest'
+          $ref: '#/definitions/dto.UpdateProductRequest'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/github_com_ima_diplom-backend_internal_handler_dto.ProductResponse'
+            $ref: '#/definitions/dto.ProductResponse'
       summary: Partial update product
       tags:
       - Products
@@ -2008,7 +1999,7 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/github_com_ima_diplom-backend_internal_handler_dto.RecalledBatchResponse'
+              $ref: '#/definitions/dto.RecalledBatchResponse'
             type: array
       summary: List recalled batches
       tags:
@@ -2029,7 +2020,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/github_com_ima_diplom-backend_internal_handler_dto.RecalledCheckResponse'
+            $ref: '#/definitions/dto.RecalledCheckResponse'
       summary: Check series for recall
       tags:
       - Recalled
@@ -2049,7 +2040,7 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/github_com_ima_diplom-backend_internal_handler_dto.ATCCodeResponse'
+              $ref: '#/definitions/dto.ATCCodeResponse'
             type: array
       summary: Search ATC codes
       tags:
@@ -2064,7 +2055,7 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/github_com_ima_diplom-backend_internal_handler_dto.CountryResponse'
+              $ref: '#/definitions/dto.CountryResponse'
             type: array
       summary: List countries
       tags:
@@ -2084,15 +2075,15 @@ paths:
         "400":
           description: invalid session ID
           schema:
-            $ref: '#/definitions/github_com_ima_diplom-backend_internal_handler_dto.ErrorResponse'
+            $ref: '#/definitions/dto.ErrorResponse'
         "403":
           description: insufficient permissions (not owner and not admin)
           schema:
-            $ref: '#/definitions/github_com_ima_diplom-backend_internal_handler_dto.ErrorResponse'
+            $ref: '#/definitions/dto.ErrorResponse'
         "404":
           description: session not found
           schema:
-            $ref: '#/definitions/github_com_ima_diplom-backend_internal_handler_dto.ErrorResponse'
+            $ref: '#/definitions/dto.ErrorResponse'
       security:
       - BearerAuth: []
       summary: Revoke own session
@@ -2108,7 +2099,7 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/github_com_ima_diplom-backend_internal_handler_dto.SystemSettingResponse'
+              $ref: '#/definitions/dto.SystemSettingResponse'
             type: array
       summary: List system settings
       tags:
@@ -2129,7 +2120,7 @@ paths:
         name: request
         required: true
         schema:
-          $ref: '#/definitions/github_com_ima_diplom-backend_internal_handler_dto.UpdateSettingRequest'
+          $ref: '#/definitions/dto.UpdateSettingRequest'
       produces:
       - application/json
       responses:
@@ -2156,7 +2147,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/github_com_ima_diplom-backend_internal_handler_dto.SupplierListResponse'
+            $ref: '#/definitions/dto.SupplierListResponse'
       summary: List suppliers
       tags:
       - Suppliers
@@ -2170,14 +2161,14 @@ paths:
         name: request
         required: true
         schema:
-          $ref: '#/definitions/github_com_ima_diplom-backend_internal_handler_dto.CreateSupplierRequest'
+          $ref: '#/definitions/dto.CreateSupplierRequest'
       produces:
       - application/json
       responses:
         "201":
           description: Created
           schema:
-            $ref: '#/definitions/github_com_ima_diplom-backend_internal_handler_dto.SupplierResponse'
+            $ref: '#/definitions/dto.SupplierResponse'
       summary: Create supplier
       tags:
       - Suppliers
@@ -2212,7 +2203,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/github_com_ima_diplom-backend_internal_handler_dto.SupplierResponse'
+            $ref: '#/definitions/dto.SupplierResponse'
       summary: Get supplier by ID
       tags:
       - Suppliers
@@ -2232,14 +2223,14 @@ paths:
         name: request
         required: true
         schema:
-          $ref: '#/definitions/github_com_ima_diplom-backend_internal_handler_dto.UpdateSupplierRequest'
+          $ref: '#/definitions/dto.UpdateSupplierRequest'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/github_com_ima_diplom-backend_internal_handler_dto.SupplierResponse'
+            $ref: '#/definitions/dto.SupplierResponse'
       summary: Partial update supplier
       tags:
       - Suppliers
@@ -2252,15 +2243,15 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/github_com_ima_diplom-backend_internal_handler_dto.UserProfileResponse'
+            $ref: '#/definitions/dto.UserProfileResponse'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/github_com_ima_diplom-backend_internal_handler_dto.ErrorResponse'
+            $ref: '#/definitions/dto.ErrorResponse'
         "404":
           description: user not found
           schema:
-            $ref: '#/definitions/github_com_ima_diplom-backend_internal_handler_dto.ErrorResponse'
+            $ref: '#/definitions/dto.ErrorResponse'
       security:
       - BearerAuth: []
       summary: Get current user profile
@@ -2276,26 +2267,26 @@ paths:
         name: body
         required: true
         schema:
-          $ref: '#/definitions/github_com_ima_diplom-backend_internal_handler_dto.PatchMeRequest'
+          $ref: '#/definitions/dto.PatchMeRequest'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/github_com_ima_diplom-backend_internal_handler_dto.UserProfileResponse'
+            $ref: '#/definitions/dto.UserProfileResponse'
         "400":
           description: invalid request body
           schema:
-            $ref: '#/definitions/github_com_ima_diplom-backend_internal_handler_dto.ErrorResponse'
+            $ref: '#/definitions/dto.ErrorResponse'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/github_com_ima_diplom-backend_internal_handler_dto.ErrorResponse'
+            $ref: '#/definitions/dto.ErrorResponse'
         "404":
           description: profile not found
           schema:
-            $ref: '#/definitions/github_com_ima_diplom-backend_internal_handler_dto.ErrorResponse'
+            $ref: '#/definitions/dto.ErrorResponse'
       security:
       - BearerAuth: []
       summary: Update current user profile
@@ -2311,7 +2302,7 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/github_com_ima_diplom-backend_internal_handler_dto.ZoneResponse'
+              $ref: '#/definitions/dto.ZoneResponse'
             type: array
       summary: List warehouse zones
       tags:
@@ -2326,14 +2317,14 @@ paths:
         name: request
         required: true
         schema:
-          $ref: '#/definitions/github_com_ima_diplom-backend_internal_handler_dto.CreateZoneRequest'
+          $ref: '#/definitions/dto.CreateZoneRequest'
       produces:
       - application/json
       responses:
         "201":
           description: Created
           schema:
-            $ref: '#/definitions/github_com_ima_diplom-backend_internal_handler_dto.ZoneResponse'
+            $ref: '#/definitions/dto.ZoneResponse'
       summary: Create warehouse zone
       tags:
       - Zones
@@ -2368,7 +2359,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/github_com_ima_diplom-backend_internal_handler_dto.ZoneResponse'
+            $ref: '#/definitions/dto.ZoneResponse'
       summary: Get warehouse zone by ID
       tags:
       - Zones
@@ -2388,14 +2379,14 @@ paths:
         name: request
         required: true
         schema:
-          $ref: '#/definitions/github_com_ima_diplom-backend_internal_handler_dto.UpdateZoneRequest'
+          $ref: '#/definitions/dto.UpdateZoneRequest'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/github_com_ima_diplom-backend_internal_handler_dto.ZoneResponse'
+            $ref: '#/definitions/dto.ZoneResponse'
       summary: Partial update warehouse zone
       tags:
       - Zones
@@ -2411,26 +2402,26 @@ paths:
         name: body
         required: true
         schema:
-          $ref: '#/definitions/github_com_ima_diplom-backend_internal_handler_dto.GoogleAuthRequest'
+          $ref: '#/definitions/dto.GoogleAuthRequest'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/github_com_ima_diplom-backend_internal_handler_dto.TokenResponse'
+            $ref: '#/definitions/dto.TokenResponse'
         "400":
           description: invalid JSON
           schema:
-            $ref: '#/definitions/github_com_ima_diplom-backend_internal_handler_dto.ErrorResponse'
+            $ref: '#/definitions/dto.ErrorResponse'
         "401":
           description: google auth failed
           schema:
-            $ref: '#/definitions/github_com_ima_diplom-backend_internal_handler_dto.ErrorResponse'
+            $ref: '#/definitions/dto.ErrorResponse'
         "403":
           description: account is blocked
           schema:
-            $ref: '#/definitions/github_com_ima_diplom-backend_internal_handler_dto.ErrorResponse'
+            $ref: '#/definitions/dto.ErrorResponse'
       summary: Google OAuth Login
       tags:
       - auth
@@ -2454,11 +2445,11 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/github_com_ima_diplom-backend_internal_handler_dto.TokenResponse'
+            $ref: '#/definitions/dto.TokenResponse'
         "401":
           description: refresh token missing or invalid session
           schema:
-            $ref: '#/definitions/github_com_ima_diplom-backend_internal_handler_dto.ErrorResponse'
+            $ref: '#/definitions/dto.ErrorResponse'
       summary: Refresh tokens
       tags:
       - auth
@@ -2473,26 +2464,26 @@ paths:
         name: body
         required: true
         schema:
-          $ref: '#/definitions/github_com_ima_diplom-backend_internal_handler_dto.RegisterRequest'
+          $ref: '#/definitions/dto.RegisterRequest'
       produces:
       - application/json
       responses:
         "201":
           description: Created
           schema:
-            $ref: '#/definitions/github_com_ima_diplom-backend_internal_handler_dto.RegisterResponse'
+            $ref: '#/definitions/dto.RegisterResponse'
         "400":
           description: email is required
           schema:
-            $ref: '#/definitions/github_com_ima_diplom-backend_internal_handler_dto.ErrorResponse'
+            $ref: '#/definitions/dto.ErrorResponse'
         "409":
           description: email already registered
           schema:
-            $ref: '#/definitions/github_com_ima_diplom-backend_internal_handler_dto.ErrorResponse'
+            $ref: '#/definitions/dto.ErrorResponse'
         "500":
           description: failed to register
           schema:
-            $ref: '#/definitions/github_com_ima_diplom-backend_internal_handler_dto.ErrorResponse'
+            $ref: '#/definitions/dto.ErrorResponse'
       summary: Регистрация нового пользователя по email
       tags:
       - auth
@@ -2507,30 +2498,30 @@ paths:
         name: body
         required: true
         schema:
-          $ref: '#/definitions/github_com_ima_diplom-backend_internal_handler_dto.SendCodeRequest'
+          $ref: '#/definitions/dto.SendCodeRequest'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/github_com_ima_diplom-backend_internal_handler_dto.SendCodeResponse'
+            $ref: '#/definitions/dto.SendCodeResponse'
         "400":
           description: invalid request body or email is required
           schema:
-            $ref: '#/definitions/github_com_ima_diplom-backend_internal_handler_dto.ErrorResponse'
+            $ref: '#/definitions/dto.ErrorResponse'
         "404":
           description: user with this email not found
           schema:
-            $ref: '#/definitions/github_com_ima_diplom-backend_internal_handler_dto.ErrorResponse'
+            $ref: '#/definitions/dto.ErrorResponse'
         "429":
           description: too many requests, try again later
           schema:
-            $ref: '#/definitions/github_com_ima_diplom-backend_internal_handler_dto.ErrorResponse'
+            $ref: '#/definitions/dto.ErrorResponse'
         "500":
           description: failed to send code
           schema:
-            $ref: '#/definitions/github_com_ima_diplom-backend_internal_handler_dto.ErrorResponse'
+            $ref: '#/definitions/dto.ErrorResponse'
       summary: Send OTP code
       tags:
       - auth
@@ -2546,26 +2537,26 @@ paths:
         name: body
         required: true
         schema:
-          $ref: '#/definitions/github_com_ima_diplom-backend_internal_handler_dto.VerifyCodeRequest'
+          $ref: '#/definitions/dto.VerifyCodeRequest'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/github_com_ima_diplom-backend_internal_handler_dto.TokenResponse'
+            $ref: '#/definitions/dto.TokenResponse'
         "400":
           description: invalid request body or missing fields
           schema:
-            $ref: '#/definitions/github_com_ima_diplom-backend_internal_handler_dto.ErrorResponse'
+            $ref: '#/definitions/dto.ErrorResponse'
         "401":
           description: invalid or expired code
           schema:
-            $ref: '#/definitions/github_com_ima_diplom-backend_internal_handler_dto.ErrorResponse'
+            $ref: '#/definitions/dto.ErrorResponse'
         "500":
           description: failed to verify code
           schema:
-            $ref: '#/definitions/github_com_ima_diplom-backend_internal_handler_dto.ErrorResponse'
+            $ref: '#/definitions/dto.ErrorResponse'
       summary: Verify OTP code
       tags:
       - auth

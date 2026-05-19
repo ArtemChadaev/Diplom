@@ -107,6 +107,13 @@ func (h *Handler) adminPatchEmployeeProfile(w http.ResponseWriter, r *http.Reque
 	callerID := r.Context().Value(middleware.CtxUserID).(int)
 	callerRole := r.Context().Value(middleware.CtxRole).(domain.UserRole)
 
+	var gdpRaw json.RawMessage
+	if req.GDPTrainingHistory != nil {
+		if b, err := json.Marshal(req.GDPTrainingHistory); err == nil {
+			gdpRaw = b
+		}
+	}
+
 	input := domain.UpdateEmployeeProfileInput{
 		EmployeeCode:       req.EmployeeCode,
 		FullName:           req.FullName,
@@ -120,7 +127,7 @@ func (h *Handler) adminPatchEmployeeProfile(w http.ResponseWriter, r *http.Reque
 		DismissalDate:      req.DismissalDate,
 		MedicalBookScanURL: req.MedicalBookScanURL,
 		SpecialZoneAccess:  req.SpecialZoneAccess,
-		GDPTrainingHistory: req.GDPTrainingHistory,
+		GDPTrainingHistory: gdpRaw,
 	}
 
 	updated, err := h.service.EmployeeProfile.UpdateProfile(r.Context(), callerID, callerRole, targetUserID, input)
