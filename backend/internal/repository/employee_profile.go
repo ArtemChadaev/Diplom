@@ -86,6 +86,41 @@ func (r *employeeProfileRepository) Update(ctx context.Context, id int, input do
 	return r.FindByID(ctx, id)
 }
 
+func (r *employeeProfileRepository) Create(ctx context.Context, profile *domain.EmployeeProfile) (*domain.EmployeeProfile, error) {
+	gdpHistoryJSON, err := json.Marshal(profile.GDPTrainingHistory)
+	if err != nil || gdpHistoryJSON == nil {
+		gdpHistoryJSON = []byte("[]")
+	}
+
+	d := dao.EmployeeProfileDAO{
+		UserID:             profile.UserID,
+		EmployeeCode:       profile.EmployeeCode,
+		FullName:           profile.FullName,
+		CorporateEmail:     profile.CorporateEmail,
+		Phone:              profile.Phone,
+		Position:           profile.Position,
+		Department:         profile.Department,
+		BirthDate:          profile.BirthDate,
+		AvatarURL:          profile.AvatarURL,
+		HireDate:           profile.HireDate,
+		DismissalDate:      profile.DismissalDate,
+		MedicalBookScanURL: profile.MedicalBookScanURL,
+		SpecialZoneAccess:  profile.SpecialZoneAccess,
+		GDPTrainingHistory: gdpHistoryJSON,
+	}
+
+	if err := r.db.WithContext(ctx).Create(&d).Error; err != nil {
+		return nil, errors.New("employeeProfileRepo.Create: " + err.Error())
+	}
+
+	logger.FromContext(ctx).Info("employee profile created",
+		"profile_id", d.ID,
+		"user_id", d.UserID,
+	)
+
+	return r.toDomain(&d), nil
+}
+
 func (r *employeeProfileRepository) List(ctx context.Context, limit, offset int) ([]domain.EmployeeProfile, error) {
 	var rows []dao.EmployeeProfileDAO
 	if err := r.db.WithContext(ctx).Limit(limit).Offset(offset).Find(&rows).Error; err != nil {

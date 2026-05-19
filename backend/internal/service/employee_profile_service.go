@@ -2,6 +2,8 @@ package service
 
 import (
 	"context"
+	"encoding/json"
+	"errors"
 	"regexp"
 
 	"github.com/ima/diplom-backend/internal/domain"
@@ -50,6 +52,65 @@ func (s *employeeProfileService) UpdateProfile(
 
 	profile, err := s.repo.FindByUserID(ctx, targetUserID)
 	if err != nil {
+		if errors.Is(err, domain.ErrEmployeeProfileNotFound) {
+			// If not found, CREATE it!
+			newProfile := &domain.EmployeeProfile{
+				UserID: uint(targetUserID),
+			}
+			if input.EmployeeCode != nil {
+				newProfile.EmployeeCode = *input.EmployeeCode
+			}
+			if input.FullName != nil {
+				newProfile.FullName = *input.FullName
+			}
+			if input.CorporateEmail != nil {
+				newProfile.CorporateEmail = *input.CorporateEmail
+			}
+			if input.Phone != nil {
+				newProfile.Phone = *input.Phone
+			}
+			if input.Position != nil {
+				newProfile.Position = *input.Position
+			}
+			if input.Department != nil {
+				newProfile.Department = *input.Department
+			}
+			if input.BirthDate != nil {
+				newProfile.BirthDate = *input.BirthDate
+			}
+			if input.AvatarURL != nil {
+				newProfile.AvatarURL = *input.AvatarURL
+			}
+			if input.HireDate != nil {
+				newProfile.HireDate = *input.HireDate
+			}
+			if input.DismissalDate != nil {
+				newProfile.DismissalDate = input.DismissalDate
+			}
+			if input.MedicalBookScanURL != nil {
+				newProfile.MedicalBookScanURL = *input.MedicalBookScanURL
+			}
+			if input.SpecialZoneAccess != nil {
+				newProfile.SpecialZoneAccess = *input.SpecialZoneAccess
+			}
+			if input.GDPTrainingHistory != nil {
+				var gdp []domain.GDPTrainingRecord
+				_ = json.Unmarshal(input.GDPTrainingHistory, &gdp)
+				newProfile.GDPTrainingHistory = gdp
+			}
+
+			created, err := s.repo.Create(ctx, newProfile)
+			if err != nil {
+				return nil, err
+			}
+
+			logger.FromContext(ctx).Info("admin created employee profile",
+				"admin_id", callerID,
+				"target_user_id", targetUserID,
+				"profile_id", int(created.ID),
+			)
+			return created, nil
+		}
 		return nil, err
 	}
 

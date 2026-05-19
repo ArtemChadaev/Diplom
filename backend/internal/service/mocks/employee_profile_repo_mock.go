@@ -36,6 +36,14 @@ func (m *MockEmployeeProfileRepository) Update(ctx context.Context, id int, inpu
 	return args.Get(0).(*domain.EmployeeProfile), args.Error(1)
 }
 
+func (m *MockEmployeeProfileRepository) Create(ctx context.Context, profile *domain.EmployeeProfile) (*domain.EmployeeProfile, error) {
+	args := m.Called(ctx, profile)
+	if args.Get(0) == nil {
+		return nil, args.Error(1)
+	}
+	return args.Get(0).(*domain.EmployeeProfile), args.Error(1)
+}
+
 func (m *MockEmployeeProfileRepository) List(ctx context.Context, limit, offset int) ([]domain.EmployeeProfile, error) {
 	args := m.Called(ctx, limit, offset)
 	if args.Get(0) == nil {
