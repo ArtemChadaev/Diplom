@@ -1,5 +1,14 @@
+import { jwtDecode } from "jwt-decode"
 import { useState, useEffect } from "react"
-import { useSearchParams } from "react-router-dom"
+import { useNavigate, useSearchParams } from "react-router-dom"
+
+import { LoginForm } from "@/features/auth/login"
+import { OtpVerifyForm } from "@/features/auth/otp-verify"
+import { RegisterForm } from "@/features/auth/register"
+
+import { useAuthStore } from "@/entities/user"
+
+import { api } from "@/shared/api"
 import { 
   Card, 
   CardContent, 
@@ -7,41 +16,72 @@ import {
   CardHeader, 
   CardTitle 
 } from "@/shared/ui/card"
-import { LoginForm } from "@/features/auth/login"
-import { RegisterForm } from "@/features/auth/register"
-import { OtpVerifyForm } from "@/features/auth/otp-verify"
 
 type AuthStep = "email" | "register-request" | "otp"
 
-import { Button } from "@/shared/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle
-} from "@/shared/ui/card";
-import { Separator } from "@/shared/ui/separator";
-import { Tabs, TabsList, TabsTrigger } from "@/shared/ui/tabs";
-
+interface DecodedToken {
+  sub: number
+  jti: string
+  role: "admin" | "qp" | "warehouse_manager" | "storekeeper" | "pharmacist" | "unverified"
+  email?: string
+  exp: number
+}
 
 export function AuthPage() {
   const [searchParams] = useSearchParams()
-  const [step, setStep] = useState<AuthStep>("email")
-  const [email, setEmail] = useState("")
-
-  // Handle query params on mount (for token expiration redirect case)
-  useEffect(() => {
+  const [email, setEmail] = useState(() => searchParams.get("email") ?? "")
+  const [step, setStep] = useState<AuthStep>(() => {
     const emailParam = searchParams.get("email")
     const stepParam = searchParams.get("step")
+    return (emailParam && stepParam === "otp") ? "otp" : "email"
+  })
 
-    if (emailParam) {
-      setEmail(emailParam)
-      if (stepParam === "otp") {
-        setStep("otp")
+  const [googleLoading, setGoogleLoading] = useState(false)
+  const [googleError, setGoogleError] = useState<string | null>(null)
+
+  const navigate = useNavigate()
+  const setAuth = useAuthStore((state) => state.setAuth)
+
+  useEffect(() => {
+    const handleGoogleCallback = async () => {
+      const hash = window.location.hash
+      if (!hash) return
+
+      const params = new URLSearchParams(hash.substring(1)) // Remove '#'
+      const idToken = params.get("id_token")
+      if (!idToken) return
+
+      // Clear hash to prevent double verification
+      window.history.replaceState({}, document.title, window.location.pathname + window.location.search)
+
+      setGoogleLoading(true)
+      setGoogleError(null)
+      try {
+        const response = await api.post<{ access_token: string }>("/auth/google", { id_token: idToken })
+        const { access_token } = response
+
+        const decoded = jwtDecode<DecodedToken>(access_token)
+
+        setAuth(access_token, decoded.role, {
+          id: String(decoded.sub),
+          email: decoded.email ?? "",
+          full_name: "",
+          role: decoded.role,
+          ns_pv_access: false,
+          ukep_bound: false,
+        })
+
+        void navigate("/")
+      } catch (err) {
+        const apiErr = err as { message?: string } | null
+        setGoogleError(apiErr?.message ?? "Ошибка авторизации через Google.")
+      } finally {
+        setGoogleLoading(false)
       }
     }
-  }, [searchParams])
+
+    void handleGoogleCallback()
+  }, [navigate, setAuth])
 
   const getStepHeader = () => {
     switch (step) {
@@ -58,17 +98,39 @@ export function AuthPage() {
       case "otp":
         return {
           title: "Подтверждение",
-          description: "Введите одноразовый код для входа в систему"
+          description: (
+            <span>
+              Введите одноразовый код для входа в систему, отправленный на адрес{" "}
+              <span className="font-semibold text-muted-foreground/90 whitespace-nowrap">
+                {email}
+              </span>
+            </span>
+          )
         }
     }
   }
 
   const headerInfo = getStepHeader()
 
+  if (googleLoading) {
+    return (
+      <div className="w-full max-w-[440px] animate-in fade-in zoom-in-95 duration-500">
+        <Card className="border-border/40 shadow-2xl bg-card/50 backdrop-blur-md overflow-hidden min-h-[380px] flex flex-col items-center justify-center p-8">
+          <div className="flex flex-col items-center space-y-4">
+            <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
+            <p className="text-sm text-muted-foreground font-medium animate-pulse">
+              Авторизация через Google...
+            </p>
+          </div>
+        </Card>
+      </div>
+    )
+  }
+
   return (
     <div className="w-full max-w-[440px] animate-in fade-in zoom-in-95 duration-500">
-      <Card className="border-border/40 shadow-2xl bg-card/50 backdrop-blur-md overflow-hidden min-h-[500px] flex flex-col">
-        <CardHeader className="space-y-1 text-center pt-8 pb-4">
+      <Card className="border-border/40 shadow-2xl bg-card/50 backdrop-blur-md overflow-hidden min-h-[380px] flex flex-col">
+        <CardHeader className="space-y-1 text-center pt-8 pb-1">
           <CardTitle className="text-2xl font-bold tracking-tight">
             {headerInfo.title}
           </CardTitle>
@@ -77,7 +139,7 @@ export function AuthPage() {
           </CardDescription>
         </CardHeader>
         
-        <CardContent className="flex-1 px-8 pb-8 pt-4 flex flex-col justify-center">
+        <CardContent className="flex-1 px-8 pb-6 pt-1 flex flex-col justify-center">
           {step === "email" && (
             <LoginForm 
               onFound={(emailVal) => {
@@ -89,13 +151,14 @@ export function AuthPage() {
                 setStep("register-request")
               }}
               defaultEmail={email}
+              externalError={googleError}
             />
           )}
 
           {step === "register-request" && (
             <RegisterForm 
               email={email}
-              onBack={() => setStep("email")}
+              onBack={() => { setStep("email"); }}
               onSuccess={(emailVal) => {
                 setEmail(emailVal)
                 setStep("otp")
@@ -106,7 +169,7 @@ export function AuthPage() {
           {step === "otp" && (
             <OtpVerifyForm 
               email={email}
-              onBack={() => setStep("email")}
+              onBack={() => { setStep("email"); }}
             />
           )}
         </CardContent>

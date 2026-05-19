@@ -1,7 +1,8 @@
-import { useState } from "react"
-import { Button } from "@/shared/ui/button"
-import { api } from "@/shared/api"
 import { ArrowLeft, UserPlus } from "lucide-react"
+import { useState } from "react"
+
+import { api } from "@/shared/api"
+import { Button } from "@/shared/ui/button"
 
 interface RegisterFormProps {
   email: string
@@ -19,11 +20,12 @@ export function RegisterForm({ email, onBack, onSuccess }: RegisterFormProps) {
     try {
       await api.post("/auth/register", { email })
       onSuccess(email)
-    } catch (err: any) {
-      if (err.status === 409) {
+    } catch (err) {
+      const apiErr = err as { status?: number; message?: string } | null
+      if (apiErr?.status === 409) {
         setError("Этот email уже зарегистрирован. Попробуйте войти.")
       } else {
-        setError(err.message || "Не удалось отправить запрос на регистрацию. Пожалуйста, попробуйте позже.")
+        setError(apiErr?.message ?? "Не удалось отправить запрос на регистрацию. Пожалуйста, попробуйте позже.")
       }
     } finally {
       setIsLoading(false)
@@ -48,9 +50,9 @@ export function RegisterForm({ email, onBack, onSuccess }: RegisterFormProps) {
       </div>
 
       {error && (
-        <div className="text-sm text-destructive font-medium bg-destructive/10 p-3 rounded-lg border border-destructive/20 animate-in fade-in slide-in-from-top-1">
+        <p className="text-sm text-destructive font-medium animate-in fade-in slide-in-from-top-1 text-center">
           {error}
-        </div>
+        </p>
       )}
 
       <div className="flex gap-4 pt-2">

@@ -1,8 +1,10 @@
-import { useState, useEffect } from "react"
 import { jwtDecode } from "jwt-decode"
+import { useState, useEffect } from "react"
 import { useNavigate } from "react-router-dom"
-import { api } from "@/shared/api"
+
 import { useAuthStore } from "@/entities/user"
+
+import { api } from "@/shared/api"
 
 interface UseOtpVerifyProps {
   email: string
@@ -13,23 +15,16 @@ interface DecodedToken {
   sub: number
   jti: string
   role: "admin" | "qp" | "warehouse_manager" | "storekeeper" | "pharmacist" | "unverified"
-  email: string
+  email?: string
   exp: number
 }
 
-const REDIRECT_MAP: Record<string, string> = {
-  admin: "/admin/users",
-  qp: "/receiving",
-  warehouse_manager: "/warehouse",
-  storekeeper: "/search",
-  pharmacist: "/search",
-}
 
 export function useOtpVerify({ email, onSuccess }: UseOtpVerifyProps) {
   const [code, setCode] = useState("")
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const [secondsLeft, setSecondsLeft] = useState(600) // 10 minutes (600s)
+  const [secondsLeft, setSecondsLeft] = useState(60) // 1 minute (60s)
   const [resendLoading, setResendLoading] = useState(false)
   const [resendMessage, setResendMessage] = useState<string | null>(null)
 
@@ -44,14 +39,14 @@ export function useOtpVerify({ email, onSuccess }: UseOtpVerifyProps) {
       setSecondsLeft((s) => Math.max(0, s - 1))
     }, 1000)
 
-    return () => clearInterval(interval)
+    return () => { clearInterval(interval); }
   }, [secondsLeft])
 
   const verify = async (otpCode: string) => {
     setIsLoading(true)
     setError(null)
     try {
-      const response = await api.post("/auth/verify-code", { email, code: otpCode })
+      const response = await api.post<{ access_token: string }>("/auth/verify-code", { email, code: otpCode })
       const { access_token } = response
 
       // Decode token to extract role, email, sub
@@ -60,7 +55,7 @@ export function useOtpVerify({ email, onSuccess }: UseOtpVerifyProps) {
       // Update Zustand store
       setAuth(access_token, decoded.role, {
         id: String(decoded.sub),
-        email: decoded.email || email,
+        email: decoded.email ?? email,
         full_name: "", // Will be fetched later from profile if needed
         role: decoded.role,
         ns_pv_access: false, // Default placeholders
@@ -71,18 +66,18 @@ export function useOtpVerify({ email, onSuccess }: UseOtpVerifyProps) {
         onSuccess()
       }
 
-      // Redirect by role
-      const redirectPath = REDIRECT_MAP[decoded.role] || "/search"
-      navigate(redirectPath)
-    } catch (err: any) {
-      if (err.status === 400) {
-        setError(err.message || "Неверный код.")
-      } else if (err.status === 410) {
+      void navigate("/")
+    } catch (err) {
+      setCode("") // Clear input code on error
+      const apiErr = err as { status?: number; message?: string } | null
+      if (apiErr?.status === 400 || apiErr?.status === 401) {
+        setError(apiErr.message ?? "Неверный код.")
+      } else if (apiErr?.status === 410) {
         setError("Срок действия кода истек. Пожалуйста, запросите новый код.")
-      } else if (err.status === 429) {
+      } else if (apiErr?.status === 429) {
         setError("Превышено максимальное количество попыток ввода. Запросите новый код.")
       } else {
-        setError(err.message || "Ошибка верификации кода. Попробуйте еще раз.")
+        setError(apiErr?.message ?? "Ошибка верификации кода. Попробуйте еще раз.")
       }
     } finally {
       setIsLoading(false)
@@ -95,11 +90,12 @@ export function useOtpVerify({ email, onSuccess }: UseOtpVerifyProps) {
     setResendMessage(null)
     try {
       await api.post("/auth/send-code", { email })
-      setSecondsLeft(600) // Reset to 10 mins
+      setSecondsLeft(60) // Reset to 1 min (60s)
       setResendMessage("Новый код отправлен на ваш email")
       setCode("") // Clear input code
-    } catch (err: any) {
-      setError(err.message || "Не удалось отправить повторный код.")
+    } catch (err) {
+      const apiErr = err as { message?: string } | null
+      setError(apiErr?.message ?? "Не удалось отправить повторный код.")
     } finally {
       setResendLoading(false)
     }
@@ -108,7 +104,7 @@ export function useOtpVerify({ email, onSuccess }: UseOtpVerifyProps) {
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60)
     const secs = seconds % 60
-    return `${mins}:${secs.toString().padStart(2, "0")}`
+    return `${String(mins)}:${secs.toString().padStart(2, "0")}`
   }
 
   return {

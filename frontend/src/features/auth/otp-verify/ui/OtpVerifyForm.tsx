@@ -1,12 +1,14 @@
-import { useOtpVerify } from "../model/use-otp-verify"
+import { ArrowLeft, RefreshCw } from "lucide-react"
+
 import { Button } from "@/shared/ui/button"
 import { 
   InputOTP, 
   InputOTPGroup, 
+  InputOTPSeparator, 
   InputOTPSlot, 
-  InputOTPSeparator 
 } from "@/shared/ui/input-otp"
-import { ArrowLeft, RefreshCw, KeyRound } from "lucide-react"
+
+import { useOtpVerify } from "../model/use-otp-verify"
 
 interface OtpVerifyFormProps {
   email: string
@@ -21,7 +23,6 @@ export function OtpVerifyForm({ email, onBack }: OtpVerifyFormProps) {
     error,
     secondsLeft,
     resendLoading,
-    resendMessage,
     verify,
     resend,
     formatTime,
@@ -30,26 +31,12 @@ export function OtpVerifyForm({ email, onBack }: OtpVerifyFormProps) {
   const handleOTPChange = (value: string) => {
     setCode(value)
     if (value.length === 6) {
-      verify(value)
+      void verify(value)
     }
   }
 
   return (
     <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-300">
-      <div className="text-center space-y-3">
-        <div className="inline-flex p-3 bg-primary/10 text-primary rounded-full ring-4 ring-primary/5">
-          <KeyRound className="h-6 w-6" />
-        </div>
-        <div className="space-y-1">
-          <h3 className="text-lg font-semibold text-foreground tracking-tight">Подтверждение почты</h3>
-          <p className="text-sm text-muted-foreground px-4 leading-relaxed">
-            Мы отправили 6-значный код подтверждения на адрес:
-          </p>
-          <div className="inline-block mt-1 font-mono text-sm bg-accent/30 text-accent-foreground px-2.5 py-1 rounded border border-border/40 font-medium">
-            {email}
-          </div>
-        </div>
-      </div>
 
       <div className="flex flex-col items-center justify-center space-y-4">
         <InputOTP
@@ -80,16 +67,11 @@ export function OtpVerifyForm({ email, onBack }: OtpVerifyFormProps) {
       </div>
 
       {error && (
-        <div className="text-sm text-destructive font-medium bg-destructive/10 p-3 rounded-lg border border-destructive/20 animate-in fade-in slide-in-from-top-1">
+        <p className="text-sm text-destructive font-medium animate-in fade-in slide-in-from-top-1 text-center">
           {error}
-        </div>
+        </p>
       )}
 
-      {resendMessage && !error && (
-        <div className="text-sm text-emerald-600 dark:text-emerald-400 font-medium bg-emerald-500/10 p-3 rounded-lg border border-emerald-500/20 animate-in fade-in slide-in-from-top-1">
-          {resendMessage}
-        </div>
-      )}
 
       <div className="space-y-4 pt-2">
         <div className="text-center text-sm">
@@ -102,7 +84,7 @@ export function OtpVerifyForm({ email, onBack }: OtpVerifyFormProps) {
               variant="link"
               type="button"
               className="text-primary hover:text-primary/80 font-medium p-0 h-auto"
-              onClick={resend}
+              onClick={() => { void resend(); }}
               disabled={resendLoading || isLoading}
             >
               <RefreshCw className={`h-4 w-4 mr-2 ${resendLoading ? "animate-spin" : ""}`} />
@@ -110,6 +92,10 @@ export function OtpVerifyForm({ email, onBack }: OtpVerifyFormProps) {
             </Button>
           )}
         </div>
+
+        <p className="text-xs text-muted-foreground/70 text-center">
+          Если письмо не пришло, проверьте папку «Спам»
+        </p>
 
         <Button
           variant="outline"

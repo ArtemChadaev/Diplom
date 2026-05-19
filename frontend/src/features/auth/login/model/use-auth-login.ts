@@ -1,11 +1,12 @@
-import { useState } from "react"
-import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
+import { useEffect, useState } from "react"
+import { useForm } from "react-hook-form"
 import { z } from "zod"
+
 import { api } from "@/shared/api"
 
 export const emailSchema = z.object({
-  email: z.string().email("Введите корректный адрес электронной почты"),
+  email: z.email({ message: "Введите корректный адрес электронной почты" }),
 })
 
 export type EmailFormValues = z.infer<typeof emailSchema>
@@ -28,7 +29,7 @@ export function useAuthLogin({ onFound, onNotFound, defaultEmail = "" }: UseAuth
   })
 
   // Update default value if it changes
-  React.useEffect(() => {
+  useEffect(() => {
     if (defaultEmail) {
       form.setValue("email", defaultEmail)
     }
@@ -40,11 +41,12 @@ export function useAuthLogin({ onFound, onNotFound, defaultEmail = "" }: UseAuth
     try {
       await api.post("/auth/send-code", { email: values.email })
       onFound(values.email)
-    } catch (err: any) {
-      if (err.status === 404) {
+    } catch (err) {
+      const apiErr = err as { status?: number; message?: string } | null
+      if (apiErr?.status === 404) {
         onNotFound(values.email)
       } else {
-        setError(err.message || "Произошла ошибка при отправке кода. Попробуйте позже.")
+        setError(apiErr?.message ?? "Произошла ошибка при отправке кода. Попробуйте позже.")
       }
     } finally {
       setIsLoading(false)
@@ -59,4 +61,3 @@ export function useAuthLogin({ onFound, onNotFound, defaultEmail = "" }: UseAuth
     setError,
   }
 }
-import * as React from "react"

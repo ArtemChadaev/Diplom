@@ -1,16 +1,22 @@
+import { jwtDecode } from "jwt-decode"
 import { useEffect, useState } from "react"
 import { Outlet, useNavigate } from "react-router-dom"
-import { Header } from "@/widgets/header"
+
 import { Footer } from "@/widgets/footer"
+import { Header } from "@/widgets/header"
+import { AppSidebar } from "@/widgets/sidebar"
+
 import { useAuthStore } from "@/entities/user"
+
 import { api } from "@/shared/api"
-import { jwtDecode } from "jwt-decode"
+import { SidebarProvider } from "@/shared/ui/sidebar"
+import { TooltipProvider } from "@/shared/ui/tooltip"
 
 interface DecodedToken {
   sub: number
   jti: string
   role: "admin" | "qp" | "warehouse_manager" | "storekeeper" | "pharmacist" | "unverified"
-  email: string
+  email?: string
   exp: number
 }
 
@@ -28,33 +34,33 @@ export function AppLayout() {
 
       try {
         // Try to refresh token using HTTPOnly cookie
-        const response = await api.post("/auth/refresh")
+        const response = await api.post<{ access_token: string }>("/auth/refresh")
         const { access_token } = response
         
         const decoded = jwtDecode<DecodedToken>(access_token)
         
         setAuth(access_token, decoded.role, {
           id: String(decoded.sub),
-          email: decoded.email,
+          email: decoded.email ?? "",
           full_name: "",
           role: decoded.role,
           ns_pv_access: false,
           ukep_bound: false,
         })
-      } catch (err: any) {
+      } catch {
+        const currentEmail = user?.email ?? ""
         logout()
-        const currentEmail = user?.email || ""
         if (currentEmail) {
-          navigate(`/auth?step=otp&email=${encodeURIComponent(currentEmail)}`)
+          void navigate(`/auth?email=${encodeURIComponent(currentEmail)}`)
         } else {
-          navigate("/auth")
+          void navigate("/auth")
         }
       } finally {
         setIsInitializing(false)
       }
     }
 
-    checkAuth()
+    void checkAuth()
   }, [accessToken, setAuth, logout, navigate, user?.email])
 
   if (isInitializing) {
@@ -73,12 +79,19 @@ export function AppLayout() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col bg-background selection:bg-secondary/20">
-      <Header />
-      <main className="flex-1 w-full mx-auto p-6 md:p-10">
-        <Outlet />
-      </main>
-      <Footer />
-    </div>
+    <TooltipProvider>
+      <SidebarProvider>
+        <div className="min-h-screen flex w-full bg-background selection:bg-secondary/20">
+          <AppSidebar />
+          <div className="flex-1 flex flex-col min-w-0">
+            <Header />
+            <main className="flex-1 w-full mx-auto p-6 md:p-10">
+              <Outlet />
+            </main>
+            <Footer />
+          </div>
+        </div>
+      </SidebarProvider>
+    </TooltipProvider>
   )
 }
