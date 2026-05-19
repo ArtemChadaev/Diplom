@@ -71,6 +71,7 @@ func (h *Handler) adminPatchEmployeeProfile(w http.ResponseWriter, r *http.Reque
 	callerRole := r.Context().Value(middleware.CtxRole).(domain.UserRole)
 
 	input := domain.UpdateEmployeeProfileInput{
+		EmployeeCode:       req.EmployeeCode,
 		FullName:           req.FullName,
 		CorporateEmail:     req.CorporateEmail,
 		Phone:              req.Phone,
@@ -104,6 +105,10 @@ func handleEmployeeError(w http.ResponseWriter, r *http.Request, err error) {
 		http.Error(w, "forbidden", http.StatusForbidden)
 		return
 	}
+	if errors.Is(err, domain.ErrInvalidEmployeeCode) {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
 	log.Error("employee profile operation failed", "error", err)
 	http.Error(w, "internal server error", http.StatusInternalServerError)
 }
@@ -119,6 +124,13 @@ func mustParseIntParam(w http.ResponseWriter, r *http.Request, param string) int
 }
 
 func profileToResponse(p *domain.EmployeeProfile) *dto.EmployeeProfileResponse {
+	var gdpRaw json.RawMessage
+	if len(p.GDPTrainingHistory) > 0 {
+		if bytes, err := json.Marshal(p.GDPTrainingHistory); err == nil {
+			gdpRaw = bytes
+		}
+	}
+
 	return &dto.EmployeeProfileResponse{
 		ID:                 p.ID,
 		UserID:             p.UserID,
@@ -134,5 +146,6 @@ func profileToResponse(p *domain.EmployeeProfile) *dto.EmployeeProfileResponse {
 		DismissalDate:      p.DismissalDate,
 		MedicalBookScanURL: p.MedicalBookScanURL,
 		SpecialZoneAccess:  p.SpecialZoneAccess,
+		GDPTrainingHistory: gdpRaw,
 	}
 }

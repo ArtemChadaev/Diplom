@@ -9,7 +9,7 @@
 CREATE TABLE employee_profiles (
     id                    SERIAL PRIMARY KEY,
     user_id               INT UNIQUE NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-    employee_code         VARCHAR(100) UNIQUE NOT NULL,
+    employee_code         VARCHAR(100) UNIQUE NOT NULL CHECK (employee_code ~ '^[A-Z]{2}-[0-9]{3}$'),
     full_name             VARCHAR(255) NOT NULL,
     corporate_email       VARCHAR(255) UNIQUE NOT NULL,
     phone                 VARCHAR(20) UNIQUE NOT NULL,

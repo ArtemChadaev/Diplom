@@ -101,11 +101,6 @@ func (s *authService) LoginWithGoogle(ctx context.Context, idToken, userAgent, i
 	return s.issueTokens(ctx, created, userAgent, ip)
 }
 
-func (s *authService) LoginWithTelegram(ctx context.Context, data domain.TelegramAuthData, userAgent, ip string) (*domain.TokenPair, error) {
-	// TODO: verify Telegram hash with bot token
-	panic("LoginWithTelegram not implemented: need Telegram hash validator")
-}
-
 func (s *authService) RefreshTokens(ctx context.Context, oldRefreshToken string, meta domain.SessionMeta) (*domain.TokenPair, error) {
 	hash := s.tokenSvc.HashToken(oldRefreshToken)
 	session, err := s.sessionRepo.FindByTokenHash(ctx, hash)

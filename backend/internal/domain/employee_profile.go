@@ -38,6 +38,7 @@ type EmployeeProfile struct {
 // UpdateEmployeeProfileInput carries only the fields the admin wants to change.
 // Pointer semantics: nil means "don't touch this field".
 type UpdateEmployeeProfileInput struct {
+	EmployeeCode        *string             `json:"employee_code"`
 	FullName            *string             `json:"full_name"`
 	CorporateEmail      *string             `json:"corporate_email"`
 	Phone               *string             `json:"phone"`
@@ -64,5 +65,6 @@ type EmployeeProfileRepository interface {
 type EmployeeProfileService interface {
 	GetProfile(ctx context.Context, callerID int, callerRole UserRole, targetUserID int) (*EmployeeProfile, error)
 	UpdateProfile(ctx context.Context, callerID int, callerRole UserRole, targetUserID int, input UpdateEmployeeProfileInput) (*EmployeeProfile, error)
+	PatchSelfProfile(ctx context.Context, userID int, input UpdateEmployeeProfileInput) (*EmployeeProfile, error)
 	ListProfiles(ctx context.Context, callerID int, callerRole UserRole, limit, offset int) ([]EmployeeProfile, error)
 }

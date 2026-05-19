@@ -74,6 +74,7 @@ func (h *Handler) Router() chi.Router {
 
 		// User profile (own)
 		r.Get("/users/me", h.getMe)
+		r.Patch("/users/me", h.patchMe)
 
 		// Session management (own)
 		r.Delete("/sessions/{sessionID}", h.revokeSession)

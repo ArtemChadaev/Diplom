@@ -25,7 +25,6 @@ func (r *userRepository) toDomain(d *dao.UserDAO) *domain.User {
 		ID:         d.ID,
 		Email:      d.Email,
 		GoogleID:   d.GoogleID,
-		TelegramID: d.TelegramID,
 		Role:       domain.UserRole(d.Role),
 		NsPvAccess: d.NsPvAccess,
 		UkepBound:  d.UkepBound,
@@ -44,7 +43,6 @@ func (r *userRepository) fromDomain(u *domain.User) *dao.UserDAO {
 		ID:         u.ID,
 		Email:      u.Email,
 		GoogleID:   u.GoogleID,
-		TelegramID: u.TelegramID,
 		Role:       string(u.Role),
 		NsPvAccess: u.NsPvAccess,
 		UkepBound:  u.UkepBound,
@@ -99,17 +97,6 @@ func (r *userRepository) FindByGoogleID(ctx context.Context, googleID string) (*
 	return r.toDomain(&u), nil
 }
 
-func (r *userRepository) FindByTelegramID(ctx context.Context, telegramID int64) (*domain.User, error) {
-	var u dao.UserDAO
-	if err := r.db.WithContext(ctx).Where("telegram_id = ?", telegramID).First(&u).Error; err != nil {
-		if err == gorm.ErrRecordNotFound {
-			return nil, domain.ErrUserNotFound
-		}
-		return nil, err
-	}
-	return r.toDomain(&u), nil
-}
-
 func (r *userRepository) Create(ctx context.Context, u *domain.User) (*domain.User, error) {
 	daoUser := r.fromDomain(u)
 	if err := r.db.WithContext(ctx).Create(daoUser).Error; err != nil {
@@ -134,17 +121,6 @@ func (r *userRepository) UpdateRole(ctx context.Context, userID int, role domain
 
 func (r *userRepository) LinkGoogle(ctx context.Context, userID int, googleID string) error {
 	res := r.db.WithContext(ctx).Model(&dao.UserDAO{}).Where("id = ?", userID).Update("google_id", googleID)
-	if res.Error != nil {
-		return res.Error
-	}
-	if res.RowsAffected == 0 {
-		return domain.ErrUserNotFound
-	}
-	return nil
-}
-
-func (r *userRepository) LinkTelegram(ctx context.Context, userID int, telegramID int64) error {
-	res := r.db.WithContext(ctx).Model(&dao.UserDAO{}).Where("id = ?", userID).Update("telegram_id", telegramID)
 	if res.Error != nil {
 		return res.Error
 	}

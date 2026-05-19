@@ -5,6 +5,7 @@ import (
 	"errors"
 	"net/http"
 	"strconv"
+	"time"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/ima/diplom-backend/internal/domain"
@@ -31,6 +32,69 @@ func (h *Handler) getMe(w http.ResponseWriter, r *http.Request) {
 
 	resp := mapToUserProfileResponse(profile)
 	writeJSON(w, http.StatusOK, resp)
+}
+
+func (h *Handler) patchMe(w http.ResponseWriter, r *http.Request) {
+	userID, ok := r.Context().Value(middleware.CtxUserID).(int)
+	if !ok {
+		writeError(w, http.StatusUnauthorized, "unauthorized")
+		return
+	}
+
+	var req dto.PatchMeRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		writeError(w, http.StatusBadRequest, "invalid request body")
+		return
+	}
+
+	var corporateEmail *string
+	if req.CorporateMail != nil {
+		corporateEmail = req.CorporateMail
+	} else {
+		corporateEmail = req.CorporateEmail
+	}
+
+	var birthDate *time.Time
+	if req.BirthdayDate != nil {
+		birthDate = req.BirthdayDate
+	} else {
+		birthDate = req.BirthDate
+	}
+
+	var avatarURL *string
+	if req.AvatarURL2 != nil {
+		avatarURL = req.AvatarURL2
+	} else {
+		avatarURL = req.AvatarURL
+	}
+
+	input := domain.UpdateEmployeeProfileInput{
+		FullName:           req.FullName,
+		Phone:              req.Phone,
+		CorporateEmail:     corporateEmail,
+		BirthDate:          birthDate,
+		AvatarURL:          avatarURL,
+		MedicalBookScanURL: req.MedicalBookScanURL,
+		GDPTrainingHistory: req.GDPTrainingHistory,
+	}
+
+	_, err := h.service.EmployeeProfile.PatchSelfProfile(r.Context(), userID, input)
+	if err != nil {
+		if errors.Is(err, domain.ErrEmployeeProfileNotFound) {
+			writeError(w, http.StatusNotFound, "employee profile not found")
+			return
+		}
+		writeError(w, http.StatusInternalServerError, "internal server error")
+		return
+	}
+
+	profile, err := h.userRepo.FindProfileByUserID(r.Context(), userID)
+	if err != nil {
+		writeError(w, http.StatusInternalServerError, "internal server error")
+		return
+	}
+
+	writeJSON(w, http.StatusOK, mapToUserProfileResponse(profile))
 }
 
 func (h *Handler) listUsers(w http.ResponseWriter, r *http.Request) {
