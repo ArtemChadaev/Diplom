@@ -1,4 +1,3 @@
-import React from "react";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AppLayout } from "./app/layouts/AppLayout";
 import { AuthLayout } from "./app/layouts/AuthLayout";
