@@ -84,14 +84,69 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/dto.EmployeeProfileResponse"
+                                "$ref": "#/definitions/github_com_ima_diplom-backend_internal_handler_dto.EmployeeProfileResponse"
                             }
                         }
                     },
                     "403": {
                         "description": "insufficient permissions",
                         "schema": {
-                            "$ref": "#/definitions/dto.ErrorResponse"
+                            "$ref": "#/definitions/github_com_ima_diplom-backend_internal_handler_dto.ErrorResponse"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Creates a new employee profile. Admin role required.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Admin"
+                ],
+                "summary": "Create employee profile (Admin)",
+                "parameters": [
+                    {
+                        "description": "Fields to create",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/github_com_ima_diplom-backend_internal_handler_dto.CreateEmployeeProfileRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_ima_diplom-backend_internal_handler_dto.EmployeeProfileResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "invalid JSON or invalid fields",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_ima_diplom-backend_internal_handler_dto.ErrorResponse"
+                        }
+                    },
+                    "403": {
+                        "description": "insufficient permissions",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_ima_diplom-backend_internal_handler_dto.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "internal error",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_ima_diplom-backend_internal_handler_dto.ErrorResponse"
                         }
                     }
                 }
@@ -125,25 +180,25 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/dto.EmployeeProfileResponse"
+                            "$ref": "#/definitions/github_com_ima_diplom-backend_internal_handler_dto.EmployeeProfileResponse"
                         }
                     },
                     "400": {
                         "description": "invalid user ID",
                         "schema": {
-                            "$ref": "#/definitions/dto.ErrorResponse"
+                            "$ref": "#/definitions/github_com_ima_diplom-backend_internal_handler_dto.ErrorResponse"
                         }
                     },
                     "403": {
                         "description": "insufficient permissions",
                         "schema": {
-                            "$ref": "#/definitions/dto.ErrorResponse"
+                            "$ref": "#/definitions/github_com_ima_diplom-backend_internal_handler_dto.ErrorResponse"
                         }
                     },
                     "404": {
                         "description": "profile not found",
                         "schema": {
-                            "$ref": "#/definitions/dto.ErrorResponse"
+                            "$ref": "#/definitions/github_com_ima_diplom-backend_internal_handler_dto.ErrorResponse"
                         }
                     }
                 }
@@ -179,7 +234,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/dto.PatchEmployeeProfileRequest"
+                            "$ref": "#/definitions/github_com_ima_diplom-backend_internal_handler_dto.PatchEmployeeProfileRequest"
                         }
                     }
                 ],
@@ -187,25 +242,25 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/dto.EmployeeProfileResponse"
+                            "$ref": "#/definitions/github_com_ima_diplom-backend_internal_handler_dto.EmployeeProfileResponse"
                         }
                     },
                     "400": {
                         "description": "invalid user ID, invalid JSON or invalid fields",
                         "schema": {
-                            "$ref": "#/definitions/dto.ErrorResponse"
+                            "$ref": "#/definitions/github_com_ima_diplom-backend_internal_handler_dto.ErrorResponse"
                         }
                     },
                     "403": {
                         "description": "insufficient permissions",
                         "schema": {
-                            "$ref": "#/definitions/dto.ErrorResponse"
+                            "$ref": "#/definitions/github_com_ima_diplom-backend_internal_handler_dto.ErrorResponse"
                         }
                     },
                     "404": {
                         "description": "profile not found",
                         "schema": {
-                            "$ref": "#/definitions/dto.ErrorResponse"
+                            "$ref": "#/definitions/github_com_ima_diplom-backend_internal_handler_dto.ErrorResponse"
                         }
                     }
                 }
@@ -239,19 +294,19 @@ const docTemplate = `{
                     "400": {
                         "description": "invalid session ID",
                         "schema": {
-                            "$ref": "#/definitions/dto.ErrorResponse"
+                            "$ref": "#/definitions/github_com_ima_diplom-backend_internal_handler_dto.ErrorResponse"
                         }
                     },
                     "403": {
                         "description": "insufficient permissions",
                         "schema": {
-                            "$ref": "#/definitions/dto.ErrorResponse"
+                            "$ref": "#/definitions/github_com_ima_diplom-backend_internal_handler_dto.ErrorResponse"
                         }
                     },
                     "404": {
                         "description": "session not found",
                         "schema": {
-                            "$ref": "#/definitions/dto.ErrorResponse"
+                            "$ref": "#/definitions/github_com_ima_diplom-backend_internal_handler_dto.ErrorResponse"
                         }
                     }
                 }
@@ -304,14 +359,14 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/dto.UserProfileResponse"
+                                "$ref": "#/definitions/github_com_ima_diplom-backend_internal_handler_dto.UserProfileResponse"
                             }
                         }
                     },
                     "403": {
                         "description": "insufficient permissions",
                         "schema": {
-                            "$ref": "#/definitions/dto.ErrorResponse"
+                            "$ref": "#/definitions/github_com_ima_diplom-backend_internal_handler_dto.ErrorResponse"
                         }
                     }
                 }
@@ -345,25 +400,25 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/dto.UserProfileResponse"
+                            "$ref": "#/definitions/github_com_ima_diplom-backend_internal_handler_dto.UserProfileResponse"
                         }
                     },
                     "400": {
                         "description": "invalid user ID",
                         "schema": {
-                            "$ref": "#/definitions/dto.ErrorResponse"
+                            "$ref": "#/definitions/github_com_ima_diplom-backend_internal_handler_dto.ErrorResponse"
                         }
                     },
                     "403": {
                         "description": "insufficient permissions",
                         "schema": {
-                            "$ref": "#/definitions/dto.ErrorResponse"
+                            "$ref": "#/definitions/github_com_ima_diplom-backend_internal_handler_dto.ErrorResponse"
                         }
                     },
                     "404": {
                         "description": "user not found",
                         "schema": {
-                            "$ref": "#/definitions/dto.ErrorResponse"
+                            "$ref": "#/definitions/github_com_ima_diplom-backend_internal_handler_dto.ErrorResponse"
                         }
                     }
                 }
@@ -399,7 +454,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/dto.PatchUserRequest"
+                            "$ref": "#/definitions/github_com_ima_diplom-backend_internal_handler_dto.PatchUserRequest"
                         }
                     }
                 ],
@@ -407,25 +462,25 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/dto.UserProfileResponse"
+                            "$ref": "#/definitions/github_com_ima_diplom-backend_internal_handler_dto.UserProfileResponse"
                         }
                     },
                     "400": {
                         "description": "invalid user ID or request body",
                         "schema": {
-                            "$ref": "#/definitions/dto.ErrorResponse"
+                            "$ref": "#/definitions/github_com_ima_diplom-backend_internal_handler_dto.ErrorResponse"
                         }
                     },
                     "403": {
                         "description": "insufficient permissions",
                         "schema": {
-                            "$ref": "#/definitions/dto.ErrorResponse"
+                            "$ref": "#/definitions/github_com_ima_diplom-backend_internal_handler_dto.ErrorResponse"
                         }
                     },
                     "404": {
                         "description": "user not found",
                         "schema": {
-                            "$ref": "#/definitions/dto.ErrorResponse"
+                            "$ref": "#/definitions/github_com_ima_diplom-backend_internal_handler_dto.ErrorResponse"
                         }
                     }
                 }
@@ -463,7 +518,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/dto.SetBlockedRequest"
+                            "$ref": "#/definitions/github_com_ima_diplom-backend_internal_handler_dto.SetBlockedRequest"
                         }
                     }
                 ],
@@ -480,19 +535,19 @@ const docTemplate = `{
                     "400": {
                         "description": "invalid user ID or invalid JSON",
                         "schema": {
-                            "$ref": "#/definitions/dto.ErrorResponse"
+                            "$ref": "#/definitions/github_com_ima_diplom-backend_internal_handler_dto.ErrorResponse"
                         }
                     },
                     "403": {
                         "description": "insufficient permissions",
                         "schema": {
-                            "$ref": "#/definitions/dto.ErrorResponse"
+                            "$ref": "#/definitions/github_com_ima_diplom-backend_internal_handler_dto.ErrorResponse"
                         }
                     },
                     "404": {
                         "description": "user not found",
                         "schema": {
-                            "$ref": "#/definitions/dto.ErrorResponse"
+                            "$ref": "#/definitions/github_com_ima_diplom-backend_internal_handler_dto.ErrorResponse"
                         }
                     }
                 }
@@ -530,7 +585,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/dto.AssignRoleRequest"
+                            "$ref": "#/definitions/github_com_ima_diplom-backend_internal_handler_dto.AssignRoleRequest"
                         }
                     }
                 ],
@@ -547,19 +602,19 @@ const docTemplate = `{
                     "400": {
                         "description": "invalid user ID or invalid JSON",
                         "schema": {
-                            "$ref": "#/definitions/dto.ErrorResponse"
+                            "$ref": "#/definitions/github_com_ima_diplom-backend_internal_handler_dto.ErrorResponse"
                         }
                     },
                     "403": {
                         "description": "insufficient permissions",
                         "schema": {
-                            "$ref": "#/definitions/dto.ErrorResponse"
+                            "$ref": "#/definitions/github_com_ima_diplom-backend_internal_handler_dto.ErrorResponse"
                         }
                     },
                     "404": {
                         "description": "user not found",
                         "schema": {
-                            "$ref": "#/definitions/dto.ErrorResponse"
+                            "$ref": "#/definitions/github_com_ima_diplom-backend_internal_handler_dto.ErrorResponse"
                         }
                     }
                 }
@@ -611,7 +666,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/dto.BatchListResponse"
+                            "$ref": "#/definitions/github_com_ima_diplom-backend_internal_handler_dto.BatchListResponse"
                         }
                     }
                 }
@@ -640,7 +695,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/dto.BatchResponse"
+                            "$ref": "#/definitions/github_com_ima_diplom-backend_internal_handler_dto.BatchResponse"
                         }
                     }
                 }
@@ -673,7 +728,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/dto.UpdateBatchStatusRequest"
+                            "$ref": "#/definitions/github_com_ima_diplom-backend_internal_handler_dto.UpdateBatchStatusRequest"
                         }
                     }
                 ],
@@ -711,7 +766,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/dto.TransferBatchRequest"
+                            "$ref": "#/definitions/github_com_ima_diplom-backend_internal_handler_dto.TransferBatchRequest"
                         }
                     }
                 ],
@@ -750,7 +805,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/dto.ClaimListResponse"
+                            "$ref": "#/definitions/github_com_ima_diplom-backend_internal_handler_dto.ClaimListResponse"
                         }
                     }
                 }
@@ -774,7 +829,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/dto.CreateClaimRequest"
+                            "$ref": "#/definitions/github_com_ima_diplom-backend_internal_handler_dto.CreateClaimRequest"
                         }
                     }
                 ],
@@ -782,7 +837,7 @@ const docTemplate = `{
                     "201": {
                         "description": "Created",
                         "schema": {
-                            "$ref": "#/definitions/dto.ClaimResponse"
+                            "$ref": "#/definitions/github_com_ima_diplom-backend_internal_handler_dto.ClaimResponse"
                         }
                     }
                 }
@@ -811,7 +866,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/dto.ClaimResponse"
+                            "$ref": "#/definitions/github_com_ima_diplom-backend_internal_handler_dto.ClaimResponse"
                         }
                     }
                 }
@@ -844,7 +899,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/dto.UpdateClaimStatusRequest"
+                            "$ref": "#/definitions/github_com_ima_diplom-backend_internal_handler_dto.UpdateClaimStatusRequest"
                         }
                     }
                 ],
@@ -889,7 +944,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/dto.EnvLogListResponse"
+                            "$ref": "#/definitions/github_com_ima_diplom-backend_internal_handler_dto.EnvLogListResponse"
                         }
                     }
                 }
@@ -915,7 +970,7 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/dto.RecordEnvLogRequest"
+                                "$ref": "#/definitions/github_com_ima_diplom-backend_internal_handler_dto.RecordEnvLogRequest"
                             }
                         }
                     }
@@ -923,6 +978,34 @@ const docTemplate = `{
                 "responses": {
                     "204": {
                         "description": "No Content"
+                    }
+                }
+            }
+        },
+        "/api/v1/env/logs/export": {
+            "get": {
+                "description": "Generates and downloads a stylized Excel file containing all climate logs",
+                "produces": [
+                    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+                ],
+                "tags": [
+                    "Environment"
+                ],
+                "summary": "Export climate logs to Excel",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Filter by zone UUID",
+                        "name": "zone_id",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "file"
+                        }
                     }
                 }
             }
@@ -955,7 +1038,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/dto.InboundListResponse"
+                            "$ref": "#/definitions/github_com_ima_diplom-backend_internal_handler_dto.InboundListResponse"
                         }
                     }
                 }
@@ -979,7 +1062,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/dto.CreateInboundRequest"
+                            "$ref": "#/definitions/github_com_ima_diplom-backend_internal_handler_dto.CreateInboundRequest"
                         }
                     }
                 ],
@@ -987,7 +1070,7 @@ const docTemplate = `{
                     "201": {
                         "description": "Created",
                         "schema": {
-                            "$ref": "#/definitions/dto.InboundResponse"
+                            "$ref": "#/definitions/github_com_ima_diplom-backend_internal_handler_dto.InboundResponse"
                         }
                     }
                 }
@@ -1016,7 +1099,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/dto.InboundResponse"
+                            "$ref": "#/definitions/github_com_ima_diplom-backend_internal_handler_dto.InboundResponse"
                         }
                     }
                 }
@@ -1073,7 +1156,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/dto.UpdateInboundStatusRequest"
+                            "$ref": "#/definitions/github_com_ima_diplom-backend_internal_handler_dto.UpdateInboundStatusRequest"
                         }
                     }
                 ],
@@ -1114,7 +1197,7 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/dto.InventorySessionResponse"
+                                "$ref": "#/definitions/github_com_ima_diplom-backend_internal_handler_dto.InventorySessionResponse"
                             }
                         }
                     }
@@ -1139,7 +1222,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/dto.StartInventoryRequest"
+                            "$ref": "#/definitions/github_com_ima_diplom-backend_internal_handler_dto.StartInventoryRequest"
                         }
                     }
                 ],
@@ -1147,7 +1230,7 @@ const docTemplate = `{
                     "201": {
                         "description": "Created",
                         "schema": {
-                            "$ref": "#/definitions/dto.InventorySessionResponse"
+                            "$ref": "#/definitions/github_com_ima_diplom-backend_internal_handler_dto.InventorySessionResponse"
                         }
                     }
                 }
@@ -1176,7 +1259,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/dto.InventorySessionResponse"
+                            "$ref": "#/definitions/github_com_ima_diplom-backend_internal_handler_dto.InventorySessionResponse"
                         }
                     }
                 }
@@ -1209,7 +1292,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/dto.SubmitCountRequest"
+                            "$ref": "#/definitions/github_com_ima_diplom-backend_internal_handler_dto.SubmitCountRequest"
                         }
                     }
                 ],
@@ -1246,6 +1329,38 @@ const docTemplate = `{
                 }
             }
         },
+        "/api/v1/inventory/{id}/netting": {
+            "get": {
+                "description": "Calculates discrepancies grouped by ATC group for a completed session",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Inventory"
+                ],
+                "summary": "Get netting act for a completed inventory session",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Session UUID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/github_com_ima_diplom-backend_internal_domain.NettingLine"
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/api/v1/orders": {
             "get": {
                 "description": "Returns a paginated list of orders, sorted by priority and date",
@@ -1274,7 +1389,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/dto.OrderListResponse"
+                            "$ref": "#/definitions/github_com_ima_diplom-backend_internal_handler_dto.OrderListResponse"
                         }
                     }
                 }
@@ -1298,7 +1413,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/dto.CreateOrderRequest"
+                            "$ref": "#/definitions/github_com_ima_diplom-backend_internal_handler_dto.CreateOrderRequest"
                         }
                     }
                 ],
@@ -1306,7 +1421,7 @@ const docTemplate = `{
                     "201": {
                         "description": "Created",
                         "schema": {
-                            "$ref": "#/definitions/dto.OrderResponse"
+                            "$ref": "#/definitions/github_com_ima_diplom-backend_internal_handler_dto.OrderResponse"
                         }
                     }
                 }
@@ -1335,7 +1450,65 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/dto.OrderResponse"
+                            "$ref": "#/definitions/github_com_ima_diplom-backend_internal_handler_dto.OrderResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/orders/{id}/pdf/quality-registry": {
+            "get": {
+                "description": "Generates and downloads a quality certificate registry PDF for an order",
+                "produces": [
+                    "application/pdf"
+                ],
+                "tags": [
+                    "Orders"
+                ],
+                "summary": "Get quality registry PDF",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Order UUID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "file"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/orders/{id}/pdf/ttn": {
+            "get": {
+                "description": "Generates and downloads a consignment note (ТТН) PDF for an order",
+                "produces": [
+                    "application/pdf"
+                ],
+                "tags": [
+                    "Orders"
+                ],
+                "summary": "Get consignment note (TTN) PDF",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Order UUID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "file"
                         }
                     }
                 }
@@ -1368,7 +1541,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/dto.UpdateOrderStatusRequest"
+                            "$ref": "#/definitions/github_com_ima_diplom-backend_internal_handler_dto.UpdateOrderStatusRequest"
                         }
                     }
                 ],
@@ -1425,7 +1598,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/dto.ProductListResponse"
+                            "$ref": "#/definitions/github_com_ima_diplom-backend_internal_handler_dto.ProductListResponse"
                         }
                     }
                 }
@@ -1449,7 +1622,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/dto.CreateProductRequest"
+                            "$ref": "#/definitions/github_com_ima_diplom-backend_internal_handler_dto.CreateProductRequest"
                         }
                     }
                 ],
@@ -1457,7 +1630,30 @@ const docTemplate = `{
                     "201": {
                         "description": "Created",
                         "schema": {
-                            "$ref": "#/definitions/dto.ProductResponse"
+                            "$ref": "#/definitions/github_com_ima_diplom-backend_internal_handler_dto.ProductResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/products/reorder-check": {
+            "get": {
+                "description": "Calculates reorder point (ROP) and reorder quantities for all products (Admin or Warehouse Manager only)",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Products"
+                ],
+                "summary": "Run reorder check",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/github_com_ima_diplom-backend_internal_domain.ROPResult"
+                            }
                         }
                     }
                 }
@@ -1486,7 +1682,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/dto.ProductResponse"
+                            "$ref": "#/definitions/github_com_ima_diplom-backend_internal_handler_dto.ProductResponse"
                         }
                     }
                 }
@@ -1541,7 +1737,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/dto.UpdateProductRequest"
+                            "$ref": "#/definitions/github_com_ima_diplom-backend_internal_handler_dto.UpdateProductRequest"
                         }
                     }
                 ],
@@ -1549,7 +1745,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/dto.ProductResponse"
+                            "$ref": "#/definitions/github_com_ima_diplom-backend_internal_handler_dto.ProductResponse"
                         }
                     }
                 }
@@ -1585,7 +1781,7 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/dto.RecalledBatchResponse"
+                                "$ref": "#/definitions/github_com_ima_diplom-backend_internal_handler_dto.RecalledBatchResponse"
                             }
                         }
                     }
@@ -1615,7 +1811,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/dto.RecalledCheckResponse"
+                            "$ref": "#/definitions/github_com_ima_diplom-backend_internal_handler_dto.RecalledCheckResponse"
                         }
                     }
                 }
@@ -1645,7 +1841,7 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/dto.ATCCodeResponse"
+                                "$ref": "#/definitions/github_com_ima_diplom-backend_internal_handler_dto.ATCCodeResponse"
                             }
                         }
                     }
@@ -1668,7 +1864,7 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/dto.CountryResponse"
+                                "$ref": "#/definitions/github_com_ima_diplom-backend_internal_handler_dto.CountryResponse"
                             }
                         }
                     }
@@ -1703,19 +1899,19 @@ const docTemplate = `{
                     "400": {
                         "description": "invalid session ID",
                         "schema": {
-                            "$ref": "#/definitions/dto.ErrorResponse"
+                            "$ref": "#/definitions/github_com_ima_diplom-backend_internal_handler_dto.ErrorResponse"
                         }
                     },
                     "403": {
                         "description": "insufficient permissions (not owner and not admin)",
                         "schema": {
-                            "$ref": "#/definitions/dto.ErrorResponse"
+                            "$ref": "#/definitions/github_com_ima_diplom-backend_internal_handler_dto.ErrorResponse"
                         }
                     },
                     "404": {
                         "description": "session not found",
                         "schema": {
-                            "$ref": "#/definitions/dto.ErrorResponse"
+                            "$ref": "#/definitions/github_com_ima_diplom-backend_internal_handler_dto.ErrorResponse"
                         }
                     }
                 }
@@ -1737,7 +1933,7 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/dto.SystemSettingResponse"
+                                "$ref": "#/definitions/github_com_ima_diplom-backend_internal_handler_dto.SystemSettingResponse"
                             }
                         }
                     }
@@ -1771,7 +1967,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/dto.UpdateSettingRequest"
+                            "$ref": "#/definitions/github_com_ima_diplom-backend_internal_handler_dto.UpdateSettingRequest"
                         }
                     }
                 ],
@@ -1810,7 +2006,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/dto.SupplierListResponse"
+                            "$ref": "#/definitions/github_com_ima_diplom-backend_internal_handler_dto.SupplierListResponse"
                         }
                     }
                 }
@@ -1834,7 +2030,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/dto.CreateSupplierRequest"
+                            "$ref": "#/definitions/github_com_ima_diplom-backend_internal_handler_dto.CreateSupplierRequest"
                         }
                     }
                 ],
@@ -1842,7 +2038,7 @@ const docTemplate = `{
                     "201": {
                         "description": "Created",
                         "schema": {
-                            "$ref": "#/definitions/dto.SupplierResponse"
+                            "$ref": "#/definitions/github_com_ima_diplom-backend_internal_handler_dto.SupplierResponse"
                         }
                     }
                 }
@@ -1871,7 +2067,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/dto.SupplierResponse"
+                            "$ref": "#/definitions/github_com_ima_diplom-backend_internal_handler_dto.SupplierResponse"
                         }
                     }
                 }
@@ -1926,7 +2122,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/dto.UpdateSupplierRequest"
+                            "$ref": "#/definitions/github_com_ima_diplom-backend_internal_handler_dto.UpdateSupplierRequest"
                         }
                     }
                 ],
@@ -1934,7 +2130,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/dto.SupplierResponse"
+                            "$ref": "#/definitions/github_com_ima_diplom-backend_internal_handler_dto.SupplierResponse"
                         }
                     }
                 }
@@ -1959,19 +2155,19 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/dto.UserProfileResponse"
+                            "$ref": "#/definitions/github_com_ima_diplom-backend_internal_handler_dto.UserProfileResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/dto.ErrorResponse"
+                            "$ref": "#/definitions/github_com_ima_diplom-backend_internal_handler_dto.ErrorResponse"
                         }
                     },
                     "404": {
                         "description": "user not found",
                         "schema": {
-                            "$ref": "#/definitions/dto.ErrorResponse"
+                            "$ref": "#/definitions/github_com_ima_diplom-backend_internal_handler_dto.ErrorResponse"
                         }
                     }
                 }
@@ -2000,7 +2196,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/dto.PatchMeRequest"
+                            "$ref": "#/definitions/github_com_ima_diplom-backend_internal_handler_dto.PatchMeRequest"
                         }
                     }
                 ],
@@ -2008,25 +2204,62 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/dto.UserProfileResponse"
+                            "$ref": "#/definitions/github_com_ima_diplom-backend_internal_handler_dto.UserProfileResponse"
                         }
                     },
                     "400": {
                         "description": "invalid request body",
                         "schema": {
-                            "$ref": "#/definitions/dto.ErrorResponse"
+                            "$ref": "#/definitions/github_com_ima_diplom-backend_internal_handler_dto.ErrorResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/dto.ErrorResponse"
+                            "$ref": "#/definitions/github_com_ima_diplom-backend_internal_handler_dto.ErrorResponse"
                         }
                     },
                     "404": {
                         "description": "profile not found",
                         "schema": {
-                            "$ref": "#/definitions/dto.ErrorResponse"
+                            "$ref": "#/definitions/github_com_ima_diplom-backend_internal_handler_dto.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/users/me/profile": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Returns the full employee profile for the authenticated user (including GDP and medical history)",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Users"
+                ],
+                "summary": "Get current user full employee profile",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_ima_diplom-backend_internal_handler_dto.EmployeeProfileResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_ima_diplom-backend_internal_handler_dto.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "profile not found",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_ima_diplom-backend_internal_handler_dto.ErrorResponse"
                         }
                     }
                 }
@@ -2048,7 +2281,7 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/dto.ZoneResponse"
+                                "$ref": "#/definitions/github_com_ima_diplom-backend_internal_handler_dto.ZoneResponse"
                             }
                         }
                     }
@@ -2073,7 +2306,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/dto.CreateZoneRequest"
+                            "$ref": "#/definitions/github_com_ima_diplom-backend_internal_handler_dto.CreateZoneRequest"
                         }
                     }
                 ],
@@ -2081,7 +2314,7 @@ const docTemplate = `{
                     "201": {
                         "description": "Created",
                         "schema": {
-                            "$ref": "#/definitions/dto.ZoneResponse"
+                            "$ref": "#/definitions/github_com_ima_diplom-backend_internal_handler_dto.ZoneResponse"
                         }
                     }
                 }
@@ -2110,7 +2343,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/dto.ZoneResponse"
+                            "$ref": "#/definitions/github_com_ima_diplom-backend_internal_handler_dto.ZoneResponse"
                         }
                     }
                 }
@@ -2165,7 +2398,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/dto.UpdateZoneRequest"
+                            "$ref": "#/definitions/github_com_ima_diplom-backend_internal_handler_dto.UpdateZoneRequest"
                         }
                     }
                 ],
@@ -2173,7 +2406,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/dto.ZoneResponse"
+                            "$ref": "#/definitions/github_com_ima_diplom-backend_internal_handler_dto.ZoneResponse"
                         }
                     }
                 }
@@ -2199,7 +2432,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/dto.GoogleAuthRequest"
+                            "$ref": "#/definitions/github_com_ima_diplom-backend_internal_handler_dto.GoogleAuthRequest"
                         }
                     }
                 ],
@@ -2207,25 +2440,25 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/dto.TokenResponse"
+                            "$ref": "#/definitions/github_com_ima_diplom-backend_internal_handler_dto.TokenResponse"
                         }
                     },
                     "400": {
                         "description": "invalid JSON",
                         "schema": {
-                            "$ref": "#/definitions/dto.ErrorResponse"
+                            "$ref": "#/definitions/github_com_ima_diplom-backend_internal_handler_dto.ErrorResponse"
                         }
                     },
                     "401": {
                         "description": "google auth failed",
                         "schema": {
-                            "$ref": "#/definitions/dto.ErrorResponse"
+                            "$ref": "#/definitions/github_com_ima_diplom-backend_internal_handler_dto.ErrorResponse"
                         }
                     },
                     "403": {
                         "description": "account is blocked",
                         "schema": {
-                            "$ref": "#/definitions/dto.ErrorResponse"
+                            "$ref": "#/definitions/github_com_ima_diplom-backend_internal_handler_dto.ErrorResponse"
                         }
                     }
                 }
@@ -2264,13 +2497,13 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/dto.TokenResponse"
+                            "$ref": "#/definitions/github_com_ima_diplom-backend_internal_handler_dto.TokenResponse"
                         }
                     },
                     "401": {
                         "description": "refresh token missing or invalid session",
                         "schema": {
-                            "$ref": "#/definitions/dto.ErrorResponse"
+                            "$ref": "#/definitions/github_com_ima_diplom-backend_internal_handler_dto.ErrorResponse"
                         }
                     }
                 }
@@ -2296,7 +2529,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/dto.RegisterRequest"
+                            "$ref": "#/definitions/github_com_ima_diplom-backend_internal_handler_dto.RegisterRequest"
                         }
                     }
                 ],
@@ -2304,25 +2537,25 @@ const docTemplate = `{
                     "201": {
                         "description": "Created",
                         "schema": {
-                            "$ref": "#/definitions/dto.RegisterResponse"
+                            "$ref": "#/definitions/github_com_ima_diplom-backend_internal_handler_dto.RegisterResponse"
                         }
                     },
                     "400": {
                         "description": "email is required",
                         "schema": {
-                            "$ref": "#/definitions/dto.ErrorResponse"
+                            "$ref": "#/definitions/github_com_ima_diplom-backend_internal_handler_dto.ErrorResponse"
                         }
                     },
                     "409": {
                         "description": "email already registered",
                         "schema": {
-                            "$ref": "#/definitions/dto.ErrorResponse"
+                            "$ref": "#/definitions/github_com_ima_diplom-backend_internal_handler_dto.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "failed to register",
                         "schema": {
-                            "$ref": "#/definitions/dto.ErrorResponse"
+                            "$ref": "#/definitions/github_com_ima_diplom-backend_internal_handler_dto.ErrorResponse"
                         }
                     }
                 }
@@ -2348,7 +2581,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/dto.SendCodeRequest"
+                            "$ref": "#/definitions/github_com_ima_diplom-backend_internal_handler_dto.SendCodeRequest"
                         }
                     }
                 ],
@@ -2356,31 +2589,31 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/dto.SendCodeResponse"
+                            "$ref": "#/definitions/github_com_ima_diplom-backend_internal_handler_dto.SendCodeResponse"
                         }
                     },
                     "400": {
                         "description": "invalid request body or email is required",
                         "schema": {
-                            "$ref": "#/definitions/dto.ErrorResponse"
+                            "$ref": "#/definitions/github_com_ima_diplom-backend_internal_handler_dto.ErrorResponse"
                         }
                     },
                     "404": {
                         "description": "user with this email not found",
                         "schema": {
-                            "$ref": "#/definitions/dto.ErrorResponse"
+                            "$ref": "#/definitions/github_com_ima_diplom-backend_internal_handler_dto.ErrorResponse"
                         }
                     },
                     "429": {
                         "description": "too many requests, try again later",
                         "schema": {
-                            "$ref": "#/definitions/dto.ErrorResponse"
+                            "$ref": "#/definitions/github_com_ima_diplom-backend_internal_handler_dto.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "failed to send code",
                         "schema": {
-                            "$ref": "#/definitions/dto.ErrorResponse"
+                            "$ref": "#/definitions/github_com_ima_diplom-backend_internal_handler_dto.ErrorResponse"
                         }
                     }
                 }
@@ -2406,7 +2639,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/dto.VerifyCodeRequest"
+                            "$ref": "#/definitions/github_com_ima_diplom-backend_internal_handler_dto.VerifyCodeRequest"
                         }
                     }
                 ],
@@ -2414,25 +2647,25 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/dto.TokenResponse"
+                            "$ref": "#/definitions/github_com_ima_diplom-backend_internal_handler_dto.TokenResponse"
                         }
                     },
                     "400": {
                         "description": "invalid request body or missing fields",
                         "schema": {
-                            "$ref": "#/definitions/dto.ErrorResponse"
+                            "$ref": "#/definitions/github_com_ima_diplom-backend_internal_handler_dto.ErrorResponse"
                         }
                     },
                     "401": {
                         "description": "invalid or expired code",
                         "schema": {
-                            "$ref": "#/definitions/dto.ErrorResponse"
+                            "$ref": "#/definitions/github_com_ima_diplom-backend_internal_handler_dto.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "failed to verify code",
                         "schema": {
-                            "$ref": "#/definitions/dto.ErrorResponse"
+                            "$ref": "#/definitions/github_com_ima_diplom-backend_internal_handler_dto.ErrorResponse"
                         }
                     }
                 }
@@ -2440,7 +2673,7 @@ const docTemplate = `{
         }
     },
     "definitions": {
-        "domain.BatchStatus": {
+        "github_com_ima_diplom-backend_internal_domain.BatchStatus": {
             "type": "string",
             "enum": [
                 "quarantine",
@@ -2455,7 +2688,7 @@ const docTemplate = `{
                 "BatchStatusBlocked"
             ]
         },
-        "domain.ClaimStatus": {
+        "github_com_ima_diplom-backend_internal_domain.ClaimStatus": {
             "type": "string",
             "enum": [
                 "new",
@@ -2470,7 +2703,7 @@ const docTemplate = `{
                 "ClaimStatusRejected"
             ]
         },
-        "domain.InboundStatus": {
+        "github_com_ima_diplom-backend_internal_domain.InboundStatus": {
             "type": "string",
             "enum": [
                 "draft",
@@ -2496,7 +2729,7 @@ const docTemplate = `{
                 "InboundStatusCancelled"
             ]
         },
-        "domain.InventoryStatus": {
+        "github_com_ima_diplom-backend_internal_domain.InventoryStatus": {
             "type": "string",
             "enum": [
                 "draft",
@@ -2509,7 +2742,26 @@ const docTemplate = `{
                 "InventoryStatusCompleted"
             ]
         },
-        "domain.OrderStatus": {
+        "github_com_ima_diplom-backend_internal_domain.NettingLine": {
+            "type": "object",
+            "properties": {
+                "atc_group": {
+                    "description": "АТХ группа 3-го уровня (первые 3 символа)",
+                    "type": "string"
+                },
+                "delta": {
+                    "description": "Разница (physical_qty - system_qty)",
+                    "type": "integer"
+                },
+                "product_id": {
+                    "type": "string"
+                },
+                "product_name": {
+                    "type": "string"
+                }
+            }
+        },
+        "github_com_ima_diplom-backend_internal_domain.OrderStatus": {
             "type": "string",
             "enum": [
                 "new",
@@ -2539,7 +2791,58 @@ const docTemplate = `{
                 "OrderStatusCancelled"
             ]
         },
-        "domain.ZoneType": {
+        "github_com_ima_diplom-backend_internal_domain.ROPResult": {
+            "type": "object",
+            "properties": {
+                "current_stock": {
+                    "type": "integer"
+                },
+                "daily_usage": {
+                    "type": "number"
+                },
+                "max_stock": {
+                    "type": "integer"
+                },
+                "monthly_turnover": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "needs_reorder": {
+                    "type": "boolean"
+                },
+                "product_id": {
+                    "type": "string"
+                },
+                "reorder_qty": {
+                    "type": "integer"
+                },
+                "rop": {
+                    "type": "integer"
+                },
+                "safety_stock": {
+                    "type": "integer"
+                },
+                "sku": {
+                    "type": "string"
+                }
+            }
+        },
+        "github_com_ima_diplom-backend_internal_domain.VenCategory": {
+            "type": "string",
+            "enum": [
+                "V",
+                "E",
+                "N"
+            ],
+            "x-enum-varnames": [
+                "VenV",
+                "VenE",
+                "VenN"
+            ]
+        },
+        "github_com_ima_diplom-backend_internal_domain.ZoneType": {
             "type": "string",
             "enum": [
                 "ambient",
@@ -2570,7 +2873,7 @@ const docTemplate = `{
                 "ZoneTypeQuarantine"
             ]
         },
-        "dto.ATCCodeResponse": {
+        "github_com_ima_diplom-backend_internal_handler_dto.ATCCodeResponse": {
             "type": "object",
             "properties": {
                 "code": {
@@ -2583,7 +2886,7 @@ const docTemplate = `{
                 }
             }
         },
-        "dto.AssignRoleRequest": {
+        "github_com_ima_diplom-backend_internal_handler_dto.AssignRoleRequest": {
             "type": "object",
             "properties": {
                 "role": {
@@ -2591,13 +2894,13 @@ const docTemplate = `{
                 }
             }
         },
-        "dto.BatchListResponse": {
+        "github_com_ima_diplom-backend_internal_handler_dto.BatchListResponse": {
             "type": "object",
             "properties": {
                 "batches": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/dto.BatchResponse"
+                        "$ref": "#/definitions/github_com_ima_diplom-backend_internal_handler_dto.BatchResponse"
                     }
                 },
                 "total": {
@@ -2605,7 +2908,7 @@ const docTemplate = `{
                 }
             }
         },
-        "dto.BatchResponse": {
+        "github_com_ima_diplom-backend_internal_handler_dto.BatchResponse": {
             "type": "object",
             "properties": {
                 "expiry_date": {
@@ -2627,7 +2930,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "status": {
-                    "$ref": "#/definitions/domain.BatchStatus"
+                    "$ref": "#/definitions/github_com_ima_diplom-backend_internal_domain.BatchStatus"
                 },
                 "updated_at": {
                     "type": "string"
@@ -2637,13 +2940,13 @@ const docTemplate = `{
                 }
             }
         },
-        "dto.ClaimListResponse": {
+        "github_com_ima_diplom-backend_internal_handler_dto.ClaimListResponse": {
             "type": "object",
             "properties": {
                 "claims": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/dto.ClaimResponse"
+                        "$ref": "#/definitions/github_com_ima_diplom-backend_internal_handler_dto.ClaimResponse"
                     }
                 },
                 "total": {
@@ -2651,7 +2954,7 @@ const docTemplate = `{
                 }
             }
         },
-        "dto.ClaimResponse": {
+        "github_com_ima_diplom-backend_internal_handler_dto.ClaimResponse": {
             "type": "object",
             "properties": {
                 "created_at": {
@@ -2673,7 +2976,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "status": {
-                    "$ref": "#/definitions/domain.ClaimStatus"
+                    "$ref": "#/definitions/github_com_ima_diplom-backend_internal_domain.ClaimStatus"
                 },
                 "title": {
                     "type": "string"
@@ -2683,7 +2986,7 @@ const docTemplate = `{
                 }
             }
         },
-        "dto.CountItem": {
+        "github_com_ima_diplom-backend_internal_handler_dto.CountItem": {
             "type": "object",
             "required": [
                 "batch_number",
@@ -2707,7 +3010,7 @@ const docTemplate = `{
                 }
             }
         },
-        "dto.CountryResponse": {
+        "github_com_ima_diplom-backend_internal_handler_dto.CountryResponse": {
             "type": "object",
             "properties": {
                 "code": {
@@ -2720,7 +3023,7 @@ const docTemplate = `{
                 }
             }
         },
-        "dto.CreateClaimRequest": {
+        "github_com_ima_diplom-backend_internal_handler_dto.CreateClaimRequest": {
             "type": "object",
             "required": [
                 "description",
@@ -2741,7 +3044,52 @@ const docTemplate = `{
                 }
             }
         },
-        "dto.CreateInboundItem": {
+        "github_com_ima_diplom-backend_internal_handler_dto.CreateEmployeeProfileRequest": {
+            "type": "object",
+            "properties": {
+                "avatar_url": {
+                    "type": "string"
+                },
+                "birth_date": {
+                    "type": "string"
+                },
+                "corporate_email": {
+                    "type": "string"
+                },
+                "department": {
+                    "type": "string"
+                },
+                "dismissal_date": {
+                    "type": "string"
+                },
+                "employee_code": {
+                    "type": "string"
+                },
+                "full_name": {
+                    "type": "string"
+                },
+                "gdp_training_history": {},
+                "hire_date": {
+                    "type": "string"
+                },
+                "medical_book_scan_url": {
+                    "type": "string"
+                },
+                "phone": {
+                    "type": "string"
+                },
+                "position": {
+                    "type": "string"
+                },
+                "special_zone_access": {
+                    "type": "boolean"
+                },
+                "user_id": {
+                    "type": "integer"
+                }
+            }
+        },
+        "github_com_ima_diplom-backend_internal_handler_dto.CreateInboundItem": {
             "type": "object",
             "required": [
                 "batch_number",
@@ -2782,7 +3130,7 @@ const docTemplate = `{
                 }
             }
         },
-        "dto.CreateInboundRequest": {
+        "github_com_ima_diplom-backend_internal_handler_dto.CreateInboundRequest": {
             "type": "object",
             "required": [
                 "invoice_date",
@@ -2800,7 +3148,7 @@ const docTemplate = `{
                 "items": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/dto.CreateInboundItem"
+                        "$ref": "#/definitions/github_com_ima_diplom-backend_internal_handler_dto.CreateInboundItem"
                     }
                 },
                 "notes": {
@@ -2811,7 +3159,7 @@ const docTemplate = `{
                 }
             }
         },
-        "dto.CreateOrderItem": {
+        "github_com_ima_diplom-backend_internal_handler_dto.CreateOrderItem": {
             "type": "object",
             "required": [
                 "product_id",
@@ -2827,7 +3175,7 @@ const docTemplate = `{
                 }
             }
         },
-        "dto.CreateOrderRequest": {
+        "github_com_ima_diplom-backend_internal_handler_dto.CreateOrderRequest": {
             "type": "object",
             "required": [
                 "customer_name",
@@ -2840,7 +3188,7 @@ const docTemplate = `{
                 "items": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/dto.CreateOrderItem"
+                        "$ref": "#/definitions/github_com_ima_diplom-backend_internal_handler_dto.CreateOrderItem"
                     }
                 },
                 "priority": {
@@ -2850,7 +3198,7 @@ const docTemplate = `{
                 }
             }
         },
-        "dto.CreateProductRequest": {
+        "github_com_ima_diplom-backend_internal_handler_dto.CreateProductRequest": {
             "type": "object",
             "required": [
                 "atc_code",
@@ -2874,8 +3222,14 @@ const docTemplate = `{
                 "is_jnvlp": {
                     "type": "boolean"
                 },
+                "lead_time_days": {
+                    "type": "integer"
+                },
                 "manufacturer_id": {
                     "type": "string"
+                },
+                "max_stock_qty": {
+                    "type": "integer"
                 },
                 "name": {
                     "type": "string"
@@ -2887,6 +3241,9 @@ const docTemplate = `{
                 "photo_url": {
                     "type": "string"
                 },
+                "safety_stock_qty": {
+                    "type": "integer"
+                },
                 "sku": {
                     "type": "string"
                 },
@@ -2895,10 +3252,13 @@ const docTemplate = `{
                 },
                 "strength": {
                     "type": "string"
+                },
+                "ven_category": {
+                    "$ref": "#/definitions/github_com_ima_diplom-backend_internal_domain.VenCategory"
                 }
             }
         },
-        "dto.CreateSupplierRequest": {
+        "github_com_ima_diplom-backend_internal_handler_dto.CreateSupplierRequest": {
             "type": "object",
             "required": [
                 "inn",
@@ -2929,7 +3289,7 @@ const docTemplate = `{
                 }
             }
         },
-        "dto.CreateZoneRequest": {
+        "github_com_ima_diplom-backend_internal_handler_dto.CreateZoneRequest": {
             "type": "object",
             "required": [
                 "name",
@@ -2961,13 +3321,13 @@ const docTemplate = `{
                     ],
                     "allOf": [
                         {
-                            "$ref": "#/definitions/domain.ZoneType"
+                            "$ref": "#/definitions/github_com_ima_diplom-backend_internal_domain.ZoneType"
                         }
                     ]
                 }
             }
         },
-        "dto.EmployeeProfileResponse": {
+        "github_com_ima_diplom-backend_internal_handler_dto.EmployeeProfileResponse": {
             "type": "object",
             "properties": {
                 "avatar_url": {
@@ -3015,13 +3375,13 @@ const docTemplate = `{
                 }
             }
         },
-        "dto.EnvLogListResponse": {
+        "github_com_ima_diplom-backend_internal_handler_dto.EnvLogListResponse": {
             "type": "object",
             "properties": {
                 "logs": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/dto.EnvLogResponse"
+                        "$ref": "#/definitions/github_com_ima_diplom-backend_internal_handler_dto.EnvLogResponse"
                     }
                 },
                 "total": {
@@ -3029,7 +3389,7 @@ const docTemplate = `{
                 }
             }
         },
-        "dto.EnvLogResponse": {
+        "github_com_ima_diplom-backend_internal_handler_dto.EnvLogResponse": {
             "type": "object",
             "properties": {
                 "humidity": {
@@ -3047,6 +3407,9 @@ const docTemplate = `{
                 "recorded_by": {
                     "type": "integer"
                 },
+                "shift": {
+                    "type": "string"
+                },
                 "temperature": {
                     "type": "number"
                 },
@@ -3055,7 +3418,7 @@ const docTemplate = `{
                 }
             }
         },
-        "dto.ErrorResponse": {
+        "github_com_ima_diplom-backend_internal_handler_dto.ErrorResponse": {
             "type": "object",
             "properties": {
                 "error": {
@@ -3063,7 +3426,7 @@ const docTemplate = `{
                 }
             }
         },
-        "dto.GoogleAuthRequest": {
+        "github_com_ima_diplom-backend_internal_handler_dto.GoogleAuthRequest": {
             "type": "object",
             "properties": {
                 "id_token": {
@@ -3071,7 +3434,7 @@ const docTemplate = `{
                 }
             }
         },
-        "dto.InboundItemResponse": {
+        "github_com_ima_diplom-backend_internal_handler_dto.InboundItemResponse": {
             "type": "object",
             "properties": {
                 "batch_number": {
@@ -3106,13 +3469,13 @@ const docTemplate = `{
                 }
             }
         },
-        "dto.InboundListResponse": {
+        "github_com_ima_diplom-backend_internal_handler_dto.InboundListResponse": {
             "type": "object",
             "properties": {
                 "inbounds": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/dto.InboundResponse"
+                        "$ref": "#/definitions/github_com_ima_diplom-backend_internal_handler_dto.InboundResponse"
                     }
                 },
                 "total": {
@@ -3120,7 +3483,7 @@ const docTemplate = `{
                 }
             }
         },
-        "dto.InboundResponse": {
+        "github_com_ima_diplom-backend_internal_handler_dto.InboundResponse": {
             "type": "object",
             "properties": {
                 "created_at": {
@@ -3138,7 +3501,7 @@ const docTemplate = `{
                 "items": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/dto.InboundItemResponse"
+                        "$ref": "#/definitions/github_com_ima_diplom-backend_internal_handler_dto.InboundItemResponse"
                     }
                 },
                 "notes": {
@@ -3148,7 +3511,7 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "status": {
-                    "$ref": "#/definitions/domain.InboundStatus"
+                    "$ref": "#/definitions/github_com_ima_diplom-backend_internal_domain.InboundStatus"
                 },
                 "supplier_id": {
                     "type": "string"
@@ -3164,7 +3527,7 @@ const docTemplate = `{
                 }
             }
         },
-        "dto.InventoryItemResponse": {
+        "github_com_ima_diplom-backend_internal_handler_dto.InventoryItemResponse": {
             "type": "object",
             "properties": {
                 "batch_number": {
@@ -3187,7 +3550,7 @@ const docTemplate = `{
                 }
             }
         },
-        "dto.InventorySessionResponse": {
+        "github_com_ima_diplom-backend_internal_handler_dto.InventorySessionResponse": {
             "type": "object",
             "properties": {
                 "completed_at": {
@@ -3199,7 +3562,7 @@ const docTemplate = `{
                 "items": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/dto.InventoryItemResponse"
+                        "$ref": "#/definitions/github_com_ima_diplom-backend_internal_handler_dto.InventoryItemResponse"
                     }
                 },
                 "started_at": {
@@ -3209,14 +3572,14 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "status": {
-                    "$ref": "#/definitions/domain.InventoryStatus"
+                    "$ref": "#/definitions/github_com_ima_diplom-backend_internal_domain.InventoryStatus"
                 },
                 "zone_id": {
                     "type": "string"
                 }
             }
         },
-        "dto.OrderItemResponse": {
+        "github_com_ima_diplom-backend_internal_handler_dto.OrderItemResponse": {
             "type": "object",
             "properties": {
                 "id": {
@@ -3233,13 +3596,13 @@ const docTemplate = `{
                 }
             }
         },
-        "dto.OrderListResponse": {
+        "github_com_ima_diplom-backend_internal_handler_dto.OrderListResponse": {
             "type": "object",
             "properties": {
                 "orders": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/dto.OrderResponse"
+                        "$ref": "#/definitions/github_com_ima_diplom-backend_internal_handler_dto.OrderResponse"
                     }
                 },
                 "total": {
@@ -3247,7 +3610,7 @@ const docTemplate = `{
                 }
             }
         },
-        "dto.OrderResponse": {
+        "github_com_ima_diplom-backend_internal_handler_dto.OrderResponse": {
             "type": "object",
             "properties": {
                 "created_at": {
@@ -3265,7 +3628,7 @@ const docTemplate = `{
                 "items": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/dto.OrderItemResponse"
+                        "$ref": "#/definitions/github_com_ima_diplom-backend_internal_handler_dto.OrderItemResponse"
                     }
                 },
                 "order_number": {
@@ -3275,14 +3638,14 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "status": {
-                    "$ref": "#/definitions/domain.OrderStatus"
+                    "$ref": "#/definitions/github_com_ima_diplom-backend_internal_domain.OrderStatus"
                 },
                 "updated_at": {
                     "type": "string"
                 }
             }
         },
-        "dto.PatchEmployeeProfileRequest": {
+        "github_com_ima_diplom-backend_internal_handler_dto.PatchEmployeeProfileRequest": {
             "type": "object",
             "properties": {
                 "avatar_url": {
@@ -3324,7 +3687,7 @@ const docTemplate = `{
                 }
             }
         },
-        "dto.PatchMeRequest": {
+        "github_com_ima_diplom-backend_internal_handler_dto.PatchMeRequest": {
             "type": "object",
             "properties": {
                 "avatar_url": {
@@ -3357,7 +3720,7 @@ const docTemplate = `{
                 }
             }
         },
-        "dto.PatchUserRequest": {
+        "github_com_ima_diplom-backend_internal_handler_dto.PatchUserRequest": {
             "type": "object",
             "properties": {
                 "ns_pv_access": {
@@ -3371,13 +3734,13 @@ const docTemplate = `{
                 }
             }
         },
-        "dto.ProductListResponse": {
+        "github_com_ima_diplom-backend_internal_handler_dto.ProductListResponse": {
             "type": "object",
             "properties": {
                 "products": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/dto.ProductResponse"
+                        "$ref": "#/definitions/github_com_ima_diplom-backend_internal_handler_dto.ProductResponse"
                     }
                 },
                 "total": {
@@ -3385,7 +3748,7 @@ const docTemplate = `{
                 }
             }
         },
-        "dto.ProductResponse": {
+        "github_com_ima_diplom-backend_internal_handler_dto.ProductResponse": {
             "type": "object",
             "properties": {
                 "atc_code": {
@@ -3409,8 +3772,14 @@ const docTemplate = `{
                 "is_jnvlp": {
                     "type": "boolean"
                 },
+                "lead_time_days": {
+                    "type": "integer"
+                },
                 "manufacturer_id": {
                     "type": "string"
+                },
+                "max_stock_qty": {
+                    "type": "integer"
                 },
                 "name": {
                     "type": "string"
@@ -3420,6 +3789,9 @@ const docTemplate = `{
                 },
                 "photo_url": {
                     "type": "string"
+                },
+                "safety_stock_qty": {
+                    "type": "integer"
                 },
                 "sku": {
                     "type": "string"
@@ -3432,10 +3804,13 @@ const docTemplate = `{
                 },
                 "updated_at": {
                     "type": "string"
+                },
+                "ven_category": {
+                    "$ref": "#/definitions/github_com_ima_diplom-backend_internal_domain.VenCategory"
                 }
             }
         },
-        "dto.RecalledBatchResponse": {
+        "github_com_ima_diplom-backend_internal_handler_dto.RecalledBatchResponse": {
             "type": "object",
             "properties": {
                 "id": {
@@ -3461,20 +3836,21 @@ const docTemplate = `{
                 }
             }
         },
-        "dto.RecalledCheckResponse": {
+        "github_com_ima_diplom-backend_internal_handler_dto.RecalledCheckResponse": {
             "type": "object",
             "properties": {
                 "details": {
-                    "$ref": "#/definitions/dto.RecalledBatchResponse"
+                    "$ref": "#/definitions/github_com_ima_diplom-backend_internal_handler_dto.RecalledBatchResponse"
                 },
                 "is_recalled": {
                     "type": "boolean"
                 }
             }
         },
-        "dto.RecordEnvLogRequest": {
+        "github_com_ima_diplom-backend_internal_handler_dto.RecordEnvLogRequest": {
             "type": "object",
             "required": [
+                "shift",
                 "zone_id"
             ],
             "properties": {
@@ -3484,6 +3860,13 @@ const docTemplate = `{
                 "notes": {
                     "type": "string"
                 },
+                "shift": {
+                    "type": "string",
+                    "enum": [
+                        "morning",
+                        "evening"
+                    ]
+                },
                 "temperature": {
                     "type": "number"
                 },
@@ -3492,7 +3875,7 @@ const docTemplate = `{
                 }
             }
         },
-        "dto.RegisterRequest": {
+        "github_com_ima_diplom-backend_internal_handler_dto.RegisterRequest": {
             "type": "object",
             "properties": {
                 "email": {
@@ -3500,7 +3883,7 @@ const docTemplate = `{
                 }
             }
         },
-        "dto.RegisterResponse": {
+        "github_com_ima_diplom-backend_internal_handler_dto.RegisterResponse": {
             "type": "object",
             "properties": {
                 "expires_in": {
@@ -3511,7 +3894,7 @@ const docTemplate = `{
                 }
             }
         },
-        "dto.SendCodeRequest": {
+        "github_com_ima_diplom-backend_internal_handler_dto.SendCodeRequest": {
             "type": "object",
             "properties": {
                 "email": {
@@ -3519,7 +3902,7 @@ const docTemplate = `{
                 }
             }
         },
-        "dto.SendCodeResponse": {
+        "github_com_ima_diplom-backend_internal_handler_dto.SendCodeResponse": {
             "type": "object",
             "properties": {
                 "expires_in": {
@@ -3530,7 +3913,7 @@ const docTemplate = `{
                 }
             }
         },
-        "dto.SetBlockedRequest": {
+        "github_com_ima_diplom-backend_internal_handler_dto.SetBlockedRequest": {
             "type": "object",
             "properties": {
                 "blocked": {
@@ -3538,7 +3921,7 @@ const docTemplate = `{
                 }
             }
         },
-        "dto.StartInventoryRequest": {
+        "github_com_ima_diplom-backend_internal_handler_dto.StartInventoryRequest": {
             "type": "object",
             "required": [
                 "zone_id"
@@ -3549,7 +3932,7 @@ const docTemplate = `{
                 }
             }
         },
-        "dto.SubmitCountRequest": {
+        "github_com_ima_diplom-backend_internal_handler_dto.SubmitCountRequest": {
             "type": "object",
             "required": [
                 "items"
@@ -3558,18 +3941,18 @@ const docTemplate = `{
                 "items": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/dto.CountItem"
+                        "$ref": "#/definitions/github_com_ima_diplom-backend_internal_handler_dto.CountItem"
                     }
                 }
             }
         },
-        "dto.SupplierListResponse": {
+        "github_com_ima_diplom-backend_internal_handler_dto.SupplierListResponse": {
             "type": "object",
             "properties": {
                 "suppliers": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/dto.SupplierResponse"
+                        "$ref": "#/definitions/github_com_ima_diplom-backend_internal_handler_dto.SupplierResponse"
                     }
                 },
                 "total": {
@@ -3577,7 +3960,7 @@ const docTemplate = `{
                 }
             }
         },
-        "dto.SupplierResponse": {
+        "github_com_ima_diplom-backend_internal_handler_dto.SupplierResponse": {
             "type": "object",
             "properties": {
                 "address": {
@@ -3615,7 +3998,7 @@ const docTemplate = `{
                 }
             }
         },
-        "dto.SystemSettingResponse": {
+        "github_com_ima_diplom-backend_internal_handler_dto.SystemSettingResponse": {
             "type": "object",
             "properties": {
                 "key": {
@@ -3626,7 +4009,7 @@ const docTemplate = `{
                 }
             }
         },
-        "dto.TokenResponse": {
+        "github_com_ima_diplom-backend_internal_handler_dto.TokenResponse": {
             "type": "object",
             "properties": {
                 "access_token": {
@@ -3637,7 +4020,7 @@ const docTemplate = `{
                 }
             }
         },
-        "dto.TransferBatchRequest": {
+        "github_com_ima_diplom-backend_internal_handler_dto.TransferBatchRequest": {
             "type": "object",
             "required": [
                 "target_zone_id"
@@ -3648,29 +4031,29 @@ const docTemplate = `{
                 }
             }
         },
-        "dto.UpdateBatchStatusRequest": {
+        "github_com_ima_diplom-backend_internal_handler_dto.UpdateBatchStatusRequest": {
             "type": "object",
             "required": [
                 "status"
             ],
             "properties": {
                 "status": {
-                    "$ref": "#/definitions/domain.BatchStatus"
+                    "$ref": "#/definitions/github_com_ima_diplom-backend_internal_domain.BatchStatus"
                 }
             }
         },
-        "dto.UpdateClaimStatusRequest": {
+        "github_com_ima_diplom-backend_internal_handler_dto.UpdateClaimStatusRequest": {
             "type": "object",
             "required": [
                 "status"
             ],
             "properties": {
                 "status": {
-                    "$ref": "#/definitions/domain.ClaimStatus"
+                    "$ref": "#/definitions/github_com_ima_diplom-backend_internal_domain.ClaimStatus"
                 }
             }
         },
-        "dto.UpdateInboundStatusRequest": {
+        "github_com_ima_diplom-backend_internal_handler_dto.UpdateInboundStatusRequest": {
             "type": "object",
             "required": [
                 "status"
@@ -3685,24 +4068,24 @@ const docTemplate = `{
                     ],
                     "allOf": [
                         {
-                            "$ref": "#/definitions/domain.InboundStatus"
+                            "$ref": "#/definitions/github_com_ima_diplom-backend_internal_domain.InboundStatus"
                         }
                     ]
                 }
             }
         },
-        "dto.UpdateOrderStatusRequest": {
+        "github_com_ima_diplom-backend_internal_handler_dto.UpdateOrderStatusRequest": {
             "type": "object",
             "required": [
                 "status"
             ],
             "properties": {
                 "status": {
-                    "$ref": "#/definitions/domain.OrderStatus"
+                    "$ref": "#/definitions/github_com_ima_diplom-backend_internal_domain.OrderStatus"
                 }
             }
         },
-        "dto.UpdateProductRequest": {
+        "github_com_ima_diplom-backend_internal_handler_dto.UpdateProductRequest": {
             "type": "object",
             "properties": {
                 "atc_code": {
@@ -3717,8 +4100,14 @@ const docTemplate = `{
                 "is_jnvlp": {
                     "type": "boolean"
                 },
+                "lead_time_days": {
+                    "type": "integer"
+                },
                 "manufacturer_id": {
                     "type": "string"
+                },
+                "max_stock_qty": {
+                    "type": "integer"
                 },
                 "name": {
                     "type": "string"
@@ -3729,15 +4118,21 @@ const docTemplate = `{
                 "photo_url": {
                     "type": "string"
                 },
+                "safety_stock_qty": {
+                    "type": "integer"
+                },
                 "storage_conditions": {
                     "type": "string"
                 },
                 "strength": {
                     "type": "string"
+                },
+                "ven_category": {
+                    "$ref": "#/definitions/github_com_ima_diplom-backend_internal_domain.VenCategory"
                 }
             }
         },
-        "dto.UpdateSettingRequest": {
+        "github_com_ima_diplom-backend_internal_handler_dto.UpdateSettingRequest": {
             "type": "object",
             "required": [
                 "value"
@@ -3748,7 +4143,7 @@ const docTemplate = `{
                 }
             }
         },
-        "dto.UpdateSupplierRequest": {
+        "github_com_ima_diplom-backend_internal_handler_dto.UpdateSupplierRequest": {
             "type": "object",
             "properties": {
                 "address": {
@@ -3774,7 +4169,7 @@ const docTemplate = `{
                 }
             }
         },
-        "dto.UpdateZoneRequest": {
+        "github_com_ima_diplom-backend_internal_handler_dto.UpdateZoneRequest": {
             "type": "object",
             "properties": {
                 "capacity": {
@@ -3796,11 +4191,11 @@ const docTemplate = `{
                     "type": "number"
                 },
                 "type": {
-                    "$ref": "#/definitions/domain.ZoneType"
+                    "$ref": "#/definitions/github_com_ima_diplom-backend_internal_domain.ZoneType"
                 }
             }
         },
-        "dto.UserProfileResponse": {
+        "github_com_ima_diplom-backend_internal_handler_dto.UserProfileResponse": {
             "type": "object",
             "properties": {
                 "department": {
@@ -3835,7 +4230,7 @@ const docTemplate = `{
                 }
             }
         },
-        "dto.VerifyCodeRequest": {
+        "github_com_ima_diplom-backend_internal_handler_dto.VerifyCodeRequest": {
             "type": "object",
             "properties": {
                 "code": {
@@ -3846,7 +4241,7 @@ const docTemplate = `{
                 }
             }
         },
-        "dto.ZoneResponse": {
+        "github_com_ima_diplom-backend_internal_handler_dto.ZoneResponse": {
             "type": "object",
             "properties": {
                 "capacity": {
@@ -3874,7 +4269,7 @@ const docTemplate = `{
                     "type": "number"
                 },
                 "type": {
-                    "$ref": "#/definitions/domain.ZoneType"
+                    "$ref": "#/definitions/github_com_ima_diplom-backend_internal_domain.ZoneType"
                 },
                 "updated_at": {
                     "type": "string"
