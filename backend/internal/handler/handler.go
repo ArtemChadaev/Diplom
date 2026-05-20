@@ -74,6 +74,7 @@ func (h *Handler) Router() chi.Router {
 
 		// User profile (own)
 		r.Get("/users/me", h.getMe)
+		r.Get("/users/me/profile", h.getMeProfile)
 		r.Patch("/users/me", h.patchMe)
 
 		// Session management (own)
@@ -97,6 +98,7 @@ func (h *Handler) Router() chi.Router {
 
 			// Admin Employee Profile routes
 			r.Route("/employees", func(r chi.Router) {
+				r.Post("/", h.adminCreateEmployeeProfile)
 				r.Get("/", h.adminListEmployeeProfiles)
 				r.Get("/{userID}", h.adminGetEmployeeProfile)
 				r.Patch("/{userID}", h.adminPatchEmployeeProfile)
@@ -112,6 +114,7 @@ func (h *Handler) Router() chi.Router {
 		// Product management
 		r.Route("/products", func(r chi.Router) {
 			r.Get("/", h.listProducts)
+			r.Get("/reorder-check", h.runReorderCheck)
 			r.Get("/{id}", h.getProduct)
 			r.Post("/", h.createProduct)
 			r.Patch("/{id}", h.patchProduct)
@@ -148,6 +151,7 @@ func (h *Handler) Router() chi.Router {
 		// Environment logs
 		r.Route("/env", func(r chi.Router) {
 			r.Get("/logs", h.listEnvLogs)
+			r.Get("/logs/export", h.exportEnvLogs)
 			r.Post("/logs", h.recordEnvLogs)
 		})
 
@@ -157,6 +161,8 @@ func (h *Handler) Router() chi.Router {
 			r.Get("/{id}", h.getOrder)
 			r.Post("/", h.createOrder)
 			r.Patch("/{id}/status", h.updateOrderStatus)
+			r.Get("/{id}/pdf/ttn", h.getOrderTTN)
+			r.Get("/{id}/pdf/quality-registry", h.getOrderQualityRegistry)
 		})
 
 		// Inventory
@@ -166,6 +172,7 @@ func (h *Handler) Router() chi.Router {
 			r.Post("/", h.startInventorySession)
 			r.Post("/{id}/count", h.submitInventoryCount)
 			r.Post("/{id}/finish", h.finishInventorySession)
+			r.With(h_middleware.RequireRole(domain.RoleAdmin, domain.RoleWarehouseManager)).Get("/{id}/netting", h.getInventoryNetting)
 		})
 
 		// Claims

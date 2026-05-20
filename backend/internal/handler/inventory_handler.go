@@ -151,3 +151,31 @@ func (h *Handler) finishInventorySession(w http.ResponseWriter, r *http.Request)
 
 	w.WriteHeader(http.StatusNoContent)
 }
+
+// getInventoryNetting godoc
+// @Summary      Get netting act for a completed inventory session
+// @Description  Calculates discrepancies grouped by ATC group for a completed session
+// @Tags         Inventory
+// @Produce      json
+// @Param        id   path      string  true  "Session UUID"
+// @Success      200  {array}   domain.NettingLine
+// @Router       /api/v1/inventory/{id}/netting [get]
+func (h *Handler) getInventoryNetting(w http.ResponseWriter, r *http.Request) {
+	id := chi.URLParam(r, "id")
+	lines, err := h.service.Inventory.CalculateNetting(r.Context(), id)
+	if err != nil {
+		if err == domain.ErrInventorySessionNotFound {
+			writeError(w, http.StatusNotFound, "Inventory session not found")
+			return
+		}
+		if err == domain.ErrInventoryNotCompleted {
+			writeError(w, http.StatusBadRequest, "Inventory session is not completed yet")
+			return
+		}
+		writeError(w, http.StatusInternalServerError, "Failed to calculate netting")
+		return
+	}
+
+	writeJSON(w, http.StatusOK, lines)
+}
+

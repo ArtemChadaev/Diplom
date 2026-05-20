@@ -44,6 +44,36 @@ func (h *Handler) getMe(w http.ResponseWriter, r *http.Request) {
 	writeJSON(w, http.StatusOK, resp)
 }
 
+// getMeProfile godoc
+// @Summary      Get current user full employee profile
+// @Description  Returns the full employee profile for the authenticated user (including GDP and medical history)
+// @Tags         Users
+// @Security     BearerAuth
+// @Produce      json
+// @Success      200  {object}  dto.EmployeeProfileResponse
+// @Failure      401  {object}  dto.ErrorResponse  "Unauthorized"
+// @Failure      404  {object}  dto.ErrorResponse  "profile not found"
+// @Router       /api/v1/users/me/profile [get]
+func (h *Handler) getMeProfile(w http.ResponseWriter, r *http.Request) {
+	userID, ok := r.Context().Value(middleware.CtxUserID).(int)
+	if !ok {
+		writeError(w, http.StatusUnauthorized, "unauthorized")
+		return
+	}
+
+	profile, err := h.service.EmployeeProfile.GetSelfProfile(r.Context(), userID)
+	if err != nil {
+		if errors.Is(err, domain.ErrEmployeeProfileNotFound) {
+			writeError(w, http.StatusNotFound, "employee profile not found")
+			return
+		}
+		writeError(w, http.StatusInternalServerError, "internal server error")
+		return
+	}
+
+	writeJSON(w, http.StatusOK, profileToResponse(profile))
+}
+
 // patchMe godoc
 // @Summary      Update current user profile
 // @Description  Partially updates the authenticated user's employee profile

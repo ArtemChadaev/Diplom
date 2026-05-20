@@ -7,21 +7,25 @@ import (
 )
 
 type ProductResponse struct {
-	ID                string     `json:"id"`
-	SKU               string     `json:"sku"`
-	Name              string     `json:"name"`
-	GenericName       string     `json:"generic_name"`
-	ATCCode           string     `json:"atc_code"`
-	DosageForm        string     `json:"dosage_form"`
-	Strength          string     `json:"strength"`
-	PackageSize       int        `json:"package_size"`
-	IsJNVLP           bool       `json:"is_jnvlp"`
-	ManufacturerID    *string    `json:"manufacturer_id,omitempty"`
-	StorageConditions string     `json:"storage_conditions"`
-	PhotoURL          string     `json:"photo_url"`
-	CreatedAt         time.Time  `json:"created_at"`
-	UpdatedAt         time.Time  `json:"updated_at"`
-	DeletedAt         *time.Time `json:"deleted_at,omitempty"`
+	ID                string             `json:"id"`
+	SKU               string             `json:"sku"`
+	Name              string             `json:"name"`
+	GenericName       string             `json:"generic_name"`
+	ATCCode           string             `json:"atc_code"`
+	DosageForm        string             `json:"dosage_form"`
+	Strength          string             `json:"strength"`
+	PackageSize       int                `json:"package_size"`
+	IsJNVLP           bool               `json:"is_jnvlp"`
+	ManufacturerID    *string            `json:"manufacturer_id,omitempty"`
+	StorageConditions string             `json:"storage_conditions"`
+	PhotoURL          string             `json:"photo_url"`
+	VenCategory       domain.VenCategory `json:"ven_category"`
+	LeadTimeDays      int                `json:"lead_time_days"`
+	SafetyStockQty    int                `json:"safety_stock_qty"`
+	MaxStockQty       int                `json:"max_stock_qty"`
+	CreatedAt         time.Time          `json:"created_at"`
+	UpdatedAt         time.Time          `json:"updated_at"`
+	DeletedAt         *time.Time         `json:"deleted_at,omitempty"`
 }
 
 func ToProductResponse(p domain.Product) ProductResponse {
@@ -38,6 +42,10 @@ func ToProductResponse(p domain.Product) ProductResponse {
 		ManufacturerID:    p.ManufacturerID,
 		StorageConditions: p.StorageConditions,
 		PhotoURL:          p.PhotoURL,
+		VenCategory:       p.VenCategory,
+		LeadTimeDays:      p.LeadTimeDays,
+		SafetyStockQty:    p.SafetyStockQty,
+		MaxStockQty:       p.MaxStockQty,
 		CreatedAt:         p.CreatedAt,
 		UpdatedAt:         p.UpdatedAt,
 		DeletedAt:         p.DeletedAt,
@@ -45,20 +53,33 @@ func ToProductResponse(p domain.Product) ProductResponse {
 }
 
 type CreateProductRequest struct {
-	SKU               string  `json:"sku" validate:"required"`
-	Name              string  `json:"name" validate:"required"`
-	GenericName       string  `json:"generic_name" validate:"required"`
-	ATCCode           string  `json:"atc_code" validate:"required"`
-	DosageForm        string  `json:"dosage_form" validate:"required"`
-	Strength          string  `json:"strength" validate:"required"`
-	PackageSize       int     `json:"package_size" validate:"required,min=1"`
-	IsJNVLP           bool    `json:"is_jnvlp"`
-	ManufacturerID    *string `json:"manufacturer_id" validate:"omitempty,uuid"`
-	StorageConditions string  `json:"storage_conditions"`
-	PhotoURL          string  `json:"photo_url"`
+	SKU               string             `json:"sku" validate:"required"`
+	Name              string             `json:"name" validate:"required"`
+	GenericName       string             `json:"generic_name" validate:"required"`
+	ATCCode           string             `json:"atc_code" validate:"required"`
+	DosageForm        string             `json:"dosage_form" validate:"required"`
+	Strength          string             `json:"strength" validate:"required"`
+	PackageSize       int                `json:"package_size" validate:"required,min=1"`
+	IsJNVLP           bool               `json:"is_jnvlp"`
+	ManufacturerID    *string            `json:"manufacturer_id" validate:"omitempty,uuid"`
+	StorageConditions string             `json:"storage_conditions"`
+	PhotoURL          string             `json:"photo_url"`
+	VenCategory       domain.VenCategory `json:"ven_category"`
+	LeadTimeDays      int                `json:"lead_time_days"`
+	SafetyStockQty    int                `json:"safety_stock_qty"`
+	MaxStockQty       int                `json:"max_stock_qty"`
 }
 
 func (r CreateProductRequest) ToDomain() domain.Product {
+	if r.VenCategory == "" {
+		r.VenCategory = domain.VenN
+	}
+	if r.LeadTimeDays == 0 {
+		r.LeadTimeDays = 14
+	}
+	if r.MaxStockQty == 0 {
+		r.MaxStockQty = 1000
+	}
 	return domain.Product{
 		SKU:               r.SKU,
 		Name:              r.Name,
@@ -71,20 +92,28 @@ func (r CreateProductRequest) ToDomain() domain.Product {
 		ManufacturerID:    r.ManufacturerID,
 		StorageConditions: r.StorageConditions,
 		PhotoURL:          r.PhotoURL,
+		VenCategory:       r.VenCategory,
+		LeadTimeDays:      r.LeadTimeDays,
+		SafetyStockQty:    r.SafetyStockQty,
+		MaxStockQty:       r.MaxStockQty,
 	}
 }
 
 type UpdateProductRequest struct {
-	Name              *string `json:"name"`
-	GenericName       *string `json:"generic_name"`
-	ATCCode           *string `json:"atc_code"`
-	DosageForm        *string `json:"dosage_form"`
-	Strength          *string `json:"strength"`
-	PackageSize       *int    `json:"package_size"`
-	IsJNVLP           *bool   `json:"is_jnvlp"`
-	ManufacturerID    *string `json:"manufacturer_id"`
-	StorageConditions *string `json:"storage_conditions"`
-	PhotoURL          *string `json:"photo_url"`
+	Name              *string             `json:"name"`
+	GenericName       *string             `json:"generic_name"`
+	ATCCode           *string             `json:"atc_code"`
+	DosageForm        *string             `json:"dosage_form"`
+	Strength          *string             `json:"strength"`
+	PackageSize       *int                `json:"package_size"`
+	IsJNVLP           *bool               `json:"is_jnvlp"`
+	ManufacturerID    *string             `json:"manufacturer_id"`
+	StorageConditions *string             `json:"storage_conditions"`
+	PhotoURL          *string             `json:"photo_url"`
+	VenCategory       *domain.VenCategory `json:"ven_category"`
+	LeadTimeDays      *int                `json:"lead_time_days"`
+	SafetyStockQty    *int                `json:"safety_stock_qty"`
+	MaxStockQty       *int                `json:"max_stock_qty"`
 }
 
 func (r UpdateProductRequest) ApplyTo(p *domain.Product) {
@@ -98,6 +127,10 @@ func (r UpdateProductRequest) ApplyTo(p *domain.Product) {
 	if r.ManufacturerID != nil { p.ManufacturerID = r.ManufacturerID }
 	if r.StorageConditions != nil { p.StorageConditions = *r.StorageConditions }
 	if r.PhotoURL != nil { p.PhotoURL = *r.PhotoURL }
+	if r.VenCategory != nil { p.VenCategory = *r.VenCategory }
+	if r.LeadTimeDays != nil { p.LeadTimeDays = *r.LeadTimeDays }
+	if r.SafetyStockQty != nil { p.SafetyStockQty = *r.SafetyStockQty }
+	if r.MaxStockQty != nil { p.MaxStockQty = *r.MaxStockQty }
 }
 
 type ProductListResponse struct {

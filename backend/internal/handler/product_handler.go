@@ -196,3 +196,26 @@ func (h *Handler) deleteProduct(w http.ResponseWriter, r *http.Request) {
 
 	w.WriteHeader(http.StatusNoContent)
 }
+
+// runReorderCheck godoc
+// @Summary      Run reorder check
+// @Description  Calculates reorder point (ROP) and reorder quantities for all products (Admin or Warehouse Manager only)
+// @Tags         Products
+// @Produce      json
+// @Success      200  {array}   domain.ROPResult
+// @Router       /api/v1/products/reorder-check [get]
+func (h *Handler) runReorderCheck(w http.ResponseWriter, r *http.Request) {
+	role, _ := r.Context().Value(middleware.CtxRole).(domain.UserRole)
+	if role != domain.RoleAdmin && role != domain.RoleWarehouseManager {
+		writeError(w, http.StatusForbidden, "No permission to perform reorder check")
+		return
+	}
+
+	results, err := h.service.Product.RunReorderCheckAll(r.Context())
+	if err != nil {
+		writeError(w, http.StatusInternalServerError, "Failed to run reorder check: "+err.Error())
+		return
+	}
+
+	writeJSON(w, http.StatusOK, results)
+}

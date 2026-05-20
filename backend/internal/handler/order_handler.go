@@ -11,6 +11,7 @@ import (
 	"github.com/ima/diplom-backend/internal/domain"
 	"github.com/ima/diplom-backend/internal/handler/dto"
 	"github.com/ima/diplom-backend/internal/handler/middleware"
+	"github.com/ima/diplom-backend/internal/pkg/pdf"
 )
 
 // listOrders godoc
@@ -143,3 +144,146 @@ func (h *Handler) updateOrderStatus(w http.ResponseWriter, r *http.Request) {
 
 	w.WriteHeader(http.StatusNoContent)
 }
+
+// getOrderTTN godoc
+// @Summary      Get consignment note (TTN) PDF
+// @Description  Generates and downloads a consignment note (ТТН) PDF for an order
+// @Tags         Orders
+// @Produce      application/pdf
+// @Param        id   path      string  true  "Order UUID"
+// @Success      200  {file}    binary
+// @Router       /api/v1/orders/{id}/pdf/ttn [get]
+func (h *Handler) getOrderTTN(w http.ResponseWriter, r *http.Request) {
+	id := chi.URLParam(r, "id")
+	o, err := h.service.Order.GetOrder(r.Context(), id)
+	if err != nil {
+		if err == domain.ErrOrderNotFound {
+			writeError(w, http.StatusNotFound, "Order not found")
+			return
+		}
+		writeError(w, http.StatusInternalServerError, "Failed to fetch order")
+		return
+	}
+
+	var items []pdf.TTNItem
+	for _, item := range o.Items {
+		prodName := "Unknown Product"
+		sku := item.ProductID
+		batchSerial := "N/A"
+
+		if prod, err := h.service.Product.GetProduct(r.Context(), item.ProductID); err == nil && prod != nil {
+			prodName = prod.Name
+			sku = prod.SKU
+		}
+
+		if item.BatchID != nil {
+			if b, err := h.service.Batch.GetBatch(r.Context(), *item.BatchID); err == nil && b != nil {
+				batchSerial = b.SerialNumber
+			} else {
+				batchSerial = *item.BatchID
+			}
+		}
+
+		items = append(items, pdf.TTNItem{
+			ProductName: prodName,
+			SKU:         sku,
+			BatchSerial: batchSerial,
+			Quantity:    item.Quantity,
+		})
+	}
+
+	doc := pdf.TTNDocument{
+		OrderNumber:  o.OrderNumber,
+		CustomerName: o.CustomerName,
+		OrderDate:    o.CreatedAt.Format("2006-01-02"),
+		OrderStatus:  string(o.Status),
+		OrderType:    string(o.OrderType),
+		Priority:     strconv.Itoa(o.Priority),
+		Items:        items,
+	}
+
+	data, err := pdf.GenerateTTN(doc)
+	if err != nil {
+		writeError(w, http.StatusInternalServerError, "Failed to generate TTN PDF")
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/pdf")
+	w.Header().Set("Content-Disposition", fmt.Sprintf("attachment; filename=ttn_%s.pdf", o.OrderNumber))
+	w.Header().Set("Content-Length", strconv.Itoa(len(data)))
+	_, _ = w.Write(data)
+}
+
+// getOrderQualityRegistry godoc
+// @Summary      Get quality registry PDF
+// @Description  Generates and downloads a quality certificate registry PDF for an order
+// @Tags         Orders
+// @Produce      application/pdf
+// @Param        id   path      string  true  "Order UUID"
+// @Success      200  {file}    binary
+// @Router       /api/v1/orders/{id}/pdf/quality-registry [get]
+func (h *Handler) getOrderQualityRegistry(w http.ResponseWriter, r *http.Request) {
+	id := chi.URLParam(r, "id")
+	o, err := h.service.Order.GetOrder(r.Context(), id)
+	if err != nil {
+		if err == domain.ErrOrderNotFound {
+			writeError(w, http.StatusNotFound, "Order not found")
+			return
+		}
+		writeError(w, http.StatusInternalServerError, "Failed to fetch order")
+		return
+	}
+
+	var items []pdf.QualityItem
+	for _, item := range o.Items {
+		prodName := "Unknown Product"
+		sku := item.ProductID
+		batchSerial := "N/A"
+		expiry := "N/A"
+		status := "PASS"
+
+		if prod, err := h.service.Product.GetProduct(r.Context(), item.ProductID); err == nil && prod != nil {
+			prodName = prod.Name
+			sku = prod.SKU
+		}
+
+		if item.BatchID != nil {
+			if b, err := h.service.Batch.GetBatch(r.Context(), *item.BatchID); err == nil && b != nil {
+				batchSerial = b.SerialNumber
+				expiry = b.ExpiryDate.Format("2006-01-02")
+				if b.Status == domain.BatchStatusRejected || b.Status == domain.BatchStatusBlocked {
+					status = string(b.Status)
+				}
+			} else {
+				batchSerial = *item.BatchID
+			}
+		}
+
+		items = append(items, pdf.QualityItem{
+			ProductName: prodName,
+			SKU:         sku,
+			BatchSerial: batchSerial,
+			ExpiryDate:  expiry,
+			Status:      status,
+		})
+	}
+
+	doc := pdf.QualityDocument{
+		OrderNumber:  o.OrderNumber,
+		CustomerName: o.CustomerName,
+		OrderDate:    o.CreatedAt.Format("2006-01-02"),
+		Items:        items,
+	}
+
+	data, err := pdf.GenerateQualityRegistry(doc)
+	if err != nil {
+		writeError(w, http.StatusInternalServerError, "Failed to generate Quality Registry PDF")
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/pdf")
+	w.Header().Set("Content-Disposition", fmt.Sprintf("attachment; filename=quality_registry_%s.pdf", o.OrderNumber))
+	w.Header().Set("Content-Length", strconv.Itoa(len(data)))
+	_, _ = w.Write(data)
+}
+

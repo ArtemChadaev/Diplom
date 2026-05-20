@@ -13,6 +13,63 @@ import (
 	"github.com/ima/diplom-backend/internal/pkg/logger"
 )
 
+// adminCreateEmployeeProfile handles POST /api/v1/admin/employees
+// adminCreateEmployeeProfile godoc
+// @Summary      Create employee profile (Admin)
+// @Description  Creates a new employee profile. Admin role required.
+// @Tags         Admin
+// @Security     BearerAuth
+// @Accept       json
+// @Produce      json
+// @Param        body    body      dto.CreateEmployeeProfileRequest  true  "Fields to create"
+// @Success      201     {object}  dto.EmployeeProfileResponse
+// @Failure      400     {object}  dto.ErrorResponse  "invalid JSON or invalid fields"
+// @Failure      403     {object}  dto.ErrorResponse  "insufficient permissions"
+// @Failure      500     {object}  dto.ErrorResponse  "internal error"
+// @Router       /api/v1/admin/employees [post]
+func (h *Handler) adminCreateEmployeeProfile(w http.ResponseWriter, r *http.Request) {
+	var req dto.CreateEmployeeProfileRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		http.Error(w, "invalid JSON", http.StatusBadRequest)
+		return
+	}
+
+	callerID := r.Context().Value(middleware.CtxUserID).(int)
+	callerRole := r.Context().Value(middleware.CtxRole).(domain.UserRole)
+
+	var gdpRaw json.RawMessage
+	if req.GDPTrainingHistory != nil {
+		if b, err := json.Marshal(req.GDPTrainingHistory); err == nil {
+			gdpRaw = b
+		}
+	}
+
+	input := domain.CreateEmployeeProfileInput{
+		UserID:             req.UserID,
+		EmployeeCode:       req.EmployeeCode,
+		FullName:           req.FullName,
+		CorporateEmail:     req.CorporateEmail,
+		Phone:              req.Phone,
+		Position:           req.Position,
+		Department:         req.Department,
+		BirthDate:          req.BirthDate,
+		AvatarURL:          req.AvatarURL,
+		HireDate:           req.HireDate,
+		DismissalDate:      req.DismissalDate,
+		MedicalBookScanURL: req.MedicalBookScanURL,
+		SpecialZoneAccess:  req.SpecialZoneAccess,
+		GDPTrainingHistory: gdpRaw,
+	}
+
+	created, err := h.service.EmployeeProfile.CreateProfile(r.Context(), callerID, callerRole, input)
+	if err != nil {
+		handleEmployeeError(w, r, err)
+		return
+	}
+
+	writeJSON(w, http.StatusCreated, profileToResponse(created))
+}
+
 // adminGetEmployeeProfile handles GET /api/v1/admin/employees/{userID}
 // adminGetEmployeeProfile godoc
 // @Summary      Get employee profile (Admin)
