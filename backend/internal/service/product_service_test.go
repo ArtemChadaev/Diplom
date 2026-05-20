@@ -17,7 +17,9 @@ func TestProductService_CreateProduct(t *testing.T) {
 	//   Then:   Admin/Manager can create if SKU is unique; Others blocked
 
 	mockRepo := new(mocks.MockProductRepository)
-	svc := NewProductService(mockRepo)
+	mockOrderRepo := new(mocks.MockOrderRepository)
+	mockBatchRepo := new(mocks.MockBatchRepository)
+	svc := NewProductService(mockRepo, mockOrderRepo, mockBatchRepo)
 	ctx := context.Background()
 
 	p := &domain.Product{SKU: "SKU-123", Name: "Test Product"}
@@ -75,7 +77,9 @@ func TestProductService_DeleteProduct(t *testing.T) {
 	//   Then:   Only Admin can delete
 
 	mockRepo := new(mocks.MockProductRepository)
-	svc := NewProductService(mockRepo)
+	mockOrderRepo := new(mocks.MockOrderRepository)
+	mockBatchRepo := new(mocks.MockBatchRepository)
+	svc := NewProductService(mockRepo, mockOrderRepo, mockBatchRepo)
 	ctx := context.Background()
 
 	id := "prod-123"

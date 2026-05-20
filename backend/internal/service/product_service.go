@@ -7,11 +7,21 @@ import (
 )
 
 type productService struct {
-	repo domain.ProductRepository
+	repo      domain.ProductRepository
+	orderRepo domain.OrderRepository
+	batchRepo domain.BatchRepository
 }
 
-func NewProductService(repo domain.ProductRepository) domain.ProductService {
-	return &productService{repo: repo}
+func NewProductService(
+	repo domain.ProductRepository,
+	orderRepo domain.OrderRepository,
+	batchRepo domain.BatchRepository,
+) domain.ProductService {
+	return &productService{
+		repo:      repo,
+		orderRepo: orderRepo,
+		batchRepo: batchRepo,
+	}
 }
 
 func (s *productService) ListProducts(ctx context.Context, filter domain.ProductFilter) ([]domain.Product, int, error) {
@@ -85,4 +95,68 @@ func (s *productService) DeleteProduct(ctx context.Context, callerRole domain.Us
 	}
 
 	return s.repo.Delete(ctx, id)
+}
+
+func (s *productService) CheckReorderPoint(ctx context.Context, productID string) (*domain.ROPResult, error) {
+	product, err := s.repo.GetByID(ctx, productID)
+	if err != nil {
+		return nil, err
+	}
+	if product == nil {
+		return nil, domain.ErrProductNotFound
+	}
+
+	turnover, err := s.orderRepo.GetMonthlyTurnover(ctx, productID)
+	if err != nil {
+		return nil, err
+	}
+
+	currentStock, err := s.batchRepo.GetTotalStock(ctx, productID)
+	if err != nil {
+		return nil, err
+	}
+
+	dailyUsage := float64(turnover) / 30.0
+	rop := int(dailyUsage*float64(product.LeadTimeDays)) + product.SafetyStockQty
+	needsReorder := currentStock <= rop
+
+	reorderQty := 0
+	if needsReorder {
+		reorderQty = product.MaxStockQty - currentStock
+		if reorderQty < 0 {
+			reorderQty = 0
+		}
+	}
+
+	return &domain.ROPResult{
+		ProductID:       product.ID,
+		SKU:             product.SKU,
+		Name:            product.Name,
+		CurrentStock:    currentStock,
+		SafetyStock:     product.SafetyStockQty,
+		MaxStock:        product.MaxStockQty,
+		MonthlyTurnover: turnover,
+		DailyUsage:      dailyUsage,
+		ROP:             rop,
+		NeedsReorder:    needsReorder,
+		ReorderQty:      reorderQty,
+	}, nil
+}
+
+func (s *productService) RunReorderCheckAll(ctx context.Context) ([]domain.ROPResult, error) {
+	products, _, err := s.repo.List(ctx, domain.ProductFilter{Limit: 1000})
+	if err != nil {
+		return nil, err
+	}
+
+	results := make([]domain.ROPResult, 0, len(products))
+	for _, p := range products {
+		res, err := s.CheckReorderPoint(ctx, p.ID)
+		if err != nil {
+			return nil, err
+		}
+		results = append(results, *res)
+	}
+
+	return results, nil
 }

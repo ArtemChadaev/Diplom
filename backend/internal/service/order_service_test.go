@@ -17,7 +17,10 @@ func TestOrderService_CreateOrder(t *testing.T) {
 	//   Then:   Status is set to new, priority is defaulted to 1 if zero, and record is saved
 
 	mockRepo := new(mocks.MockOrderRepository)
-	svc := NewOrderService(mockRepo)
+	mockBatchRepo := new(mocks.MockBatchRepository)
+	mockProductRepo := new(mocks.MockProductRepository)
+	mockSettingsRepo := new(mocks.MockSystemSettingsRepository)
+	svc := NewOrderService(mockRepo, mockBatchRepo, mockProductRepo, mockSettingsRepo)
 	ctx := context.Background()
 
 	tests := []struct {
@@ -34,6 +37,7 @@ func TestOrderService_CreateOrder(t *testing.T) {
 				Priority:    2,
 			},
 			mockSetup: func(o *domain.Order) {
+				mockSettingsRepo.On("Get", mock.Anything, "mos_percent").Return("", nil).Once()
 				mockRepo.On("Create", mock.Anything, mock.MatchedBy(func(order *domain.Order) bool {
 					return order.Status == domain.OrderStatusNew && order.Priority == 2
 				})).Return(nil).Once()
@@ -48,6 +52,7 @@ func TestOrderService_CreateOrder(t *testing.T) {
 				Priority:    0,
 			},
 			mockSetup: func(o *domain.Order) {
+				mockSettingsRepo.On("Get", mock.Anything, "mos_percent").Return("", nil).Once()
 				mockRepo.On("Create", mock.Anything, mock.MatchedBy(func(order *domain.Order) bool {
 					return order.Status == domain.OrderStatusNew && order.Priority == 1
 				})).Return(nil).Once()
@@ -66,6 +71,7 @@ func TestOrderService_CreateOrder(t *testing.T) {
 			assert.Equal(t, tc.wantStatus, res.Status)
 			assert.Equal(t, tc.wantPriority, res.Priority)
 			mockRepo.AssertExpectations(t)
+			mockSettingsRepo.AssertExpectations(t)
 		})
 	}
 }
@@ -77,7 +83,10 @@ func TestOrderService_UpdateStatus(t *testing.T) {
 	//   Then:   Status is updated if roles allow
 
 	mockRepo := new(mocks.MockOrderRepository)
-	svc := NewOrderService(mockRepo)
+	mockBatchRepo := new(mocks.MockBatchRepository)
+	mockProductRepo := new(mocks.MockProductRepository)
+	mockSettingsRepo := new(mocks.MockSystemSettingsRepository)
+	svc := NewOrderService(mockRepo, mockBatchRepo, mockProductRepo, mockSettingsRepo)
 	ctx := context.Background()
 
 	id := "ord-123"

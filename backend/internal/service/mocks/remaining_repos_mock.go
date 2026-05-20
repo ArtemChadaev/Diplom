@@ -2,6 +2,7 @@ package mocks
 
 import (
 	"context"
+	"time"
 
 	"github.com/ima/diplom-backend/internal/domain"
 	"github.com/stretchr/testify/mock"
@@ -109,3 +110,45 @@ func (m *MockEnvironmentLogRepository) Create(ctx context.Context, log *domain.E
 	args := m.Called(ctx, log)
 	return args.Error(0)
 }
+
+func (m *MockEnvironmentLogRepository) ExistsByZoneShiftDate(ctx context.Context, zoneID string, shift string, date time.Time) (bool, error) {
+	args := m.Called(ctx, zoneID, shift, date)
+	return args.Bool(0), args.Error(1)
+}
+
+// MockZoneRepository
+type MockZoneRepository struct {
+	mock.Mock
+}
+
+func (m *MockZoneRepository) List(ctx context.Context) ([]domain.Zone, error) {
+	args := m.Called(ctx)
+	if args.Get(0) == nil {
+		return nil, args.Error(1)
+	}
+	return args.Get(0).([]domain.Zone), args.Error(1)
+}
+
+func (m *MockZoneRepository) GetByID(ctx context.Context, id string) (*domain.Zone, error) {
+	args := m.Called(ctx, id)
+	if args.Get(0) == nil {
+		return nil, args.Error(1)
+	}
+	return args.Get(0).(*domain.Zone), args.Error(1)
+}
+
+func (m *MockZoneRepository) Create(ctx context.Context, z *domain.Zone) error {
+	args := m.Called(ctx, z)
+	return args.Error(0)
+}
+
+func (m *MockZoneRepository) Update(ctx context.Context, z *domain.Zone) error {
+	args := m.Called(ctx, z)
+	return args.Error(0)
+}
+
+func (m *MockZoneRepository) Delete(ctx context.Context, id string) error {
+	args := m.Called(ctx, id)
+	return args.Error(0)
+}
+

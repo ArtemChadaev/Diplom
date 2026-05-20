@@ -17,8 +17,17 @@ func TestInboundService_CreateInbound(t *testing.T) {
 	//   Then:   If caller is not Storekeeper or Pharmacist, record is created with status draft
 
 	mockRepo := new(mocks.MockInboundRepository)
-	svc := NewInboundService(mockRepo)
+	mockProfileRepo := new(mocks.MockEmployeeProfileRepository)
+	svc := NewInboundService(mockRepo, mockProfileRepo)
 	ctx := context.Background()
+
+	profile := &domain.EmployeeProfile{
+		ID:     1,
+		UserID: 1,
+		GDPTrainingHistory: []domain.GDPTrainingRecord{
+			{Date: "2026-01-01", CourseName: "GDP Guidelines", Result: "pass"},
+		},
+	}
 
 	tests := []struct {
 		name       string
@@ -33,8 +42,10 @@ func TestInboundService_CreateInbound(t *testing.T) {
 			role: domain.RoleAdmin,
 			inbound: &domain.InboundReceiving{
 				InvoiceNumber: "INV-001",
+				ReceivedBy:    1,
 			},
 			mockSetup: func() {
+				mockProfileRepo.On("FindByUserID", mock.Anything, 1).Return(profile, nil).Once()
 				mockRepo.On("Create", mock.Anything, mock.MatchedBy(func(i *domain.InboundReceiving) bool {
 					return i.Status == domain.InboundStatusDraft
 				})).Return(nil).Once()
@@ -47,6 +58,7 @@ func TestInboundService_CreateInbound(t *testing.T) {
 			role: domain.RoleStorekeeper,
 			inbound: &domain.InboundReceiving{
 				InvoiceNumber: "INV-002",
+				ReceivedBy:    1,
 			},
 			mockSetup: func() {},
 			wantErr:   domain.ErrInsufficientPerms,
@@ -56,6 +68,7 @@ func TestInboundService_CreateInbound(t *testing.T) {
 			role: domain.RolePharmacist,
 			inbound: &domain.InboundReceiving{
 				InvoiceNumber: "INV-003",
+				ReceivedBy:    1,
 			},
 			mockSetup: func() {},
 			wantErr:   domain.ErrInsufficientPerms,
@@ -72,6 +85,7 @@ func TestInboundService_CreateInbound(t *testing.T) {
 				assert.Equal(t, tc.wantStatus, res.Status)
 			}
 			mockRepo.AssertExpectations(t)
+			mockProfileRepo.AssertExpectations(t)
 		})
 	}
 }
@@ -83,7 +97,8 @@ func TestInboundService_UpdateStatus(t *testing.T) {
 	//   Then:   Status is updated if permissions and logic flow allow
 
 	mockRepo := new(mocks.MockInboundRepository)
-	svc := NewInboundService(mockRepo)
+	mockProfileRepo := new(mocks.MockEmployeeProfileRepository)
+	svc := NewInboundService(mockRepo, mockProfileRepo)
 	ctx := context.Background()
 
 	id := "inb-123"

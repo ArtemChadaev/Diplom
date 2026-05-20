@@ -17,7 +17,8 @@ func TestClaimService_CreateClaim(t *testing.T) {
 	//   Then:   Status is set to new and record is saved
 
 	mockRepo := new(mocks.MockClaimRepository)
-	svc := NewClaimService(mockRepo)
+	mockBatchRepo := new(mocks.MockBatchRepository)
+	svc := NewClaimService(mockRepo, mockBatchRepo)
 	ctx := context.Background()
 
 	c := &domain.Claim{Title: "Broken Package", Description: "Package arrived crushed"}
@@ -40,7 +41,8 @@ func TestClaimService_UpdateStatus(t *testing.T) {
 	//   Then:   Only Admin or WarehouseManager can move to resolved/rejected
 
 	mockRepo := new(mocks.MockClaimRepository)
-	svc := NewClaimService(mockRepo)
+	mockBatchRepo := new(mocks.MockBatchRepository)
+	svc := NewClaimService(mockRepo, mockBatchRepo)
 	ctx := context.Background()
 
 	id := "clm-123"

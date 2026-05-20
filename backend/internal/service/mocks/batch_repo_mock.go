@@ -37,3 +37,22 @@ func (m *MockBatchRepository) Delete(ctx context.Context, id string) error {
 	args := m.Called(ctx, id)
 	return args.Error(0)
 }
+
+func (m *MockBatchRepository) BlockAllByProductID(ctx context.Context, productID string) error {
+	args := m.Called(ctx, productID)
+	return args.Error(0)
+}
+
+func (m *MockBatchRepository) ListAvailableSorted(ctx context.Context, productID string) ([]domain.Batch, error) {
+	args := m.Called(ctx, productID)
+	if args.Get(0) == nil {
+		return nil, args.Error(1)
+	}
+	return args.Get(0).([]domain.Batch), args.Error(1)
+}
+
+func (m *MockBatchRepository) GetTotalStock(ctx context.Context, productID string) (int, error) {
+	args := m.Called(ctx, productID)
+	return args.Int(0), args.Error(1)
+}
+

@@ -7,11 +7,15 @@ import (
 )
 
 type claimService struct {
-	repo domain.ClaimRepository
+	repo      domain.ClaimRepository
+	batchRepo domain.BatchRepository
 }
 
-func NewClaimService(repo domain.ClaimRepository) domain.ClaimService {
-	return &claimService{repo: repo}
+func NewClaimService(repo domain.ClaimRepository, batchRepo domain.BatchRepository) domain.ClaimService {
+	return &claimService{
+		repo:      repo,
+		batchRepo: batchRepo,
+	}
 }
 
 func (s *claimService) ListClaims(ctx context.Context, limit, offset int) ([]domain.Claim, int, error) {
@@ -34,6 +38,13 @@ func (s *claimService) CreateClaim(ctx context.Context, c *domain.Claim) (*domai
 	if err := s.repo.Create(ctx, c); err != nil {
 		return nil, err
 	}
+
+	if c.Type == "recall" && c.ProductID != nil && *c.ProductID != "" {
+		if err := s.batchRepo.BlockAllByProductID(ctx, *c.ProductID); err != nil {
+			return nil, err
+		}
+	}
+
 	return c, nil
 }
 

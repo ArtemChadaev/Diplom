@@ -7,11 +7,15 @@ import (
 )
 
 type inboundService struct {
-	repo domain.InboundRepository
+	repo        domain.InboundRepository
+	profileRepo domain.EmployeeProfileRepository
 }
 
-func NewInboundService(repo domain.InboundRepository) domain.InboundService {
-	return &inboundService{repo: repo}
+func NewInboundService(repo domain.InboundRepository, profileRepo domain.EmployeeProfileRepository) domain.InboundService {
+	return &inboundService{
+		repo:        repo,
+		profileRepo: profileRepo,
+	}
 }
 
 func (s *inboundService) ListInbounds(ctx context.Context, limit, offset int) ([]domain.InboundReceiving, int, error) {
@@ -32,6 +36,14 @@ func (s *inboundService) GetInbound(ctx context.Context, id string) (*domain.Inb
 func (s *inboundService) CreateInbound(ctx context.Context, callerRole domain.UserRole, i *domain.InboundReceiving) (*domain.InboundReceiving, error) {
 	if callerRole == domain.RoleStorekeeper || callerRole == domain.RolePharmacist {
 		return nil, domain.ErrInsufficientPerms
+	}
+
+	profile, err := s.profileRepo.FindByUserID(ctx, i.ReceivedBy)
+	if err != nil {
+		return nil, domain.ErrGDPTrainingRequired
+	}
+	if err := CheckGDPValid(profile); err != nil {
+		return nil, err
 	}
 
 	i.Status = domain.InboundStatusDraft

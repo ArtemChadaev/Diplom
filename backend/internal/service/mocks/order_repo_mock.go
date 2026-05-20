@@ -42,3 +42,9 @@ func (m *MockOrderRepository) Delete(ctx context.Context, id string) error {
 	args := m.Called(ctx, id)
 	return args.Error(0)
 }
+
+func (m *MockOrderRepository) GetMonthlyTurnover(ctx context.Context, productID string) (int, error) {
+	args := m.Called(ctx, productID)
+	return args.Int(0), args.Error(1)
+}
+
