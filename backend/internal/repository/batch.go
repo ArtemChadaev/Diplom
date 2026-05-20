@@ -75,3 +75,37 @@ func (r *batchRepository) Update(ctx context.Context, b *domain.Batch) error {
 func (r *batchRepository) Delete(ctx context.Context, id string) error {
 	return r.db.WithContext(ctx).Delete(&dao.BatchDAO{}, "id = ?", id).Error
 }
+
+func (r *batchRepository) BlockAllByProductID(ctx context.Context, productID string) error {
+	return r.db.WithContext(ctx).Model(&dao.BatchDAO{}).
+		Where("product_id = ? AND status = ?", productID, domain.BatchStatusAvailable).
+		Update("status", domain.BatchStatusBlocked).Error
+}
+
+func (r *batchRepository) ListAvailableSorted(ctx context.Context, productID string) ([]domain.Batch, error) {
+	var daos []dao.BatchDAO
+	err := r.db.WithContext(ctx).Model(&dao.BatchDAO{}).
+		Where("product_id = ? AND status = ? AND quantity > 0", productID, domain.BatchStatusAvailable).
+		Order("expiry_date ASC, manufacture_date ASC").
+		Find(&daos).Error
+	if err != nil {
+		return nil, err
+	}
+	result := make([]domain.Batch, len(daos))
+	for i, d := range daos {
+		result[i] = d.ToDomain()
+	}
+	return result, nil
+}
+
+func (r *batchRepository) GetTotalStock(ctx context.Context, productID string) (int, error) {
+	var total int64
+	err := r.db.WithContext(ctx).Model(&dao.BatchDAO{}).
+		Where("product_id = ? AND status = ?", productID, domain.BatchStatusAvailable).
+		Select("COALESCE(SUM(quantity), 0)").
+		Row().Scan(&total)
+	if err != nil {
+		return 0, err
+	}
+	return int(total), nil
+}

@@ -8,21 +8,25 @@ import (
 )
 
 type ProductDAO struct {
-	ID                string         `gorm:"column:id;primaryKey"`
-	SKU               string         `gorm:"column:sku;uniqueIndex"`
-	Name              string         `gorm:"column:name"`
-	GenericName       string         `gorm:"column:generic_name"`
-	ATCCode           string         `gorm:"column:atc_code"`
-	DosageForm        string         `gorm:"column:dosage_form"`
-	Strength          string         `gorm:"column:strength"`
-	PackageSize       int            `gorm:"column:package_size"`
-	IsJNVLP           bool           `gorm:"column:is_jnvlp"`
-	ManufacturerID    *string        `gorm:"column:manufacturer_id"`
-	StorageConditions string         `gorm:"column:storage_conditions"`
-	PhotoURL          string         `gorm:"column:photo_url"`
-	CreatedAt         time.Time      `gorm:"column:created_at"`
-	UpdatedAt         time.Time      `gorm:"column:updated_at"`
-	DeletedAt         gorm.DeletedAt `gorm:"column:deleted_at;index"`
+	ID                string             `gorm:"column:id;primaryKey"`
+	SKU               string             `gorm:"column:sku;uniqueIndex"`
+	Name              string             `gorm:"column:name"`
+	GenericName       string             `gorm:"column:generic_name"`
+	ATCCode           string             `gorm:"column:atc_code"`
+	DosageForm        string             `gorm:"column:dosage_form"`
+	Strength          string             `gorm:"column:strength"`
+	PackageSize       int                `gorm:"column:package_size"`
+	IsJNVLP           bool               `gorm:"column:is_jnvlp"`
+	ManufacturerID    *string            `gorm:"column:manufacturer_id"`
+	StorageConditions string             `gorm:"column:storage_conditions"`
+	PhotoURL          string             `gorm:"column:photo_url"`
+	VenCategory       domain.VenCategory `gorm:"column:ven_category"`
+	LeadTimeDays      int                `gorm:"column:lead_time_days"`
+	SafetyStockQty    int                `gorm:"column:safety_stock_qty"`
+	MaxStockQty       int                `gorm:"column:max_stock_qty"`
+	CreatedAt         time.Time          `gorm:"column:created_at"`
+	UpdatedAt         time.Time          `gorm:"column:updated_at"`
+	DeletedAt         gorm.DeletedAt     `gorm:"column:deleted_at;index"`
 }
 
 func (ProductDAO) TableName() string {
@@ -48,6 +52,10 @@ func (p ProductDAO) ToDomain() domain.Product {
 		ManufacturerID:    p.ManufacturerID,
 		StorageConditions: p.StorageConditions,
 		PhotoURL:          p.PhotoURL,
+		VenCategory:       p.VenCategory,
+		LeadTimeDays:      p.LeadTimeDays,
+		SafetyStockQty:    p.SafetyStockQty,
+		MaxStockQty:       p.MaxStockQty,
 		CreatedAt:         p.CreatedAt,
 		UpdatedAt:         p.UpdatedAt,
 		DeletedAt:         deletedAt,
@@ -68,6 +76,10 @@ func FromProductDomain(p domain.Product) ProductDAO {
 		ManufacturerID:    p.ManufacturerID,
 		StorageConditions: p.StorageConditions,
 		PhotoURL:          p.PhotoURL,
+		VenCategory:       p.VenCategory,
+		LeadTimeDays:      p.LeadTimeDays,
+		SafetyStockQty:    p.SafetyStockQty,
+		MaxStockQty:       p.MaxStockQty,
 		CreatedAt:         p.CreatedAt,
 		UpdatedAt:         p.UpdatedAt,
 	}

@@ -11,6 +11,7 @@ type OrderDAO struct {
 	OrderNumber  string             `gorm:"column:order_number;uniqueIndex"`
 	CustomerName string             `gorm:"column:customer_name"`
 	Status       domain.OrderStatus `gorm:"column:status"`
+	OrderType    domain.OrderType   `gorm:"column:order_type"`
 	Priority     int                `gorm:"column:priority"`
 	CreatedBy    int                `gorm:"column:created_by"`
 	CreatedAt    time.Time          `gorm:"column:created_at"`
@@ -33,6 +34,7 @@ func (o OrderDAO) ToDomain() domain.Order {
 		OrderNumber:  o.OrderNumber,
 		CustomerName: o.CustomerName,
 		Status:       o.Status,
+		OrderType:    o.OrderType,
 		Priority:     o.Priority,
 		CreatedBy:    o.CreatedBy,
 		Items:        items,
@@ -42,13 +44,15 @@ func (o OrderDAO) ToDomain() domain.Order {
 }
 
 type OrderItemDAO struct {
-	ID        string    `gorm:"column:id;primaryKey"`
-	OrderID   string    `gorm:"column:order_id;index"`
-	ProductID string    `gorm:"column:product_id"`
-	Quantity  int       `gorm:"column:quantity"`
-	PickedQty int       `gorm:"column:picked_qty"`
-	CreatedAt time.Time `gorm:"column:created_at"`
-	UpdatedAt time.Time `gorm:"column:updated_at"`
+	ID         string    `gorm:"column:id;primaryKey"`
+	OrderID    string    `gorm:"column:order_id;index"`
+	ProductID  string    `gorm:"column:product_id"`
+	Quantity   int       `gorm:"column:quantity"`
+	PickedQty  int       `gorm:"column:picked_qty"`
+	BatchID    *string   `gorm:"column:batch_id;index"`
+	MosBlocked bool      `gorm:"column:mos_blocked"`
+	CreatedAt  time.Time `gorm:"column:created_at"`
+	UpdatedAt  time.Time `gorm:"column:updated_at"`
 }
 
 func (OrderItemDAO) TableName() string {
@@ -57,11 +61,13 @@ func (OrderItemDAO) TableName() string {
 
 func (i OrderItemDAO) ToDomain() domain.OrderItem {
 	return domain.OrderItem{
-		ID:        i.ID,
-		OrderID:   i.OrderID,
-		ProductID: i.ProductID,
-		Quantity:  i.Quantity,
-		PickedQty: i.PickedQty,
+		ID:         i.ID,
+		OrderID:    i.OrderID,
+		ProductID:  i.ProductID,
+		Quantity:   i.Quantity,
+		PickedQty:  i.PickedQty,
+		BatchID:    i.BatchID,
+		MosBlocked: i.MosBlocked,
 	}
 }
 
@@ -76,6 +82,7 @@ func FromOrderDomain(o domain.Order) OrderDAO {
 		OrderNumber:  o.OrderNumber,
 		CustomerName: o.CustomerName,
 		Status:       o.Status,
+		OrderType:    o.OrderType,
 		Priority:     o.Priority,
 		CreatedBy:    o.CreatedBy,
 		Items:        items,
@@ -86,10 +93,12 @@ func FromOrderDomain(o domain.Order) OrderDAO {
 
 func FromOrderItemDomain(i domain.OrderItem) OrderItemDAO {
 	return OrderItemDAO{
-		ID:        i.ID,
-		OrderID:   i.OrderID,
-		ProductID: i.ProductID,
-		Quantity:  i.Quantity,
-		PickedQty: i.PickedQty,
+		ID:         i.ID,
+		OrderID:    i.OrderID,
+		ProductID:  i.ProductID,
+		Quantity:   i.Quantity,
+		PickedQty:  i.PickedQty,
+		BatchID:    i.BatchID,
+		MosBlocked: i.MosBlocked,
 	}
 }

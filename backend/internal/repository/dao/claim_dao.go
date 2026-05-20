@@ -12,6 +12,8 @@ type ClaimDAO struct {
 	Description string             `gorm:"column:description"`
 	InboundID   *string            `gorm:"column:inbound_id;index"`
 	OrderID     *string            `gorm:"column:order_id;index"`
+	Type        string             `gorm:"column:type"`
+	ProductID   *string            `gorm:"column:product_id;index"`
 	Status      domain.ClaimStatus `gorm:"column:status"`
 	CreatedBy   int                `gorm:"column:created_by"`
 	CreatedAt   time.Time          `gorm:"column:created_at"`
@@ -29,6 +31,8 @@ func (c ClaimDAO) ToDomain() domain.Claim {
 		Description: c.Description,
 		InboundID:   c.InboundID,
 		OrderID:     c.OrderID,
+		Type:        c.Type,
+		ProductID:   c.ProductID,
 		Status:      c.Status,
 		CreatedBy:   c.CreatedBy,
 		CreatedAt:   c.CreatedAt,
@@ -43,6 +47,8 @@ func FromClaimDomain(c domain.Claim) ClaimDAO {
 		Description: c.Description,
 		InboundID:   c.InboundID,
 		OrderID:     c.OrderID,
+		Type:        c.Type,
+		ProductID:   c.ProductID,
 		Status:      c.Status,
 		CreatedBy:   c.CreatedBy,
 		CreatedAt:   c.CreatedAt,

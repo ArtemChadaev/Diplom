@@ -90,3 +90,16 @@ func (r *orderRepository) Delete(ctx context.Context, id string) error {
 		return tx.Delete(&dao.OrderDAO{}, "id = ?", id).Error
 	})
 }
+
+func (r *orderRepository) GetMonthlyTurnover(ctx context.Context, productID string) (int, error) {
+	var total int64
+	err := r.db.WithContext(ctx).Table("order_items").
+		Joins("JOIN orders ON orders.id = order_items.order_id").
+		Where("order_items.product_id = ? AND orders.created_at >= NOW() - INTERVAL '30 days' AND orders.status != ?", productID, domain.OrderStatusCancelled).
+		Select("COALESCE(SUM(order_items.quantity), 0)").
+		Row().Scan(&total)
+	if err != nil {
+		return 0, err
+	}
+	return int(total), nil
+}

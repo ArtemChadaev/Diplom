@@ -2,6 +2,7 @@ package repository
 
 import (
 	"context"
+	"time"
 
 	"github.com/google/uuid"
 	"github.com/ima/diplom-backend/internal/domain"
@@ -55,4 +56,16 @@ func (r *environmentLogRepository) Create(ctx context.Context, log *domain.Envir
 	}
 	d := dao.FromEnvLogDomain(*log)
 	return r.db.WithContext(ctx).Create(&d).Error
+}
+
+func (r *environmentLogRepository) ExistsByZoneShiftDate(ctx context.Context, zoneID string, shift string, date time.Time) (bool, error) {
+	var count int64
+	dateStr := date.Format("2006-01-02")
+	if err := r.db.WithContext(ctx).
+		Model(&dao.EnvironmentLogDAO{}).
+		Where("zone_id = ? AND shift = ? AND CAST(recorded_at AT TIME ZONE 'UTC' AS DATE) = ?", zoneID, shift, dateStr).
+		Count(&count).Error; err != nil {
+		return false, err
+	}
+	return count > 0, nil
 }

@@ -9,6 +9,7 @@ import (
 type EnvironmentLogDAO struct {
 	ID          string    `gorm:"column:id;primaryKey"`
 	ZoneID      string    `gorm:"column:zone_id;index"`
+	Shift       string    `gorm:"column:shift;type:shift_type;not null"`
 	Temperature float64   `gorm:"column:temperature"`
 	Humidity    float64   `gorm:"column:humidity"`
 	RecordedBy  int       `gorm:"column:recorded_by"`
@@ -24,6 +25,7 @@ func (e EnvironmentLogDAO) ToDomain() domain.EnvironmentLog {
 	return domain.EnvironmentLog{
 		ID:          e.ID,
 		ZoneID:      e.ZoneID,
+		Shift:       e.Shift,
 		Temperature: e.Temperature,
 		Humidity:    e.Humidity,
 		RecordedBy:  e.RecordedBy,
@@ -36,6 +38,7 @@ func FromEnvLogDomain(e domain.EnvironmentLog) EnvironmentLogDAO {
 	return EnvironmentLogDAO{
 		ID:          e.ID,
 		ZoneID:      e.ZoneID,
+		Shift:       e.Shift,
 		Temperature: e.Temperature,
 		Humidity:    e.Humidity,
 		RecordedBy:  e.RecordedBy,
