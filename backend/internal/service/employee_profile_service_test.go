@@ -154,12 +154,14 @@ func TestEmployeeProfileService_UpdateProfile(t *testing.T) {
 			setupRepo:  func(r *mocks.MockEmployeeProfileRepository) {},
 		},
 		{
-			name:       "admin, profile not found → ErrEmployeeProfileNotFound",
+			name:       "admin, profile not found → create new profile",
 			callerRole: domain.RoleAdmin,
 			input:      input,
-			wantErr:    domain.ErrEmployeeProfileNotFound,
+			wantErr:    nil,
+			wantResult: updatedProfile,
 			setupRepo: func(r *mocks.MockEmployeeProfileRepository) {
 				r.On("FindByUserID", ctx, targetUserID).Return(nil, domain.ErrEmployeeProfileNotFound)
+				r.On("Create", ctx, &domain.EmployeeProfile{UserID: uint(targetUserID)}).Return(updatedProfile, nil)
 			},
 		},
 	}

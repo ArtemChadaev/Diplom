@@ -75,7 +75,7 @@ type UpdateEmployeeProfileInput struct {
 type EmployeeProfileRepository interface {
 	FindByUserID(ctx context.Context, userID int) (*EmployeeProfile, error)
 	FindByID(ctx context.Context, id int) (*EmployeeProfile, error)
-	Create(ctx context.Context, input CreateEmployeeProfileInput) (*EmployeeProfile, error)
+	Create(ctx context.Context, profile *EmployeeProfile) (*EmployeeProfile, error)
 	Update(ctx context.Context, id int, input UpdateEmployeeProfileInput) (*EmployeeProfile, error)
 	List(ctx context.Context, limit, offset int) ([]EmployeeProfile, error)
 }

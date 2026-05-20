@@ -263,7 +263,7 @@ export function AppSidebar() {
                 {user && (
                   <DropdownMenuItem asChild>
                     <Link
-                      to={`/admin/profile/${user.id}/settings`}
+                      to="/me/settings"
                       className="w-full flex items-center gap-2 px-2.5 py-2 text-xs cursor-pointer rounded hover:bg-accent hover:text-accent-foreground"
                     >
                       <Settings className="h-4 w-4 text-muted-foreground" />

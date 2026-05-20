@@ -48,13 +48,7 @@ export function AppLayout() {
           ukep_bound: false,
         })
       } catch {
-        const currentEmail = user?.email ?? ""
-        logout()
-        if (currentEmail) {
-          void navigate(`/auth?email=${encodeURIComponent(currentEmail)}`)
-        } else {
-          void navigate("/auth")
-        }
+        await logout()
       } finally {
         setIsInitializing(false)
       }
