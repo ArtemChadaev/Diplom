@@ -9,6 +9,7 @@ import (
 type EnvironmentLog struct {
 	ID          string    `json:"id"`
 	ZoneID      string    `json:"zone_id"`
+	Shift       string    `json:"shift"` // "morning" | "evening"
 	Temperature float64   `json:"temperature"`
 	Humidity    float64   `json:"humidity"`
 	RecordedBy  int       `json:"recorded_by"` // UserID
@@ -20,6 +21,7 @@ type EnvironmentLog struct {
 type EnvironmentLogRepository interface {
 	List(ctx context.Context, zoneID string, limit, offset int) ([]EnvironmentLog, int, error)
 	Create(ctx context.Context, log *EnvironmentLog) error
+	ExistsByZoneShiftDate(ctx context.Context, zoneID string, shift string, date time.Time) (bool, error)
 }
 
 // EnvironmentLogService — бизнес-логика журнала.

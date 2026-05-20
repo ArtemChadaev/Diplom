@@ -46,6 +46,14 @@ type InventoryRepository interface {
 	AddCount(ctx context.Context, item *InventoryItem) error
 }
 
+// NettingLine — строка зачёта излишков и недостач (пересортица).
+type NettingLine struct {
+	ProductID   string `json:"product_id"`
+	ProductName string `json:"product_name"`
+	ATCGroup    string `json:"atc_group"` // АТХ группа 3-го уровня (первые 3 символа)
+	Delta       int    `json:"delta"`     // Разница (physical_qty - system_qty)
+}
+
 // InventoryService — бизнес-логика инвентаризации.
 type InventoryService interface {
 	ListSessions(ctx context.Context, limit, offset int) ([]InventorySession, int, error)
@@ -53,4 +61,5 @@ type InventoryService interface {
 	StartSession(ctx context.Context, userID int, zoneID string) (*InventorySession, error)
 	FinishSession(ctx context.Context, id string) error
 	SubmitCount(ctx context.Context, sessionID string, items []InventoryItem) error
+	CalculateNetting(ctx context.Context, sessionID string) ([]NettingLine, error)
 }

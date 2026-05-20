@@ -35,6 +35,24 @@ type EmployeeProfile struct {
 	GDPTrainingHistory  []GDPTrainingRecord
 }
 
+// CreateEmployeeProfileInput carries the fields needed to create a new employee profile.
+type CreateEmployeeProfileInput struct {
+	UserID             uint                `json:"user_id"`
+	EmployeeCode       string              `json:"employee_code"`
+	FullName           string              `json:"full_name"`
+	CorporateEmail     string              `json:"corporate_email"`
+	Phone              string              `json:"phone"`
+	Position           string              `json:"position"`
+	Department         string              `json:"department"`
+	BirthDate          time.Time           `json:"birth_date"`
+	AvatarURL          string              `json:"avatar_url"`
+	HireDate           time.Time           `json:"hire_date"`
+	DismissalDate      *time.Time          `json:"dismissal_date"`
+	MedicalBookScanURL string              `json:"medical_book_scan_url"`
+	SpecialZoneAccess  bool                `json:"special_zone_access"`
+	GDPTrainingHistory json.RawMessage     `json:"gdp_training_history"`
+}
+
 // UpdateEmployeeProfileInput carries only the fields the admin wants to change.
 // Pointer semantics: nil means "don't touch this field".
 type UpdateEmployeeProfileInput struct {
@@ -57,6 +75,7 @@ type UpdateEmployeeProfileInput struct {
 type EmployeeProfileRepository interface {
 	FindByUserID(ctx context.Context, userID int) (*EmployeeProfile, error)
 	FindByID(ctx context.Context, id int) (*EmployeeProfile, error)
+	Create(ctx context.Context, input CreateEmployeeProfileInput) (*EmployeeProfile, error)
 	Update(ctx context.Context, id int, input UpdateEmployeeProfileInput) (*EmployeeProfile, error)
 	List(ctx context.Context, limit, offset int) ([]EmployeeProfile, error)
 }
@@ -64,6 +83,8 @@ type EmployeeProfileRepository interface {
 // EmployeeProfileService — business logic interface.
 type EmployeeProfileService interface {
 	GetProfile(ctx context.Context, callerID int, callerRole UserRole, targetUserID int) (*EmployeeProfile, error)
+	GetSelfProfile(ctx context.Context, userID int) (*EmployeeProfile, error)
+	CreateProfile(ctx context.Context, callerID int, callerRole UserRole, input CreateEmployeeProfileInput) (*EmployeeProfile, error)
 	UpdateProfile(ctx context.Context, callerID int, callerRole UserRole, targetUserID int, input UpdateEmployeeProfileInput) (*EmployeeProfile, error)
 	PatchSelfProfile(ctx context.Context, userID int, input UpdateEmployeeProfileInput) (*EmployeeProfile, error)
 	ListProfiles(ctx context.Context, callerID int, callerRole UserRole, limit, offset int) ([]EmployeeProfile, error)

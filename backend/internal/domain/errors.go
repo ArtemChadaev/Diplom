@@ -33,6 +33,14 @@ var (
 	ErrInventorySessionNotFound = errors.New("inventory session not found")
 	ErrClaimNotFound            = errors.New("claim not found")
 	ErrBatchNotFound            = errors.New("batch not found")
+	ErrEnvLogDuplicateShift     = errors.New("environment log for this shift already exists")
+
+	ErrVCategoryReserveOnly  = errors.New("V-category products can only be ordered with cito order type")
+	ErrInsufficientStock     = errors.New("insufficient stock for allocation")
+	ErrGDPTrainingRequired   = errors.New("GDP training is required for this action")
+	ErrGDPTrainingExpired    = errors.New("GDP training has expired")
+	ErrZoneTempViolation     = errors.New("temperature is outside the zone's allowed range")
+	ErrInventoryNotCompleted = errors.New("inventory session is not completed")
 )
 
 // AppError is a structured application error that carries

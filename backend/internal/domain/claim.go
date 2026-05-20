@@ -21,6 +21,8 @@ type Claim struct {
 	Description string      `json:"description"`
 	InboundID   *string     `json:"inbound_id,omitempty"` // Related inbound
 	OrderID     *string     `json:"order_id,omitempty"`   // Related order
+	Type        string      `json:"type"`                 // e.g. "recall", "defect", etc.
+	ProductID   *string     `json:"product_id,omitempty"` // Related product for quality claims/recalls
 	Status      ClaimStatus `json:"status"`
 	CreatedBy   int         `json:"created_by"`
 	CreatedAt   time.Time   `json:"created_at"`

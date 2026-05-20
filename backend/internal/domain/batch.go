@@ -33,6 +33,9 @@ type BatchRepository interface {
 	GetByID(ctx context.Context, id string) (*Batch, error)
 	Update(ctx context.Context, b *Batch) error
 	Delete(ctx context.Context, id string) error
+	BlockAllByProductID(ctx context.Context, productID string) error
+	ListAvailableSorted(ctx context.Context, productID string) ([]Batch, error)
+	GetTotalStock(ctx context.Context, productID string) (int, error)
 }
 
 type BatchFilter struct {
